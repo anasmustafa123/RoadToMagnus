@@ -11,8 +11,11 @@ const authUser = asyncHandler(async (req, res) => {
     console.log("password matched");
     generateToken(res, user["email"]);
     res.status(201).json({
-      name: user.name,
-      email: user.email,
+      ok: 1,
+      data: {
+        name: user.name,
+        email: user.email,
+      },
     });
   } else {
     res.status(401);
@@ -35,6 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
   } catch (e) {
     res.status(400);
+    console.log(e)
     if (e.errorResponse.code == 11000) {
       throw new Error("user already exists with that email");
     }
@@ -44,12 +48,12 @@ const registerUser = asyncHandler(async (req, res) => {
     console.log("success");
     generateToken(res, user.email);
     console.log({
-      name: user.name,
-      email: user.email,
+      ok: 1,
+      data: { name: user.name, email: user.email },
     });
     res.status(201).json({
-      name: user.name,
-      email: user.email,
+      ok: 1,
+      data: { name: user.name, email: user.email },
     });
   } else {
     res.status(400);
@@ -66,7 +70,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     expires: new Date(0),
   });
-  res.status(200).json({ message: "User Logout" });
+  res.status(200).json({ ok: 1, message: "User Logout" });
 });
 
 export { authUser, registerUser, logoutUser };
