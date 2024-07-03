@@ -3,10 +3,12 @@ import styles from "../styles/SignUp.module.css";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import { notify } from "../scripts/toast";
-import { Link } from "react-router-dom";
-import axios from "axios";
 import { validateEmail, validatePassword } from "../scripts/validate";
+import { Link } from "react-router-dom";
 const SignUp = () => {
+  const [passwordInputType, setPasswordInputType] = useState("password");
+  const [confirmPasswordInputType, setconfirmPasswordInputType] =
+    useState("password");
   const [data, setData] = useState({
     name: "",
     email: "",
@@ -43,7 +45,7 @@ const SignUp = () => {
       errors.IsAccepted == ""
     ) {
       // Pushing data to database usuing PHP script
-      const urlApi = `https://lightem.senatorhost.com/login-react/index.php?email=${data.email.toLowerCase()}&password=${
+      /*  const urlApi = `https://lightem.senatorhost.com/login-react/index.php?email=${data.email.toLowerCase()}&password=${
         data.password
       }&register=true`;
       const pushData = async () => {
@@ -62,7 +64,7 @@ const SignUp = () => {
           );
         }
       };
-      pushData();
+      pushData(); */
     } else {
       notify("Complete your info", "error");
     }
@@ -129,7 +131,7 @@ const SignUp = () => {
             className={errors.password ? styles.unCompleted : styles.completed}
           >
             <input
-              type="password"
+              type={passwordInputType}
               name="password"
               value={data.password}
               placeholder="Password"
@@ -149,7 +151,20 @@ const SignUp = () => {
               }}
               autoComplete="off"
             />
-            <i className="bx bxs-lock"></i>
+            <i
+              onClick={() => {
+                if (passwordInputType == "password") {
+                  setPasswordInputType("text");
+                } else {
+                  setPasswordInputType("password");
+                }
+              }}
+              className={
+                passwordInputType == "password"
+                  ? "bx bxs-lock"
+                  : "bx bxs-lock-open"
+              }
+            ></i>
           </div>
           {errors.password && (
             <span className={styles.error}>{errors.password}</span>
@@ -162,7 +177,7 @@ const SignUp = () => {
             }
           >
             <input
-              type="password"
+              type={confirmPasswordInputType}
               name="confirmPassword"
               value={data.confirmPassword}
               placeholder="Confirm Password"
@@ -187,7 +202,20 @@ const SignUp = () => {
               }}
               autoComplete="off"
             />
-            <i className="bx bxs-lock"></i>
+            <i
+              onClick={() => {
+                if (confirmPasswordInputType == "password") {
+                  setconfirmPasswordInputType("text");
+                } else {
+                  setconfirmPasswordInputType("password");
+                }
+              }}
+              className={
+                confirmPasswordInputType == "password"
+                  ? "bx bxs-lock"
+                  : "bx bxs-lock-open"
+              }
+            ></i>
           </div>
           {errors.confirmPassword && (
             <span className={styles.error}>{errors.confirmPassword}</span>
@@ -212,13 +240,16 @@ const SignUp = () => {
           <button type="submit">Create Account</button>
           <span
             style={{
-              color: "#a29494",
+              color: "var(--secondary-color)",
               textAlign: "center",
               display: "inline-block",
               width: "100%",
             }}
           >
-            Already have a account? <Link to="/login">Log In</Link>
+            Already have a account?{" "}
+            <Link style={{ fontWeight: "700" }} to="/login">
+              Log In
+            </Link>
           </span>
         </div>
       </form>

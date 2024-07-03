@@ -4,7 +4,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { notify } from "../scripts/toast";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import { validateEmail, validatePassword } from "../scripts/validate";
 const Login = () => {
   const [passwordInputType, setPasswordInputType] = useState("password");
@@ -18,7 +17,7 @@ const Login = () => {
   });
 
   const chaeckData = (obj) => {
-    const { email, password } = obj;
+   /*  const { email, password } = obj;
     const res = fetch(`${import.meta.env.VITE_BACKEND_URL}/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -37,7 +36,7 @@ const Login = () => {
       pending: "Loading your data...",
       success: false,
       error: "Something went wrong!",
-    });
+    }); */
   };
 
   const changeHandler = (event) => {
@@ -121,7 +120,7 @@ const Login = () => {
                   setPasswordInputType("password");
                 }
               }}
-              className="bx bxs-lock"
+              className={passwordInputType == "password" ? "bx bxs-lock" : "bx bxs-lock-open"}
             ></i>
           </div>
           {errors.password && (
@@ -133,10 +132,11 @@ const Login = () => {
           <button type="submit">Login</button>
           <span
             style={{
-              color: "#a29494",
+              color: "white",
               textAlign: "center",
               display: "inline-block",
               width: "100%",
+              fontWeight: "700"
             }}
           >
             Don't have a account? <Link to="/register">Create account</Link>

@@ -1,10 +1,10 @@
 .formLogin {
-    background: #fff;
-    box-shadow: var(--box-shadow);
-    border: 1px solid var(--secondary-color);
-    padding: 25px;
-    border-radius: 11px;
-    min-width: 500px;
+  background: #00000075;
+  box-shadow: var(--box-shadow);
+  border: 1px solid var(--secondary-color);
+  padding: 25px;
+  border-radius: 11px;
+  min-width: 500px;
   }
   
   .container {
@@ -12,6 +12,20 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    background-image: url("/background/background_laptop.png");
+    background-size: cover;
+    background-position: center;
+  }
+  @media screen and (max-width: 1000px) {
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-image: url("/background/background_phone.jpg");
+      background-size: cover;
+      background-position: center;
+    }
   }
   
   .formLogin > h2 {
@@ -108,8 +122,8 @@
   
   .formLogin > div > div i {
     position: absolute;
-    max-width: 20px;
-    max-height: 20px;
+    font-size: 20px;
+    font-size: 20px;
     left: 7px;
     top: 50%;
     cursor: pointer;
@@ -147,7 +161,7 @@
     border-radius: 8px;
     outline: 0;
     border: none;
-    color: #fff;
+    font-weight: 700;
     padding: 10px;
     margin: 15px 0;
     background: var(--main-color);
@@ -169,6 +183,7 @@
     align-items: center;
     justify-content: center;
     margin: 19px 0;
+    color: var(--secondary-color);
   }
   
   @media (max-width: 568px) {
