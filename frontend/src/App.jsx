@@ -1,4 +1,10 @@
 import React, { useState } from "react";
+import ChessBoard from "./components/ChessBoard";
+import { fetchChessGamesonMonth } from "./api/chessApiAccess";
+import EvaluationBar from "./components/EvaluationBar";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import Login from "./components/Login";
+import SignUp from "./components/SignUp";
 function App() {
   const [finalDepth, setFinalDepth] = useState(15);
   const [stockStates, setStockStates] = useState({
@@ -18,9 +24,9 @@ function App() {
       ? "./src/scripts/stockfish/stockfish.wasm.js"
       : "./src/scripts/stockfish/stockfish.js"
   );
-  
+
   stockfish.addEventListener("message", function (e) {
-    console.log({ data: e.data });
+    console.log("loading");
     //document.getElementById("output").innerText += e.data + "\n";
 
     // Handle best move output
@@ -42,8 +48,8 @@ function App() {
         currentEval: parts[parts.indexOf("cp") + 1] / 100,
         preferedMoves: preferedMoves,
       };
-      if(newdata.currentDepth == finalDepth){
-        console.log()
+      if (newdata.currentDepth == finalDepth) {
+        console.log();
       }
       setStockStates(newdata);
       console.log(newdata);
@@ -66,19 +72,32 @@ function App() {
     }
   });
 
-  stockfish.postMessage("uci");
+  //stockfish.postMessage("uci");
   return (
     <>
-      <div id="output"></div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login></Login>} />
+          <Route path="/register" element={<SignUp></SignUp>} />
+          <Route path="/login" element={<Login></Login>} />
+          <Route path="*" element={<div>not found</div>} />
+        </Routes>
+      </BrowserRouter>
+      {/* <div id="output"></div>
       <button
-        onClick={() => {
-          let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        onClick={async () => {
+          let games = await fetchChessGamesonMonth("anasmostafa11", 2024, 6);
+
+          let fen = games.games[0].initial_setup;
+          console.log(fen);
+
           stockfish.postMessage("position fen " + fen);
           stockfish.postMessage("go depth 15");
         }}
       >
         click me
       </button>
+      <ChessBoard></ChessBoard> */}
     </>
   );
 }
