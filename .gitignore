@@ -7,14 +7,15 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+
 node_modules
 dist
 dist-ssr
 *.local
 ./backend/node_modules
-.env
 package-lock.json
 test.rest
+.env
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -25,3 +26,4 @@ test.rest
 *.njsproj
 *.sln
 *.sw?
+*.env
