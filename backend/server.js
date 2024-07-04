@@ -44,21 +44,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-/* app.use(
+ app.use(
   cors({
     origin:
-      process.env.NODE_ENV == "development"
+      process.env.NODE_ENV != "development"
         ? process.env.DEV_URL
-        : "frontendlink",
+        : "http://localhost:5173",
     credentials: true,
   })
-); */
+); 
 // Middleware to attach the db client to the request object
 app.use((req, res, next) => {
   req.dbClient = client;
   console.log("req");
   next();
-});
+}); 
 app.use("/api/users", userRoutes);
 
 //app.options("/api/users/auth", cors());
