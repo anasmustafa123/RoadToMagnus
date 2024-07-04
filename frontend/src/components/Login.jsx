@@ -16,27 +16,16 @@ const Login = () => {
     password: "",
   });
 
-  const chaeckData = (obj) => {
-   /*  const { email, password } = obj;
-    const res = fetch(`${import.meta.env.VITE_BACKEND_URL}/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify()
-    });
-    const urlApi = `https://lightem.senatorhost.com/login-react/index.php?email=${email.toLowerCase()}&password=${password}`;
-    const api = axios
-      .get(urlApi)
-      .then((response) => response.data)
-      .then((data) =>
-        data.ok
-          ? notify("You login to your account successfully", "success")
-          : notify("Your password or your email is wrong", "error")
-      );
-    toast.promise(api, {
-      pending: "Loading your data...",
-      success: false,
-      error: "Something went wrong!",
-    }); */
+  const loginReq = async (obj) => {
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/users/auth`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(obj),
+      }
+    );
+    return res.json();
   };
 
   const changeHandler = (event) => {
@@ -52,9 +41,12 @@ const Login = () => {
   const submitHandler = (event) => {
     event.preventDefault();
     if (errors.email == "" && errors.password == "") {
-      chaeckData(data);
-    } else {
-      console.log("fuck");
+      loginReq(data).then((data) => {
+        console.log(data);
+        data.ok
+          ? notify("You login to your account successfully", "success")
+          : notify(data.message, "error");
+      });
     }
   };
 
@@ -120,7 +112,11 @@ const Login = () => {
                   setPasswordInputType("password");
                 }
               }}
-              className={passwordInputType == "password" ? "bx bxs-lock" : "bx bxs-lock-open"}
+              className={
+                passwordInputType == "password"
+                  ? "bx bxs-lock"
+                  : "bx bxs-lock-open"
+              }
             ></i>
           </div>
           {errors.password && (
@@ -136,7 +132,7 @@ const Login = () => {
               textAlign: "center",
               display: "inline-block",
               width: "100%",
-              fontWeight: "700"
+              fontWeight: "700",
             }}
           >
             Don't have a account? <Link to="/register">Create account</Link>

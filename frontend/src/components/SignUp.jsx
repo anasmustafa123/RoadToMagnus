@@ -35,36 +35,41 @@ const SignUp = () => {
     }
   };
 
+  const register = async (obj) => {
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/users/register`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(obj),
+      }
+    );
+    return res.json();
+  };
+
   const submitHandler = (event) => {
     event.preventDefault();
     if (
+      data.name !== "" &&
+      data.email != "" &&
       errors.name == "" &&
       errors.email == "" &&
       errors.password == "" &&
       errors.confirmPassword == "" &&
       errors.IsAccepted == ""
     ) {
-      // Pushing data to database usuing PHP script
-      /*  const urlApi = `https://lightem.senatorhost.com/login-react/index.php?email=${data.email.toLowerCase()}&password=${
-        data.password
-      }&register=true`;
-      const pushData = async () => {
-        const responseA = axios.get(urlApi);
-        const response = await toast.promise(responseA, {
-          pending: "Check your data",
-          success: "Checked!",
-          error: "Something went wrong!",
-        });
-        if (response.data.ok) {
-          notify("You signed Up successfully", "success");
-        } else {
-          notify(
-            "You have already registered, log in to your account",
-            "warning"
-          );
-        }
-      };
-      pushData(); */
+      register({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      }).then((response) => {
+        console.log({ response });
+        response.ok
+          ? notify("user credintials added successfully", "success")
+          : notify(response.message, "error");
+      });
     } else {
       notify("Complete your info", "error");
     }
@@ -87,12 +92,14 @@ const SignUp = () => {
               placeholder="Name"
               onChange={(e) => {
                 let newname = changeHandler(e);
+                let newerr = "";
                 if (!newname.trim()) {
-                  setErrors((old) => {
-                    old.name = "Username is Required!";
-                    return old;
-                  });
+                  newerr = "Username is Required!";
                 }
+                setErrors((old) => {
+                  old.name = newerr;
+                  return old;
+                });
               }}
               autoComplete="off"
             />
