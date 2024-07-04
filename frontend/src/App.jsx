@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import ChessBoard from "./components/ChessBoard";
-import { fetchChessGamesonMonth } from "./api/chessApiAccess";
 import EvaluationBar from "./components/EvaluationBar";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Login from "./components/Login";
