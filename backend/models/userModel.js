@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import generateToken from "../utils/generateToken.js";
 
 const getUser = async ({ req, email }) => {
   const db = req.dbClient.db("users");
@@ -21,7 +20,6 @@ const createUser = async ({ req, name, email, password }) => {
     .collection("credentials")
     .insertOne({ name, email, password });
   console.log(`Document inserted with ID: ${result.insertedId}`);
-  generateToken()
   return result;
 };
 

@@ -30,6 +30,8 @@ const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
   console.log({ name, email, password });
   try {
+    const user = await getUser({ req, email });
+    if (user) throw new Error("user already exists with that email");
     await createUser({
       req,
       name,
@@ -39,9 +41,7 @@ const registerUser = asyncHandler(async (req, res) => {
   } catch (e) {
     res.status(400);
     console.log(e)
-    if (e.errorResponse.code == 11000) {
-      throw new Error("user already exists with that email");
-    }
+    throw new Error("user already exists with that email");
   }
   const user = await getUser({ req, email });
   if (user) {
