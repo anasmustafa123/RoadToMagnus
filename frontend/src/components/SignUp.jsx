@@ -5,24 +5,31 @@ import { ToastContainer, toast } from "react-toastify";
 import { notify } from "../scripts/toast";
 import { validateEmail, validatePassword } from "../scripts/validate";
 import { Link } from "react-router-dom";
+import { getUserInfo as lichessVerify } from "../api/lichessApiAccess";
+import { getUserInfo as chessVerify } from "../api/chessApiAccess";
 const SignUp = () => {
   const [passwordInputType, setPasswordInputType] = useState("password");
   const [confirmPasswordInputType, setconfirmPasswordInputType] =
     useState("password");
+  //0: no loading, 1: loading
+  const [loading, setloading] = useState({ chessdotcom: 0, lichess: 0 });
   const [data, setData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
     IsAccepted: false,
+    lichess: "",
+    chessdotcom: "",
   });
-
   const [errors, setErrors] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    IsAccepted: false,
+    IsAccepted: "",
+    lichess: "",
+    chessdotcom: "",
   });
 
   const changeHandler = (event) => {
@@ -60,18 +67,25 @@ const SignUp = () => {
       errors.confirmPassword == "" &&
       errors.IsAccepted == ""
     ) {
-      register({
-        name: data.name,
-        email: data.email,
-        password: data.password,
-      }).then((response) => {
-        console.log({ response });
-        response.ok
-          ? notify("user credintials added successfully", "success")
-          : notify(response.message, "error");
-      });
+      if (!data.lichess && !data.chessdotcom) {
+        notify(
+          "U have to add either chess.com or lichess usernames, or both",
+          "error"
+        );
+      } else {
+        register({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }).then((response) => {
+          console.log({ response });
+          response.ok
+            ? notify("user credintials added successfully", "success")
+            : notify(response.message, "error");
+        });
+      }
     } else {
-      notify("Complete your info", "error");
+      notify("Complete  info", "error");
     }
   };
 
@@ -84,7 +98,15 @@ const SignUp = () => {
       >
         <h2>Sign Up</h2>
         <div>
-          <div className={errors.name ? styles.unCompleted : styles.completed}>
+          <div
+            className={
+              !data.name
+                ? styles.unCompleted
+                : errors.name
+                ? styles.unCompleted_error
+                : styles.completed
+            }
+          >
             <input
               type="text"
               name="name"
@@ -108,7 +130,15 @@ const SignUp = () => {
           {errors.name && <span className={styles.error}>{errors.name}</span>}
         </div>
         <div>
-          <div className={errors.email ? styles.unCompleted : styles.completed}>
+          <div
+            className={
+              !data.email
+                ? styles.unCompleted
+                : errors.email
+                ? styles.unCompleted_error
+                : styles.completed
+            }
+          >
             <input
               type="text"
               name="email"
@@ -135,7 +165,13 @@ const SignUp = () => {
         </div>
         <div>
           <div
-            className={errors.password ? styles.unCompleted : styles.completed}
+            className={
+              !data.password
+                ? styles.unCompleted
+                : errors.password
+                ? styles.unCompleted_error
+                : styles.completed
+            }
           >
             <input
               type={passwordInputType}
@@ -180,7 +216,11 @@ const SignUp = () => {
         <div>
           <div
             className={
-              errors.confirmPassword ? styles.unCompleted : styles.completed
+              !data.confirmPassword
+                ? styles.unCompleted
+                : errors.confirmPassword
+                ? styles.unCompleted_error
+                : styles.completed
             }
           >
             <input
@@ -226,6 +266,176 @@ const SignUp = () => {
           </div>
           {errors.confirmPassword && (
             <span className={styles.error}>{errors.confirmPassword}</span>
+          )}
+        </div>
+        <div>
+          <div
+            className={
+              !data.lichess
+                ? styles.unCompleted
+                : errors.lichess || loading.lichess != 2
+                ? styles.unCompleted_error
+                : styles.completed
+            }
+          >
+            <input
+              name="lichess"
+              value={data.lichess}
+              onChange={(e) => {
+                setloading((old) => {
+                  const copy = { ...old };
+                  copy.lichess = 0;
+                  return copy;
+                });
+                changeHandler(e);
+              }}
+              type="text"
+              placeholder="Enter lichess.org username"
+            />
+            <img src="/logos/lichess.png" alt="lichess logo" />
+            {!loading.lichess ? (
+              <button
+                onClick={() => {
+                  if (data.lichess == "") {
+                    setErrors((old) => {
+                      const copy = { ...old };
+                      copy.lichess = "empty lichess username";
+                      return copy;
+                    });
+                    notify("empty lichess username", "error");
+                  } else {
+                    lichessVerify(data.lichess).then((res) => {
+                      console.log(res);
+                      if (res.ok) {
+                        notify("lichess verified", "success");
+                        setErrors((old) => {
+                          const copy = { ...old };
+                          copy.lichess = "";
+                          return copy;
+                        });
+                        setloading((old) => {
+                          const copy = { ...old };
+                          old.lichess = 2;
+                          return copy;
+                        });
+                      } else {
+                        notify("wrong lichess username", "error");
+                        setloading((old) => {
+                          const copy = { ...old };
+                          old.lichess = 0;
+                          return copy;
+                        });
+                        setErrors((old) => {
+                          const copy = { ...old };
+                          copy.lichess = "wrong lichess username";
+                          return copy;
+                        });
+                      }
+                    });
+                  }
+                }}
+                type="button"
+                className={styles.verifyButtonLichess}
+              >
+                verify
+              </button>
+            ) : (
+              loading.lichess == 1 && (
+                <img
+                  className={styles.loading}
+                  src="/login/loading.gif"
+                  alt=""
+                />
+              )
+            )}
+          </div>
+          {errors.lichess && (
+            <span className={styles.error}>{errors.lichess}</span>
+          )}
+        </div>
+        <div>
+          <div
+            className={
+              !data.chessdotcom
+                ? styles.unCompleted
+                : errors.chessdotcom || loading.chessdotcom != 2
+                ? styles.unCompleted_error
+                : styles.completed
+            }
+          >
+            <input
+              name="chessdotcom"
+              value={data.chessdotcom}
+              onChange={(e) => {
+                setloading((old) => {
+                  const copy = { ...old };
+                  copy.chessdotcom = 0;
+                  return copy;
+                });
+                changeHandler(e);
+              }}
+              type="text"
+              placeholder="Enter chess.com username"
+            />
+            <img src="/logos/chessdotcom.png" alt="chess.com logo" />
+            {!loading.chessdotcom ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  if (data.chessdotcom == "") {
+                    setErrors((old) => {
+                      const copy = { ...old };
+                      copy.chessdotcom = "empty chess.com username";
+                      return copy;
+                    });
+                    notify("empty chess.com username", "error");
+                  } else {
+                    chessVerify(data.chessdotcom).then((res) => {
+                      console.log(res);
+                      if (res.ok) {
+                        notify("chess.com verified", "success");
+                        setErrors((old) => {
+                          const copy = { ...old };
+                          copy.chessdotcom = "";
+                          return copy;
+                        });
+                        setloading((old) => {
+                          const copy = { ...old };
+                          old.chessdotcom = 2;
+                          return copy;
+                        });
+                      } else {
+                        notify("wrong chess.com username", "error");
+                        setloading((old) => {
+                          const copy = { ...old };
+                          old.chessdotcom = 0;
+                          return copy;
+                        });
+                        setErrors((old) => {
+                          const copy = { ...old };
+                          copy.chessdotcom = "wrong lichess username";
+                          return copy;
+                        });
+                      }
+                    });
+                  }
+                }}
+                className={styles.verifyButtonChessdotcom}
+              >
+                verify
+              </button>
+            ) : (
+              loading.chessdotcom == 1 && (
+                <img
+                  className={styles.loading}
+                  src="/login/loading.gif"
+                  alt=""
+                />
+              )
+            )}
+          </div>
+          {errors.chessdotcom && (
+            <span className={styles.error}>{errors.chessdotcom}</span>
           )}
         </div>
         <div>
