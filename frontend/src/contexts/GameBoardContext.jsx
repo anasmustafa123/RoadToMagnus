@@ -12,6 +12,20 @@ function ChessBoardContextProvider({ children }) {
     "pieces_1",
     "pieces_2",
   ]);
+  const classificationInfo = {
+    book: { color: "#897e30d6", sym: "!?" },
+    brilliant: { color: "#00989dba", sym: "$$" },
+    great: { color: "#185fb5d9", sym: "$" },
+    best: { color: "#509d0080", sym: "=$$" },
+    excellent: { color: "#509d0080", sym: "!!" },
+    good: { color: "#00563cb3", sym: "!" },
+    forced: { color: "#00563cb3", sym: "==" },
+    inaccuracy: { color: "#ff98007a", sym: "?!" },
+    mistake: { color: "#dd8400c2", sym: "?" },
+    blunder: { color: "#ff000096", sym: "??" },
+    missed: { color: "#ff0909", sym: "?$" },
+    botezgambit: { color: "#ff0909", sym: "????" },
+  };
   const [selectedBoardTheme, setSelectedBoardTheme] = useState(0);
   const [avalibleBoardThemes, setAvalibleBoardThemes] = useState([
     { dark: "#779952", light: "#edeed1" },
@@ -33,7 +47,14 @@ function ChessBoardContextProvider({ children }) {
       return update;
     });
   }
-  //
+  const getClassification = (classiSym) => {
+    for (let key in classificationInfo) {
+      if (classificationInfo[key].sym == classiSym) {
+        return key;
+      }
+    }
+  };
+
   return (
     <>
       <GameboardContext.Provider
@@ -58,6 +79,8 @@ function ChessBoardContextProvider({ children }) {
           setMoveSquares,
           optionSquares,
           setOptionSquares,
+          classificationInfo,
+          getClassification
         }}
       >
         {children}

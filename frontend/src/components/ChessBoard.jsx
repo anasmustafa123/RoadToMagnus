@@ -19,6 +19,8 @@ export default function ChessBoard({ classifications }) {
     setMoveSquares,
     optionSquares,
     setOptionSquares,
+    classificationInfo,
+    getClassification,
   } = useContext(GameboardContext);
   const [moveFrom, setMoveFrom] = useState("");
   const [moveTo, setMoveTo] = useState(null);
@@ -182,16 +184,6 @@ export default function ChessBoard({ classifications }) {
     });
   }
 
-  /* function makeAMove(move) {
-    const gameCopy = { ...game };
-    const result = gameCopy.move(move);
-    if (result) {
-      setGame(gameCopy);
-    }
-
-    return result; // null if the move was illegal, the move object if the move was legal
-  } */
-
   function onDrop(sourceSquare, targetSquare) {
     const move = makeAMove({
       from: sourceSquare,
@@ -227,35 +219,7 @@ export default function ChessBoard({ classifications }) {
     "bQ",
     "bK",
   ];
-  const getClassification = (classiSym) => {
-    let syms = {
-      "!$": "book",
-      $$: "brilliant",
-      $: "great",
-      "!!": "excellent",
-      "!": "good",
-      "?!": "inaccuracy",
-      "?": "mistake",
-      "??": "blunder",
-      "????": "botezgambit",
-      "?$": "missed",
-      "==": "forced",
-    };
-    return syms[classiSym];
-  };
-  const classificationInfo = {
-    book: { color: "#897e30d6", sym: "!?" },
-    brilliant: { color: "#00989dba", sym: "$$" },
-    great: { color: "#185fb5d9", sym: "$" },
-    best: { color: "#509d0080", sym: "=$$" },
-    excellent: { color: "#509d0080", sym: "!!" },
-    good: { color: "#00563cb3", sym: "!" },
-    forced: { color: "#00563cb3", sym: "==" },
-    inaccuracy: { color: "#ff98007a", sym: "?!" },
-    mistake: { color: "#dd8400c2", sym: "?" },
-    blunder: { color: "#ff000096", sym: "??" },
-    botezgambit: { color: "#ff0909", sym: "????" },
-  };
+
   const [customArrows, setCustomArrows] = useState({});
   const customPieces = useMemo(() => {
     const pieceComponents = {};
