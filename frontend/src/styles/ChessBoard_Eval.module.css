@@ -1,0 +1,10 @@
+.buttonContainer  button{
+    font-size: 30px;
+    background-color: #5d9948;
+    border: none;
+    border-radius: 5px;
+    color: white;
+}
+.buttonContainer  button > i {
+    padding: 15px 40px 15px 40px;
+}

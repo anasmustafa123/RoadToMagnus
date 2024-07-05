@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
+import ChessBoard_Eval from "./components/ChessBoard_Eval";
+import { ChessBoardContextProvider } from "./contexts/GameBoardContext";
 function App() {
- /*  const [finalDepth, setFinalDepth] = useState(15);
+  /*  const [finalDepth, setFinalDepth] = useState(15);
   const [stockStates, setStockStates] = useState({
     currentDepth: 0,
     currentEval: 0,
@@ -51,9 +53,9 @@ function App() {
       setStockStates(newdata);
       console.log(newdata); */
 
-      /*  var depth = parts[2]; // Assuming 'info depth X ...'
+  /*  var depth = parts[2]; // Assuming 'info depth X ...'
     var scoreIndex = parts.indexOf('score'); */
-      /*  if (scoreIndex !== -1) {
+  /*  if (scoreIndex !== -1) {
         var scoreType = parts[scoreIndex + 1];
         var scoreValue = parseInt(parts[scoreIndex + 2]);
 
@@ -72,14 +74,18 @@ function App() {
   //stockfish.postMessage("uci");
   return (
     <>
-         <BrowserRouter>
+      <ChessBoardContextProvider>
+        <ChessBoard_Eval></ChessBoard_Eval>
+      </ChessBoardContextProvider>
+
+      {/* <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login></Login>} />
           <Route path="/register" element={<SignUp></SignUp>} />
           <Route path="/login" element={<Login></Login>} />
           <Route path="*" element={<div>not found</div>} />
         </Routes>
-      </BrowserRouter>
+      </BrowserRouter> */}
 
       {/* <div id="output"></div>
       <button

@@ -3,11 +3,43 @@ import { Chessboard } from "react-chessboard";
 import "../styles/chessboard.css";
 import "react-toastify/dist/ReactToastify.css";
 import { GameboardContext } from "../contexts/GameBoardContext";
-export default function ChessBoard({ classifications }) {
+export default function ChessBoard({ classifications, movesIndex }) {
+  const [customArrows, setCustomArrows] = useState([]);
+  const [currentClassif, setCurrentClassifi] = useState("null");
+  const [currentMove, setCurrentMove] = useState({ to: "" });
+  useEffect(() => {
+    if (movesIndex) {
+      const moves = game.history({ verbose: true });
+      if (movesIndex > moves.length) {
+        throw new Error(
+          `error ${{ movesIndex, movesdotlength: moves.length }}`
+        );
+      }
+      if (moves.length == movesIndex) {
+        let themove = moves[movesIndex - 1];
+        let theclassification = getClassification(
+          classifications[movesIndex - 1]
+        );
+        setCurrentMove(themove);
+        console.log({ themove, theclassification });
+        setCurrentClassifi(theclassification);
+        setCustomArrows([
+          [
+            themove.from,
+            themove.to,
+            classificationInfo[theclassification].color,
+          ],
+        ]);
+      }
+    } else {
+      setCustomArrows([]);
+      setCurrentMove({ to: "" });
+      setCurrentClassifi("null");
+    }
+  }, [movesIndex]);
   const {
     game,
     makeAMove,
-    safeGameMutate,
     showClassification,
     selectedPieceTheme,
     selectedBoardTheme,
@@ -16,7 +48,6 @@ export default function ChessBoard({ classifications }) {
     rightClickedSquares,
     setRightClickedSquares,
     moveSquares,
-    setMoveSquares,
     optionSquares,
     setOptionSquares,
     classificationInfo,
@@ -26,6 +57,7 @@ export default function ChessBoard({ classifications }) {
   const [moveTo, setMoveTo] = useState(null);
   const [showPromotionDialog, setShowPromotionDialog] = useState(false);
   const [chessboardwidth, setChessboardWidth] = useState(1000);
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 1970) {
@@ -195,16 +227,6 @@ export default function ChessBoard({ classifications }) {
     if (move === null) return false;
     return true;
   }
-
-  const buttonStyle = {
-    marginTop: "10px",
-    padding: "10px 20px",
-    fontSize: "16px",
-    backgroundColor: "#5d9948",
-    border: "none",
-    borderRadius: "5px",
-    color: "white",
-  };
   const pieces = [
     "wP",
     "wN",
@@ -220,49 +242,15 @@ export default function ChessBoard({ classifications }) {
     "bK",
   ];
 
-  const [customArrows, setCustomArrows] = useState({});
   const customPieces = useMemo(() => {
     const pieceComponents = {};
-    let cmoveNum = 0;
-    let cmove = { to: "" };
-    let cClassification;
     pieces.forEach((piece) => {
       pieceComponents[piece] = ({ square, squareWidth }) => {
-        const moves = game.history({ verbose: true });
-        if (moves.length > cmoveNum) {
-          cmove = moves[cmoveNum];
-          cClassification = getClassification(classifications[cmoveNum]);
-          setCustomArrows([
-            [cmove.from, cmove.to, classificationInfo[cClassification].color],
-          ]);
-          console.log({
-            classification: cClassification,
-          });
-          console.log("larger");
-          cmoveNum++;
-        } else if (cmoveNum > moves.length) {
-          console.log("undo");
-          if (cmoveNum > 0) {
-            cmoveNum--;
-          }
-          if (moves.length != 0) {
-            cClassification = getClassification(classifications[cmoveNum - 1]);
-            cmove = moves[cmoveNum - 1];
-            setCustomArrows([
-              [cmove.from, cmove.to, classificationInfo[cClassification].color],
-            ]);
-          } else {
-            cmove = { to: "" };
-            setCustomArrows([]);
-          }
-          console.log({ cmoveNum, cmove });
-        }
-        console.log({ squareWidth, square, moves, cmove });
-        return showClassification && cmove.to == square ? (
+        return showClassification && currentMove.to == square ? (
           <div
             style={{
               position: "relative",
-              backgroundColor: classificationInfo[cClassification].color,
+              backgroundColor: classificationInfo[currentClassif].color,
             }}
           >
             <img
@@ -272,7 +260,7 @@ export default function ChessBoard({ classifications }) {
                 right: "-10px ",
                 top: "-10px",
               }}
-              src={`/classification/${cClassification}.png`}
+              src={`/classification/${currentClassif}.png`}
               alt="move classification"
             />
             <div
@@ -297,7 +285,7 @@ export default function ChessBoard({ classifications }) {
       };
     });
     return pieceComponents;
-  }, []);
+  }, [currentClassif, currentMove]);
 
   return (
     <div className="boardWrapper">
@@ -332,34 +320,7 @@ export default function ChessBoard({ classifications }) {
         customPieces={customPieces}
         customArrows={customArrows}
       />
-      <div style={{ display: "flex", gap: "1rem" }}>
-        <button
-          style={buttonStyle}
-          onClick={() => {
-            safeGameMutate((game) => {
-              game.reset();
-            });
-            setMoveSquares({});
-            setOptionSquares({});
-            setRightClickedSquares({});
-          }}
-        >
-          reset
-        </button>
-        <button
-          style={buttonStyle}
-          onClick={() => {
-            safeGameMutate((game) => {
-              game.undo();
-            });
-            setMoveSquares({});
-            setOptionSquares({});
-            setRightClickedSquares({});
-          }}
-        >
-          undo
-        </button>
-      </div>
+      <div style={{ display: "flex", gap: "1rem" }}></div>
     </div>
   );
 }

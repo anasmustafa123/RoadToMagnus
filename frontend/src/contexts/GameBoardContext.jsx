@@ -12,8 +12,8 @@ function ChessBoardContextProvider({ children }) {
     "pieces_1",
     "pieces_2",
   ]);
-  const classificationInfo = {
-    book: { color: "#897e30d6", sym: "!?" },
+  const [classificationInfo, setClassificationInfo] = useState({
+    book: { color: "#897e30d6", sym: "!$" },
     brilliant: { color: "#00989dba", sym: "$$" },
     great: { color: "#185fb5d9", sym: "$" },
     best: { color: "#509d0080", sym: "=$$" },
@@ -25,7 +25,7 @@ function ChessBoardContextProvider({ children }) {
     blunder: { color: "#ff000096", sym: "??" },
     missed: { color: "#ff0909", sym: "?$" },
     botezgambit: { color: "#ff0909", sym: "????" },
-  };
+  });
   const [selectedBoardTheme, setSelectedBoardTheme] = useState(0);
   const [avalibleBoardThemes, setAvalibleBoardThemes] = useState([
     { dark: "#779952", light: "#edeed1" },
@@ -33,6 +33,7 @@ function ChessBoardContextProvider({ children }) {
   function makeAMove(move) {
     const gameCopy = { ...game };
     const result = gameCopy.move(move);
+    console.log({result})
     if (result) {
       setGame(gameCopy);
     }
@@ -80,7 +81,7 @@ function ChessBoardContextProvider({ children }) {
           optionSquares,
           setOptionSquares,
           classificationInfo,
-          getClassification
+          getClassification,
         }}
       >
         {children}
