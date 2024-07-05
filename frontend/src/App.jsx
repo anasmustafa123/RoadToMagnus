@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import ChessBoard from "./components/ChessBoard";
-import { fetchChessGamesonMonth } from "./api/chessApiAccess";
-import EvaluationBar from "./components/EvaluationBar";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import Login from "./components/Login";
-import SignUp from "./components/SignUp";
+import ChessBoard_Eval from "./components/ChessBoard_Eval";
+import {
+  GameboardContext,
+  ChessBoardContextProvider,
+} from "./contexts/GameBoardContext";
 function App() {
   const [finalDepth, setFinalDepth] = useState(15);
   const [stockStates, setStockStates] = useState({
@@ -75,14 +74,10 @@ function App() {
   //stockfish.postMessage("uci");
   return (
     <>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Login></Login>} />
-          <Route path="/register" element={<SignUp></SignUp>} />
-          <Route path="/login" element={<Login></Login>} />
-          <Route path="*" element={<div>not found</div>} />
-        </Routes>
-      </BrowserRouter>
+      <ChessBoardContextProvider>
+        <ChessBoard_Eval></ChessBoard_Eval>
+      </ChessBoardContextProvider>
+
       {/* <div id="output"></div>
       <button
         onClick={async () => {
