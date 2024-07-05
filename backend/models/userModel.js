@@ -11,14 +11,25 @@ const matchPassword = async (encryptedPassword, password) => {
   console.log(result);
   return result;
 };
- 
-const createUser = async ({ req, name, email, password }) => {
+
+const createUser = async ({
+  req,
+  name,
+  email,
+  password,
+  lichessUsername,
+  chessUsername,
+}) => {
   const db = req.dbClient.db("users");
   const salt = await bcrypt.genSalt(process.env.SALTNUM);
   password = await bcrypt.hash(password, salt);
-  const result = await db
-    .collection("credentials")
-    .insertOne({ name, email, password });
+  const result = await db.collection("credentials").insertOne({
+    name,
+    email,
+    password,
+    lichess: lichessUsername ? lichessUsername : "",
+    chessdotcom: chessUsername ? chessUsername : "",
+  });
   console.log(`Document inserted with ID: ${result.insertedId}`);
   return result;
 };
