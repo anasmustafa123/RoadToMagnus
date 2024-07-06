@@ -1,0 +1,47 @@
+.game_container {
+  border: 0px solid var(--text-color);
+  border-bottom-width: 1px;
+  margin: 2rem;
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  max-width: 700px;
+  color: var(--text-color);
+}
+
+.game_container > .logo {
+  height: 30px;
+  margin: 5px 7.5px 5px 5px;
+}
+
+.game_container > .tcontrol {
+  width: 30px;
+  margin: 5px 15px 5px 7.5px;
+}
+.playersInfo {
+  margin-right: auto;
+}
+
+.playerInfo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.resultContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+.acuracyContainer {
+  margin: auto;
+}
+
+.movesCount {
+  margin-right: auto;
+}
+
+.game_container i {
+  font-size: 1.2rem;
+}

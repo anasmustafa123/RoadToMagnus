@@ -1,0 +1,41 @@
+.newReview {
+  border: 1px solid black;
+  margin: 2rem;
+}
+.line {
+  display: flex;
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+.gameResult {
+  margin: auto;
+}
+
+.brating {
+  margin-right: 10%;
+  padding: 1.5rem 5rem 1.5rem 5rem;
+  border-radius: 5px;
+  border: 3px solid;
+  background-color: rgb(18, 18, 18);
+  color: rgb(206, 206, 206);
+}
+.wrating {
+  border: 3px solid;
+  padding: 1.5rem 5rem 1.5rem 5rem;
+  margin-left: 10%;
+  border-radius: 5px;
+  background-color: rgb(206, 206, 206);
+}
+.header {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 2rem;
+  font-weight: 800;
+}
+.loading {
+  margin: auto;
+}
+
+.newReview > div {
+  margin-bottom: 1.6rem;
+}
