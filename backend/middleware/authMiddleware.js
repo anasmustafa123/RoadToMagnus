@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
-import { getUser } from "../models/userModel.js";
+import User from '../models/userModel.js';
 
 const protect = asyncHandler(async (req, res, next) => {
   let token = req.cookies.jwt;
@@ -10,7 +10,7 @@ const protect = asyncHandler(async (req, res, next) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       console.log(decoded);
-      req.user = await getUser({ req, email: decoded.userEmail });
+      req.user = await User.findOne({ email: decoded.userEmail });
     } catch (e) {
       res.status(401);
       throw new Error("not authorized, token not valid");
