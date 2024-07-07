@@ -1,26 +1,28 @@
+import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-const getUser = async ({ req, email }) => {
-  const db = req.dbClient.db("users");
-  const user = await db.collection("credentials").findOne({ email: email });
-  return user;
-};
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  chessDCusername: { type: String },
+  lichessusername: { type: String },
+  chessDotComLastUpdated: { type: String},
+  lichessComLastUpdated: { type: String},
+});
 
-const matchPassword = async (encryptedPassword, password) => {
-  let result = await bcrypt.compare(password, encryptedPassword);
-  console.log(result);
-  return result;
-};
- 
-const createUser = async ({ req, name, email, password }) => {
-  const db = req.dbClient.db("users");
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    next();
+  }
   const salt = await bcrypt.genSalt(process.env.SALTNUM);
-  password = await bcrypt.hash(password, salt);
-  const result = await db
-    .collection("credentials")
-    .insertOne({ name, email, password });
-  console.log(`Document inserted with ID: ${result.insertedId}`);
-  return result;
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+userSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
-export { getUser, matchPassword, createUser };
+const User = mongoose.model("User", userSchema);
+
+export default User;
