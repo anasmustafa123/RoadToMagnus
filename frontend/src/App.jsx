@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import Login from "./components/Login";
-import SignUp from "./components/SignUp";
-import ChessBoard_Eval from "./components/ChessBoard_Eval";
-import { ChessBoardContextProvider } from "./contexts/GameBoardContext";
+import ReviewResult from "./components/ReviewResult";
+import LinesReview from "./components/LinesReview";
+function App() {
+  return (
+    <>
+     <LinesReview></LinesReview>
+
 function App() {
   /*  const [finalDepth, setFinalDepth] = useState(15);
   const [stockStates, setStockStates] = useState({
