@@ -5,14 +5,17 @@ import cookieParser from "cookie-parser";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import cors from "cors";
 import path from "path";
-import run from "./config/db.js";
-
+//import run from "./config/db.js";
+import connectDB from './config/db.js';
+import userRoutes from "./routes/userRoutes.js";
 let client;
+
+connectDB();
 
 /* import connectDb from "./config/db.js";
 import { getUser } from "./models/userModel.js";
  */
-import userRoutes from "./routes/userRoutes.js";
+
 /* ";
 import customerRoutes from "./routes/customerRoutes.js";
 import carsRoutes from "./routes/carRoutes.js";
@@ -24,7 +27,7 @@ import officeRoutes from "./routes/officeRoutes.js";
 dotenv.config();
 
 //setting up the database
-(async () => {
+/* (async () => {
   console.log("middleware");
   try {
     console.log("before");
@@ -33,7 +36,7 @@ dotenv.config();
   } catch (e) {
     console.error(e);
   }
-})();
+})(); */  
 
 console.timeEnd();
 let port = process.env.PORT || 5200;
@@ -44,21 +47,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
- app.use(
+app.use(
   cors({
     origin:
-      process.env.NODE_ENV != "development"
-        ? process.env.DEV_URL
-        : "http://localhost:5173",
+      process.env.NODE_ENV != "development" ? "" : "http://localhost:5173",
     credentials: true,
   })
-); 
+);
 // Middleware to attach the db client to the request object
 app.use((req, res, next) => {
   req.dbClient = client;
   console.log("req");
   next();
-}); 
+});
 app.use("/api/users", userRoutes);
 
 //app.options("/api/users/auth", cors());

@@ -1,15 +1,12 @@
 import asyncHandler from "express-async-handler";
 import generateToken from "../utils/generateToken.js";
-import { createUser, getUser, matchPassword } from "../models/userModel.js";
-// @desc  Authorize user/set token
-// @route POST /api/users/auth
-// @access public
+import User from "../models/userModel.js";
+
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const user = await getUser({ req, email });
-  if (user && (await matchPassword(user["password"], password))) {
-    console.log("password matched");
-    generateToken(res, user["email"]);
+  const user = await User.findOne({ email });
+  if (user && (await user.matchPassword(password))) {
+    generateToken(res, user.email);
     res.status(201).json({
       ok: 1,
       data: {
@@ -20,58 +17,50 @@ const authUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(401);
-    throw new Error(`invalid email or password`);
+    throw new Error("Invalid email or password");
   }
 });
 
-// @desc  Register user new user
-// @route POST /api/users
-// @access public
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
-  console.log({ name, email, password });
-  try {
-    const user = await getUser({ req, email });
-    if (user) throw new Error("user already exists with that email");
-    await createUser({
-      req,
-      name,
-      email,
-      password,
-    });
-  } catch (e) {
+  const { name, email, password, lichessUsername, chessUsername } = req.body;
+  const userExists = await User.findOne({ email });
+  if (userExists) {
     res.status(400);
-    console.log(e)
-    throw new Error("user already exists with that email");
+    throw new Error("User already exists");
   }
-  const user = await getUser({ req, email });
+
+  const user = await User.create({
+    name,
+    email,
+    password,
+    chessDCusername: chessUsername,
+    lichessusername: lichessUsername,
+  });
+
   if (user) {
-    console.log("success");
     generateToken(res, user.email);
-    console.log({
-      ok: 1,
-      data: { name: user.name, email: user.email },
-    });
     res.status(201).json({
       ok: 1,
-      data: { name: user.name, email: user.email },
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        chessDCusername: user.chessDCusername,
+        lichessusername: user.lichessusername,
+      },
     });
   } else {
     res.status(400);
-    throw new Error("data format wrong");
+    throw new Error("Invalid user data");
   }
 });
 
-// @desc  Logout user
-// @route POST /api/users/logout
-// @access public
 const logoutUser = asyncHandler(async (req, res) => {
-  console.log("logging out");
   res.cookie("jwt", "", {
     httpOnly: true,
     expires: new Date(0),
   });
-  res.status(200).json({ ok: 1, message: "User Logout" });
+  res.status(200).json({ ok: 1, message: "User logged out" });
 });
 
 export { authUser, registerUser, logoutUser };
