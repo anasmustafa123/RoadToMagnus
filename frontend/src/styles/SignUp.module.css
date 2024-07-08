@@ -140,7 +140,7 @@
   left: auto !important;
 }
 .formLogin > div > div > button,
-img {
+.formLogin > div > div > img {
   position: absolute;
   width: 20px;
   left: 7px;

@@ -11,6 +11,7 @@
   --win-color: rgb(4, 154, 4);
   --loss-color: rgb(242, 26, 26);
   --draw-color: grey;
+  --light-black: #45423f;
 }
 #root.light {
   --text-color: #2f2e2b;
@@ -43,3 +44,4 @@ a {
 a:hover {
   color: var(--main-color-hover);
 }
+

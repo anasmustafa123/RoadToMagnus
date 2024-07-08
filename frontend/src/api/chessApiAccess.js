@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { getMovesNum } from "../scripts/pgn/pgn";
 async function getUserInfo(username) {
   const url = `https://api.chess.com/pub/player/${username}`;
   const res = await fetch(url);
@@ -18,7 +19,7 @@ async function getUserInfo(username) {
   };
 } */
 
-/* async function fetchChessGamesonMonth(username, year, month) {
+async function fetchChessGamesonMonth(username, year, month) {
   let month_str = month < 10 ? "0" + String(month) : month;
   const url = `https://api.chess.com/pub/player/${username}/games/${year}/${month_str}`;
 
@@ -34,9 +35,9 @@ async function getUserInfo(username) {
     toast.error("Error Enter correct chess.com username...");
     return null; // Or handle the error differently
   }
-} */
+}
 
-/* const minimizeData = (username, monthGames) => {
+const minimizeData = (username, monthGames) => {
   let minimizedData = [];
   let sample = {
     result: "",
@@ -79,8 +80,42 @@ async function getUserInfo(username) {
     minimizedData.push(sample);
   });
   return minimizedData;
-}; */
+};
+const reduceGamesOfMonth = (vendor, monthGames) => {
+  return monthGames.map((game, index) => {
+    let gameResult =
+      game.black.result.toLowerCase() === "win"
+        ? -1
+        : game.white.result.toLowerCase() === "win"
+        ? 1
+        : 0;
+    if (!gameResult) {
+      var drawType =
+        game.black.result.toLowerCase() === "agreed" ||
+        game.black.result.toLowerCase() === "repetition" ||
+        game.black.result.toLowerCase() === "stalemate" ||
+        game.black.result.toLowerCase() === "timevsinsufficient" ||
+        game.black.result.toLowerCase() === "insufficient"
+          ? game.black.result.toLowerCase()
+          : "";
+    }
 
+    return {
+      wusername: game.white.username,
+      busername: game.black.username,
+      wrating: game.white.rating,
+      brating: game.black.rating,
+      gameType: game.time_class.toLowerCase(),
+      site: vendor,
+      gameResult,
+      drawType: drawType ? drawType : "",
+      pgn: game.pgn,
+      isReviewed: false,
+      date: getYearAndMonth(game.end_time).date,
+      movesCount: getMovesNum(game.pgn),
+    };
+  });
+};
 /**
  * @param {String} username
  * @param {Number} smonth
@@ -137,21 +172,17 @@ async function getUserInfo(username) {
   return { allGames, allMoves };
 } */
 
-/* const getYearAndMonth = (joinDate) => {
+const getYearAndMonth = (joinDate) => {
   // convert to Unix timestamp to milliseconds
   const date = new Date(joinDate * 1000);
   // Get year and month
   const year = date.getFullYear();
   // Months are zero-indexed (0 = January, 1 = February, ..., 11 = December)
   const month = date.getMonth() + 1; // Adding 1 to get 1-based month
-  return { year: year, month: month };
-}; */
+  return { year: year, month: month, date: `${month}-${year}` };
+};
 
-/* const getPgnsOfMonth = async () => {
-  const username = "anasmostafa11"; // Replace with your Chess.com username
-  const year = "2024"; // Replace with the year
-  const month = "05"; // Replace with the month
-
+const getPgnsOfMonth = async (username, year, month) => {
   const apiUrl = `https://api.chess.com/pub/player/${username}/games/${year}/${month}/pgn`;
   try {
     const response = await fetch(apiUrl);
@@ -164,6 +195,12 @@ async function getUserInfo(username) {
   } catch (error) {
     console.error("Error fetching PGN data:", error);
   }
-};  */
+};
 
-export { getUserInfo };
+export {
+  getUserInfo,
+  fetchChessGamesonMonth,
+  getPgnsOfMonth,
+  getYearAndMonth,
+  reduceGamesOfMonth,
+};

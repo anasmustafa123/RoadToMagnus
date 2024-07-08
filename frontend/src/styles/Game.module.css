@@ -1,12 +1,12 @@
 .game_container {
   border: 0px solid var(--text-color);
   border-bottom-width: 1px;
-  margin: 2rem;
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 20px 15px 20px 15px;
   max-width: 700px;
   color: var(--text-color);
+  width: 700px;
 }
 
 .game_container > .logo {
@@ -20,6 +20,7 @@
 }
 .playersInfo {
   margin-right: auto;
+  min-width: 240px;
 }
 
 .playerInfo {
@@ -40,8 +41,24 @@
 
 .movesCount {
   margin-right: auto;
+  min-width: 30px;
+}
+.game_container:hover  {
+  background-color: #959494;
+  cursor: pointer;
+  transition: background-color 250ms ease;
 }
 
 .game_container i {
   font-size: 1.2rem;
+}
+.game_container .review {
+  min-width: 1.9rem;
+  font-size: 1.6rem;
+  transition: color 300ms ease, font-size 400ms ease;
+}
+.game_container .review:hover {
+  font-size: 1.8rem;
+  color: var(--hover-color) !important;
+  cursor: pointer;
 }

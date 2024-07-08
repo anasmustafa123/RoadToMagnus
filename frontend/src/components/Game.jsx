@@ -1,25 +1,40 @@
-import React from "react";
+import React, { useContext } from "react";
 import styles from "../styles/Game.module.css";
-export default function Game() {
-  let largeScreen = false;
-  const isReviewed = false;
-  const gameType = "rapid";
-  const site = "chessdotcom";
-  const wusername = "anas";
-  const busername = "ahmed";
-  const wrating = "1080";
-  const brating = "1090";
-  const wflag = "";
-  const bflag = "";
-  const playerColor = -1;
-  const gameResult = -1;
-  const waccuracy = "80.3";
-  const baccuracy = "70.4";
-  const date = "Jul 4, 2024";
-  const movesCount = 100;
+import { UserContext } from "../contexts/UserContext";
+export default function Game({
+  pass,
+  baccuracy = "-",
+  waccuracy = "-",
+  wflag = "-",
+  bflag = "-",
+  data,
+}) {
+  let largeScreen = true;
+  const hoverColor = { rapid: "green", blitz: "gold", bullet: "orange" };
+  const {
+    wusername,
+    busername,
+    wrating,
+    brating,
+    gameType,
+    site,
+    gameResult,
+    isReviewed,
+    date,
+    movesCount
+  } = data;
+  const { usernameChessDC, usernameLichess } = useContext(UserContext);
+  const playerColor =
+    site == "chessdotcom"
+      ? usernameChessDC == wusername
+        ? 1
+        : -1
+      : usernameLichess == wusername
+      ? 1
+      : -1;
   return (
     <>
-      <div className={styles.game_container}>
+      <div key={pass} className={styles.game_container}>
         <img
           className={styles.logo}
           src={`/logos/${site}.png`}
@@ -44,9 +59,13 @@ export default function Game() {
                   borderRadius: "2px",
                 }}
               ></div>
-              <div>{wusername}</div>
+              <div>
+                {wusername.length < 12
+                  ? wusername
+                  : `${wusername.slice(0, 11)}...`}
+              </div>
               <div>({wrating})</div>
-              <img src={wflag} alt="flag" draggable="false" />
+              {wflag ? <img src={wflag} alt="flag" draggable="false" /> : <></>}
             </div>
           ) : (
             <></>
@@ -62,9 +81,13 @@ export default function Game() {
                 }}
                 className="color"
               ></div>
-              <div>{busername}</div>
+              <div>
+                {busername.length < 12
+                  ? busername
+                  : `${busername.slice(0, 11)}...`}
+              </div>
               <div>({brating})</div>
-              <img src={bflag} alt="flag" draggable="false" />
+              {bflag ? <img src={bflag} alt="flag" draggable="false" /> : <></>}
             </div>
           ) : (
             <></>
@@ -109,7 +132,14 @@ export default function Game() {
             {largeScreen || playerColor == -1 ? <div>{baccuracy}</div> : <></>}
           </div>
         ) : (
-          <i style={{margin: "auto", color: "var(--text-color)"}} className="bx bxs-zoom-in"></i>
+          <i
+            style={{
+              "--hover-color": `${hoverColor[gameType]}`,
+              margin: "auto",
+              color: "var(--text-color)",
+            }}
+            className={styles.review + " bx bxs-report"}
+          ></i>
         )}
 
         {largeScreen && (
@@ -119,8 +149,6 @@ export default function Game() {
           </>
         )}
       </div>
-      <div>fads</div>
-      <div>fasdd</div>
     </>
   );
 }

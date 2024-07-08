@@ -1,12 +1,44 @@
-import React, { createContext, useState } from "react";
-
+import React, { createContext, useState, useEffect } from "react";
 const UserContext = createContext("");
 
-// dates of last game loaded to the db for chess.com and lichess
-// index.db
-const [chessDClastDate ,setChessDClastDate] = useState("");
-const [lichesslastDate ,setLichesslastDate] = useState("");
+function UserContextProvider({ children }) {
+  const [username, setUsername] = useState("");
+  const [usernameChessDC, setChessDCUsername] = useState("");
+  const [usernameLichess, setUserLicehessname] = useState("");
+  const [chessDCAvatarLink, setChessDCAvatarLink] = useState("");
+  const [isUser, setIsUser] = useState(0);
+  const [uiTheme, setUiTheme] = useState("light");
 
-export default function UserContextProvider({ children }) {
-  return <UserContext.Provider>{children}</UserContext.Provider>;
+  useEffect(() => {
+    let root = document.getElementById("root");
+    root.className = uiTheme ? uiTheme : "light";
+  }, [uiTheme]);
+
+  return (
+    <UserContext.Provider
+      value={{
+        chessDCAvatarLink,
+        setChessDCAvatarLink,
+        setUserLicehessname,
+        username,
+        setUsername,
+        setChessDCUsername,
+        isUser,
+        setIsUser,
+        usernameChessDC,
+        usernameLichess,
+        uiTheme,
+        setUiTheme,
+      }}
+    >
+      {children}
+    </UserContext.Provider>
+  );
 }
+export { UserContext, UserContextProvider };
+const getspeed = async (callback) => {
+  let st = Date.now();
+  await callback;
+  let end = Date.now();
+  return `${(end - st) / 1000}s`;
+};

@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import ReviewResult from "./components/ReviewResult";
-import LinesReview from "./components/LinesReview";
-function App() {
-  return (
-    <>
-     <LinesReview></LinesReview>
-
+import Games from "./pages/Games";
+import { ChessBoardContextProvider } from "./contexts/GameBoardContext";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import SignUp from "./components/SignUp";
+import Login from "./components/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Sidebar from "./components/Sidebar";
+import "./App.css";
 function App() {
   /*  const [finalDepth, setFinalDepth] = useState(15);
   const [stockStates, setStockStates] = useState({
@@ -76,19 +77,40 @@ function App() {
   //stockfish.postMessage("uci");
   return (
     <>
-      <ChessBoardContextProvider>
-        <ChessBoard_Eval></ChessBoard_Eval>
-      </ChessBoardContextProvider>
-
-      {/* <BrowserRouter>
+      <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login></Login>} />
           <Route path="/register" element={<SignUp></SignUp>} />
           <Route path="/login" element={<Login></Login>} />
+
+          <Route
+            path="/games"
+            element={
+              <ProtectedRoute
+                component={
+                  <div className="gridContainer">
+                    <Sidebar></Sidebar>
+                    <Games
+                      inlineStyles={{
+                        gridColumnStart: "2",
+                        marginLeft: "auto",
+                        marginRight: "auto",
+                        backgroundColor: "var(--bg-color)",
+                      }}
+                    ></Games>
+                  </div>
+                }
+              />
+            }
+          />
+
           <Route path="*" element={<div>not found</div>} />
         </Routes>
-      </BrowserRouter> */}
+      </BrowserRouter>
 
+      {/*  <ChessBoardContextProvider>
+        <ChessBoard_Eval></ChessBoard_Eval>
+      </ChessBoardContextProvider> */}
       {/* <div id="output"></div>
       <button
         onClick={async () => {

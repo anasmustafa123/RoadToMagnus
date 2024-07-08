@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { UserContext } from "../contexts/UserContext";
 import styles from "../styles/SignUp.module.css";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import { notify } from "../scripts/toast";
 import { validateEmail, validatePassword } from "../scripts/validate";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getUserInfo as lichessVerify } from "../api/lichessApiAccess";
 import { getUserInfo as chessVerify } from "../api/chessApiAccess";
 const SignUp = () => {
+  const navigate = useNavigate();
+  const {
+    setChessDCUsername,
+    setChessDCAvatarLink,
+    setUserLicehessname,
+    setUsername,
+  } = useContext(UserContext);
   const [passwordInputType, setPasswordInputType] = useState("password");
   const [confirmPasswordInputType, setconfirmPasswordInputType] =
     useState("password");
@@ -65,7 +73,8 @@ const SignUp = () => {
       errors.email == "" &&
       errors.password == "" &&
       errors.confirmPassword == "" &&
-      errors.IsAccepted == ""
+      errors.IsAccepted == "" &&
+      data.IsAccepted == true
     ) {
       if (!data.lichess && !data.chessdotcom) {
         notify(
@@ -77,8 +86,12 @@ const SignUp = () => {
           name: data.name,
           email: data.email,
           password: data.password,
+          lichessUsername: data.lichess ? data.lichess : "",
+          chessUsername: data.chessdotcom ? data.chessdotcom : "",
         }).then((response) => {
+          setUsername(data.name);
           console.log({ response });
+          navigate('/')
           response.ok
             ? notify("user credintials added successfully", "success")
             : notify(response.message, "error");
@@ -305,8 +318,9 @@ const SignUp = () => {
                     notify("empty lichess username", "error");
                   } else {
                     lichessVerify(data.lichess).then((res) => {
-                      console.log(res);
+                      console.log({ res });
                       if (res.ok) {
+                        setUserLicehessname(res.data.username);
                         notify("lichess verified", "success");
                         setErrors((old) => {
                           const copy = { ...old };
@@ -393,6 +407,10 @@ const SignUp = () => {
                     chessVerify(data.chessdotcom).then((res) => {
                       console.log(res);
                       if (res.ok) {
+                        console.log(typeof setChessDCAvatarLink);
+                        setChessDCAvatarLink(res.data.avatar);
+                        setChessDCUsername(res.data.username);
+                        console.log({ playeravatar: res.data.avatar });
                         notify("chess.com verified", "success");
                         setErrors((old) => {
                           const copy = { ...old };

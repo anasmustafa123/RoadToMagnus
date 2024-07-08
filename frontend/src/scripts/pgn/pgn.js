@@ -131,4 +131,14 @@ const pgnMerge3 = (moves, clks, evaluations, classifi) => {
     .join("");
 };
 
-export { constructPgn, parsePgn };
+/**
+ * 
+ * @param {*} pgn 
+ * @returns 
+ */
+const getMovesNum = (pgn) => {
+  const [header, body] = String(pgn).split(/\n\s*\n/);
+  return body.split(/\s+/).filter((value) => parseInt(value[0])).length;
+};
+
+export { constructPgn, parsePgn, getMovesNum };
