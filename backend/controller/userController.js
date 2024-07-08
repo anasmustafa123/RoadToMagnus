@@ -4,7 +4,7 @@ import User from "../models/userModel.js";
 
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }); 
   if (user && (await user.matchPassword(password))) {
     generateToken(res, user.email);
     res.status(201).json({
@@ -13,6 +13,8 @@ const authUser = asyncHandler(async (req, res) => {
         userId: user._id,
         name: user.name,
         email: user.email,
+        "chess.com": user.chessDCusername,
+        "lichess": user.lichessusername,
       },
     });
   } else {

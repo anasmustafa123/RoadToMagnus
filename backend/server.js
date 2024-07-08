@@ -1,4 +1,3 @@
-console.time();
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -38,7 +37,6 @@ dotenv.config();
   }
 })(); */  
 
-console.timeEnd();
 let port = process.env.PORT || 5200;
 const app = express();
 
