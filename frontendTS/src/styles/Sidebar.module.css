@@ -1,0 +1,49 @@
+.logo_container {
+  padding-bottom: 1.5rem;
+}
+.main_logo {
+  width: 83%;
+  margin: auto;
+  display: block;
+}
+
+.sidebar {
+  max-width: 200px;
+  padding: 1.5rem 0rem 1.5rem 0px;
+  background-color: #2f2e2b;
+  color: #f5f5f5;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+}
+
+.option_container > div > i {
+  font-size: 2.2rem;
+  margin-left: 1rem;
+}
+.option_container > div {
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 0rem 0.7rem 0rem;
+}
+.option_container > div:hover {
+  cursor: pointer;
+  color: var(--hover-color);
+  background-color: rgb(88, 88, 88);
+}
+
+.option_container > div > h2 {
+  font-size: 1.3rem;
+  font-weight: 900;
+  min-width: 86px;
+  text-align: center;
+  margin: auto;
+}
+.option_container {
+  padding-top: 1.5rem;
+  border: 0px #2f2e2b;
+  border-top: 1px solid !important;
+  flex-direction: column;
+  height: -webkit-fill-available;
+  display: flex;
+}

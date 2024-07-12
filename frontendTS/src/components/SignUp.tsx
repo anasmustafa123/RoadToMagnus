@@ -1,13 +1,14 @@
-import React, { useState, useContext } from "react";
-import { UserContext } from "../contexts/UserContext";
-import styles from "../styles/SignUp.module.css";
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer, toast } from "react-toastify";
-import { notify } from "../scripts/toast";
-import { validateEmail, validatePassword } from "../scripts/validate";
-import { Link, useNavigate } from "react-router-dom";
-import { getUserInfo as lichessVerify } from "../api/lichessApiAccess";
-import { getUserInfo as chessVerify } from "../api/chessApiAccess";
+import React, { useState, useContext } from 'react';
+import { UserContext } from '../contexts/UserContext';
+import styles from '../styles/SignUp.module.css';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+import { notify } from '../scripts/toast.ts';
+import { validateEmail, validatePassword } from '../scripts/validate.ts';
+import { Link, useNavigate } from 'react-router-dom';
+import { getUserInfo as lichessVerify } from '../api/lichessApiAccess.ts';
+import { getUserInfo as chessVerify } from '../api/chessApiAccess.ts';
+import { NewUser, User } from '../types/User';
 const SignUp = () => {
   const navigate = useNavigate();
   const {
@@ -16,89 +17,87 @@ const SignUp = () => {
     setUserLicehessname,
     setUsername,
   } = useContext(UserContext);
-  const [passwordInputType, setPasswordInputType] = useState("password");
+
+  const [passwordInputType, setPasswordInputType] = useState('password');
   const [confirmPasswordInputType, setconfirmPasswordInputType] =
-    useState("password");
+    useState('password');
   //0: no loading, 1: loading
-  const [loading, setloading] = useState({ chessdotcom: 0, lichess: 0 });
-  const [data, setData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+  const [loading, setloading] = useState({ 'chess.com': 0, lichess: 0 });
+  const [data, setData] = useState<NewUser>({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
     IsAccepted: false,
-    lichess: "",
-    chessdotcom: "",
+    lichess: '',
+    'chess.com': '',
   });
   const [errors, setErrors] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    IsAccepted: "",
-    lichess: "",
-    chessdotcom: "",
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    IsAccepted: '',
+    lichess: '',
+    'chess.com': '',
   });
 
-  const changeHandler = (event) => {
-    if (event.target.name === "IsAccepted") {
-      setData({ ...data, [event.target.name]: event.target.checked });
-      return event.target.checked;
-    } else {
-      setData({ ...data, [event.target.name]: event.target.value });
-      return event.target.value;
-    }
+  const changeHandler = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ): string => {
+    setData({ ...data, [event.target.name]: event.target.value });
+    return event.target.value;
   };
 
-  const register = async (obj) => {
+  const register = async (obj: User) => {
     const res = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/users/register`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(obj),
-      }
+      },
     );
     return res.json();
   };
 
-  const submitHandler = (event) => {
+  const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (
-      data.name !== "" &&
-      data.email != "" &&
-      errors.name == "" &&
-      errors.email == "" &&
-      errors.password == "" &&
-      errors.confirmPassword == "" &&
-      errors.IsAccepted == "" &&
+      data.name !== '' &&
+      data.email != '' &&
+      errors.name == '' &&
+      errors.email == '' &&
+      errors.password == '' &&
+      errors.confirmPassword == '' &&
+      errors.IsAccepted == '' &&
       data.IsAccepted == true
     ) {
-      if (!data.lichess && !data.chessdotcom) {
+      if (!data.lichess && !data['chess.com']) {
         notify(
-          "U have to add either chess.com or lichess usernames, or both",
-          "error"
+          'U have to add either chess.com or lichess usernames, or both',
+          'error',
         );
       } else {
         register({
           name: data.name,
           email: data.email,
           password: data.password,
-          lichessUsername: data.lichess ? data.lichess : "",
-          chessUsername: data.chessdotcom ? data.chessdotcom : "",
+          lichess: data.lichess ? data.lichess : '',
+          'chess.com': data['chess.com'] ? data['chess.com'] : '',
         }).then((response) => {
           setUsername(data.name);
           console.log({ response });
-          navigate('/')
+          navigate('/');
           response.ok
-            ? notify("user credintials added successfully", "success")
-            : notify(response.message, "error");
+            ? notify('user credintials added successfully', 'success')
+            : notify(response.message, 'error');
         });
       }
     } else {
-      notify("Complete  info", "error");
+      notify('Complete  info', 'error');
     }
   };
 
@@ -116,8 +115,8 @@ const SignUp = () => {
               !data.name
                 ? styles.unCompleted
                 : errors.name
-                ? styles.unCompleted_error
-                : styles.completed
+                  ? styles.unCompleted_error
+                  : styles.completed
             }
           >
             <input
@@ -127,9 +126,9 @@ const SignUp = () => {
               placeholder="Name"
               onChange={(e) => {
                 let newname = changeHandler(e);
-                let newerr = "";
+                let newerr = '';
                 if (!newname.trim()) {
-                  newerr = "Username is Required!";
+                  newerr = 'Username is Required!';
                 }
                 setErrors((old) => {
                   old.name = newerr;
@@ -148,8 +147,8 @@ const SignUp = () => {
               !data.email
                 ? styles.unCompleted
                 : errors.email
-                ? styles.unCompleted_error
-                : styles.completed
+                  ? styles.unCompleted_error
+                  : styles.completed
             }
           >
             <input
@@ -166,7 +165,7 @@ const SignUp = () => {
                       return old;
                     })
                   : setErrors((old) => {
-                      old.email = "";
+                      old.email = '';
                       return old;
                     });
               }}
@@ -182,8 +181,8 @@ const SignUp = () => {
               !data.password
                 ? styles.unCompleted
                 : errors.password
-                ? styles.unCompleted_error
-                : styles.completed
+                  ? styles.unCompleted_error
+                  : styles.completed
             }
           >
             <input
@@ -201,7 +200,7 @@ const SignUp = () => {
                       return old;
                     })
                   : setErrors((old) => {
-                      old.password = "";
+                      old.password = '';
                       return old;
                     });
               }}
@@ -209,16 +208,16 @@ const SignUp = () => {
             />
             <i
               onClick={() => {
-                if (passwordInputType == "password") {
-                  setPasswordInputType("text");
+                if (passwordInputType == 'password') {
+                  setPasswordInputType('text');
                 } else {
-                  setPasswordInputType("password");
+                  setPasswordInputType('password');
                 }
               }}
               className={
-                passwordInputType == "password"
-                  ? "bx bxs-lock"
-                  : "bx bxs-lock-open"
+                passwordInputType == 'password'
+                  ? 'bx bxs-lock'
+                  : 'bx bxs-lock-open'
               }
             ></i>
           </div>
@@ -232,8 +231,8 @@ const SignUp = () => {
               !data.confirmPassword
                 ? styles.unCompleted
                 : errors.confirmPassword
-                ? styles.unCompleted_error
-                : styles.completed
+                  ? styles.unCompleted_error
+                  : styles.completed
             }
           >
             <input
@@ -245,17 +244,17 @@ const SignUp = () => {
                 const newconfirm = changeHandler(e);
                 if (!newconfirm) {
                   setErrors((old) => {
-                    old.confirmPassword = "Confirm the Password";
+                    old.confirmPassword = 'Confirm the Password';
                     return old;
                   });
                 } else if (newconfirm !== data.password) {
                   setErrors((old) => {
-                    old.confirmPassword = "Password is not match!";
+                    old.confirmPassword = 'Password is not match!';
                     return old;
                   });
                 } else {
                   setErrors((old) => {
-                    old.confirmPassword = "";
+                    old.confirmPassword = '';
                     return old;
                   });
                 }
@@ -264,16 +263,16 @@ const SignUp = () => {
             />
             <i
               onClick={() => {
-                if (confirmPasswordInputType == "password") {
-                  setconfirmPasswordInputType("text");
+                if (confirmPasswordInputType == 'password') {
+                  setconfirmPasswordInputType('text');
                 } else {
-                  setconfirmPasswordInputType("password");
+                  setconfirmPasswordInputType('password');
                 }
               }}
               className={
-                confirmPasswordInputType == "password"
-                  ? "bx bxs-lock"
-                  : "bx bxs-lock-open"
+                confirmPasswordInputType == 'password'
+                  ? 'bx bxs-lock'
+                  : 'bx bxs-lock-open'
               }
             ></i>
           </div>
@@ -287,8 +286,8 @@ const SignUp = () => {
               !data.lichess
                 ? styles.unCompleted
                 : errors.lichess || loading.lichess != 2
-                ? styles.unCompleted_error
-                : styles.completed
+                  ? styles.unCompleted_error
+                  : styles.completed
             }
           >
             <input
@@ -309,22 +308,22 @@ const SignUp = () => {
             {!loading.lichess ? (
               <button
                 onClick={() => {
-                  if (data.lichess == "") {
+                  if (data.lichess == '') {
                     setErrors((old) => {
                       const copy = { ...old };
-                      copy.lichess = "empty lichess username";
+                      copy.lichess = 'empty lichess username';
                       return copy;
                     });
-                    notify("empty lichess username", "error");
+                    notify('empty lichess username', 'error');
                   } else {
                     lichessVerify(data.lichess).then((res) => {
                       console.log({ res });
                       if (res.ok) {
                         setUserLicehessname(res.data.username);
-                        notify("lichess verified", "success");
+                        notify('lichess verified', 'success');
                         setErrors((old) => {
                           const copy = { ...old };
-                          copy.lichess = "";
+                          copy.lichess = '';
                           return copy;
                         });
                         setloading((old) => {
@@ -333,7 +332,7 @@ const SignUp = () => {
                           return copy;
                         });
                       } else {
-                        notify("wrong lichess username", "error");
+                        notify('wrong lichess username', 'error');
                         setloading((old) => {
                           const copy = { ...old };
                           old.lichess = 0;
@@ -341,7 +340,7 @@ const SignUp = () => {
                         });
                         setErrors((old) => {
                           const copy = { ...old };
-                          copy.lichess = "wrong lichess username";
+                          copy.lichess = 'wrong lichess username';
                           return copy;
                         });
                       }
@@ -370,20 +369,20 @@ const SignUp = () => {
         <div>
           <div
             className={
-              !data.chessdotcom
+              !data['chess.com']
                 ? styles.unCompleted
-                : errors.chessdotcom || loading.chessdotcom != 2
-                ? styles.unCompleted_error
-                : styles.completed
+                : errors['chess.com'] || loading['chess.com'] != 2
+                  ? styles.unCompleted_error
+                  : styles.completed
             }
           >
             <input
-              name="chessdotcom"
-              value={data.chessdotcom}
+              name="chess.com"
+              value={data['chess.com']}
               onChange={(e) => {
                 setloading((old) => {
                   const copy = { ...old };
-                  copy.chessdotcom = 0;
+                  copy['chess.com'] = 0;
                   return copy;
                 });
                 changeHandler(e);
@@ -392,46 +391,48 @@ const SignUp = () => {
               placeholder="Enter chess.com username"
             />
             <img src="/logos/chessdotcom.png" alt="chess.com logo" />
-            {!loading.chessdotcom ? (
+            {!loading['chess.com'] ? (
               <button
                 type="button"
-                onClick={(e) => {
-                  if (data.chessdotcom == "") {
+                onClick={() => {
+                  if (data['chess.com'] == '') {
                     setErrors((old) => {
                       const copy = { ...old };
-                      copy.chessdotcom = "empty chess.com username";
+                      copy['chess.com'] = 'empty chess.com username';
                       return copy;
                     });
-                    notify("empty chess.com username", "error");
+                    notify('empty chess.com username', 'error');
                   } else {
-                    chessVerify(data.chessdotcom).then((res) => {
+                    chessVerify(
+                      data['chess.com'] ? data['chess.com'] : '',
+                    ).then((res) => {
                       console.log(res);
                       if (res.ok) {
                         console.log(typeof setChessDCAvatarLink);
                         setChessDCAvatarLink(res.data.avatar);
                         setChessDCUsername(res.data.username);
                         console.log({ playeravatar: res.data.avatar });
-                        notify("chess.com verified", "success");
+                        notify('chess.com verified', 'success');
                         setErrors((old) => {
                           const copy = { ...old };
-                          copy.chessdotcom = "";
+                          copy['chess.com'] = '';
                           return copy;
                         });
                         setloading((old) => {
                           const copy = { ...old };
-                          old.chessdotcom = 2;
+                          old['chess.com'] = 2;
                           return copy;
                         });
                       } else {
-                        notify("wrong chess.com username", "error");
+                        notify('wrong chess.com username', 'error');
                         setloading((old) => {
                           const copy = { ...old };
-                          old.chessdotcom = 0;
+                          old['chess.com'] = 0;
                           return copy;
                         });
                         setErrors((old) => {
                           const copy = { ...old };
-                          copy.chessdotcom = "wrong lichess username";
+                          copy['chess.com'] = 'wrong lichess username';
                           return copy;
                         });
                       }
@@ -443,7 +444,7 @@ const SignUp = () => {
                 verify
               </button>
             ) : (
-              loading.chessdotcom == 1 && (
+              loading['chess.com'] == 1 && (
                 <img
                   className={styles.loading}
                   src="/login/loading.gif"
@@ -452,8 +453,8 @@ const SignUp = () => {
               )
             )}
           </div>
-          {errors.chessdotcom && (
-            <span className={styles.error}>{errors.chessdotcom}</span>
+          {errors['chess.com'] && (
+            <span className={styles.error}>{errors['chess.com']}</span>
           )}
         </div>
         <div>
@@ -461,9 +462,12 @@ const SignUp = () => {
             <input
               type="checkbox"
               name="IsAccepted"
-              value={data.IsAccepted}
+              value={data.IsAccepted ? 1 : 0}
               id="accept"
-              onChange={changeHandler}
+              onChange={(event) => {
+                setData({ ...data, [event.target.name]: event.target.checked });
+                return event.target.checked;
+              }}
             />
             <label htmlFor="accept">I accept terms of privacy policy</label>
           </div>
@@ -475,14 +479,14 @@ const SignUp = () => {
           <button type="submit">Create Account</button>
           <span
             style={{
-              color: "var(--secondary-color)",
-              textAlign: "center",
-              display: "inline-block",
-              width: "100%",
+              color: 'var(--secondary-color)',
+              textAlign: 'center',
+              display: 'inline-block',
+              width: '100%',
             }}
           >
-            Already have a account?{" "}
-            <Link style={{ fontWeight: "700" }} to="/login">
+            Already have a account?{' '}
+            <Link style={{ fontWeight: '700' }} to="/login">
               Log In
             </Link>
           </span>

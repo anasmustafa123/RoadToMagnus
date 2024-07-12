@@ -1,0 +1,22 @@
+.evaluationbar_container {
+  /* height: 100%; */
+  width: 1.5rem;  
+}
+#whitebar {
+  background-color: white;
+  transition: height 0.4s ease;
+}
+#blackbar {
+  background-color: rgb(15, 9, 9);
+  height: 100%;
+  
+}
+.evaluationbar {
+  height: 100%;
+  background-color: red;
+  overflow: hidden;
+}
+.evaluationText {
+  text-align: center;
+  font-size: 1.2rem;
+}

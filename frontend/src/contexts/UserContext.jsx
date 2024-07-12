@@ -1,18 +1,20 @@
 import React, { createContext, useState, useEffect } from "react";
 const UserContext = createContext("");
 
-function UserContextProvider({ children }) {
-  const [username, setUsername] = useState("");
-  const [userId, setUserId] = useState(55);
-  const [usernameChessDC, setChessDCUsername] = useState("");
-  const [usernameLichess, setUserLicehessname] = useState("");
-  const [chessDCAvatarLink, setChessDCAvatarLink] = useState("");
-  const [isUser, setIsUser] = useState(0);
-  const [uiTheme, setUiTheme] = useState("light");
+const UserContextProvider = ({
+  children,
+}) => {
+  const [username, setUsername] = useState<String>("");
+  const [userId, setUserId] = useState<number>(55);
+  const [usernameChessDC, setChessDCUsername] = useState<String>("");
+  const [usernameLichess, setUserLicehessname] = useState<String>("");
+  const [chessDCAvatarLink, setChessDCAvatarLink] = useState<String>("");
+  const [isUser, setIsUser] = useState<boolean>(false);
+  const [uiTheme, setUiTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     let root = document.getElementById("root");
-    root.className = uiTheme ? uiTheme : "light";
+    if (root) root.className = uiTheme ? uiTheme : "light";
   }, [uiTheme]);
 
   return (
@@ -37,5 +39,5 @@ function UserContextProvider({ children }) {
       {children}
     </UserContext.Provider>
   );
-}
+};
 export { UserContext, UserContextProvider };
