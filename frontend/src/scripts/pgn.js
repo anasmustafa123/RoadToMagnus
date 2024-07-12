@@ -35,9 +35,6 @@ const parsePgn = (pgn) => {
     evaluations = [],
     classifi = [],
     moves = [];
-  let hasClocks = true,
-    hasEvaluations = true,
-    hasClassifications = true;
 
   const [header, body] = String(pgn).split(/\n\s*\n/);
 
@@ -45,43 +42,42 @@ const parsePgn = (pgn) => {
     if (line.startsWith("[White ")) {
       wname = line.slice(8, -2);
     } else if (line.startsWith("[WhiteElo ")) {
-      wrating = parseInt(line.slice(10, -2));
+      wrating = parseInt(line.slice(11, -2));
     } else if (line.startsWith("[Black ")) {
       bname = line.slice(8, -2);
     } else if (line.startsWith("[BlackElo ")) {
-      brating = parseInt(line.slice(10, -2));
+      brating = parseInt(line.slice(11, -2));
     } else if (line.startsWith("[Result ")) {
       const resultStr = line.slice(line.indexOf('"') + 1, -2).split("-")[0];
       result = resultStr.length > 1 ? 0 : !parseInt(resultStr) ? -1 : 1;
     }
   });
-
   const parts = body.split(/\s+/);
-  for (let i = 1; i < parts.length; ) {
-    moves.push(parts[i]);
-    if (hasClocks && parts[i + 1]?.includes("clk")) {
-      if (!parts[i + 2]) throw new Error("Missing clk");
-      clks.push(parts[i + 2]);
+  console.log(parts);
 
-      if (hasEvaluations && parts[i + 3]?.includes("eval")) {
-        if (!parts[i + 4]) throw new Error("Missing evaluations");
-        evaluations.push(parts[i + 4]);
-
-        if (hasClassifications && parts[i + 5]?.includes("class")) {
-          if (!parts[i + 6]) throw new Error("Missing classifications");
-          classifi.push(parts[i + 6].slice(0, -2));
-        } else {
-          hasClassifications = false;
-        }
+  for (let i = 1; i < parts.length; i++) {
+    if (!parts[i]) continue;
+    if (parts[i].indexOf(":") != -1) {
+      if (parts[i].endsWith("]}")) {
+        clks.push(parts[i].slice(0, -2));
       } else {
-        hasEvaluations = false;
+        clks.push(parts[i]);
       }
-    } else {
-      hasClocks = false;
+      continue;
     }
-    i += 8;
-  }
 
+    if (startsWithAlpha(parts[i])) {
+      moves.push(parts[i]);
+    } else if (parts[i] == "%eval") {
+      if (parts[i].endsWith("]}")) {
+        evaluations.push(parts[i].slice(0, -2));
+      } else {
+        evaluations.push(parts[i + 1]);
+      }
+    } else if (parts[i] == "%classi") {
+      classifi.push(parts[i].slice(0, -2));
+    }
+  }
   return {
     wname,
     wrating,
@@ -96,7 +92,12 @@ const parsePgn = (pgn) => {
 };
 
 const getHeader = (title, content) => `[${title} "${content}"]\n`;
-
+function startsWithAlpha(str) {
+  const charCode = str.charCodeAt(0);
+  return (
+    (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)
+  );
+}
 const pgnMerge1 = (moves) => {
   return moves
     .map((move, i) =>
@@ -132,9 +133,9 @@ const pgnMerge3 = (moves, clks, evaluations, classifi) => {
 };
 
 /**
- * 
- * @param {*} pgn 
- * @returns 
+ *
+ * @param {*} pgn
+ * @returns
  */
 const getMovesNum = (pgn) => {
   const [header, body] = String(pgn).split(/\n\s*\n/);

@@ -3,6 +3,7 @@ const UserContext = createContext("");
 
 function UserContextProvider({ children }) {
   const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState(55);
   const [usernameChessDC, setChessDCUsername] = useState("");
   const [usernameLichess, setUserLicehessname] = useState("");
   const [chessDCAvatarLink, setChessDCAvatarLink] = useState("");
@@ -29,6 +30,8 @@ function UserContextProvider({ children }) {
         usernameLichess,
         uiTheme,
         setUiTheme,
+        userId,
+        setUserId,
       }}
     >
       {children}
@@ -36,9 +39,3 @@ function UserContextProvider({ children }) {
   );
 }
 export { UserContext, UserContextProvider };
-const getspeed = async (callback) => {
-  let st = Date.now();
-  await callback;
-  let end = Date.now();
-  return `${(end - st) / 1000}s`;
-};

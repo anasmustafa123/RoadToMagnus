@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import Game from "../components/Game";
-import { getMovesNum } from "../scripts/pgn/pgn";
+import { getMovesNum } from "../scripts/pgn";
 import styles from "../styles/Games.module.css";
 import {
   fetchChessGamesonMonth as chessDCGamesOMonth,

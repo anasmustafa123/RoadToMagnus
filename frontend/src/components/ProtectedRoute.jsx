@@ -1,9 +1,17 @@
 import React, { useContext } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
+import Sidebar from "./Sidebar";
 
-export default function ProtectedRoute({ component }) {
+export default function ProtectedRoute() {
   const { isUser } = useContext(UserContext);
   !isUser ? console.error("no no") : "";
-  return isUser ? component : <Navigate to="/login" />;
+  return isUser ? (
+    <div className="gridContainer">
+      <Sidebar></Sidebar>
+      <Outlet />
+    </div>
+  ) : (
+    <Navigate to="/login" />
+  );
 }

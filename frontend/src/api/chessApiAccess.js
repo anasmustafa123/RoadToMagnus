@@ -1,6 +1,6 @@
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { getMovesNum } from "../scripts/pgn/pgn";
+import { getMovesNum } from "../scripts/pgn";
 async function getUserInfo(username) {
   const url = `https://api.chess.com/pub/player/${username}`;
   const res = await fetch(url);

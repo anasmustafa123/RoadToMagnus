@@ -4,6 +4,7 @@ const GameContext = createContext("");
 
 function GameContextProvider({ children }) {
   const [allGames, setAllGames] = useState([]);
+  const [engineDepth, setEngineDepth] = useState(18);
   const [countChessDCLoaded, setCountChessDCLoaded] = useState(0);
   const [countLichessLoaded, setLichessDCLoaded] = useState(0);
 

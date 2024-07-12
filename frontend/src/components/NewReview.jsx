@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Loading from "./Loading";
 import styles from "../styles/NewReview.module.css";
 export default function NewReview() {
@@ -19,7 +19,8 @@ export default function NewReview() {
   const date = "Jul 4, 2024";
   const movesCount = 100;
   const perc = 20;
-  const message = "calculating\t                                                                                                                                                                                                                                                                                                                                                                                                                                            variations...";
+  const message =
+    "calculating\t                                                                                                                                                                                                                                                                                                                                                                                                                                            variations...";
   const maxValue = 100;
   const depth = 18;
   return (
@@ -56,9 +57,24 @@ export default function NewReview() {
           </div>
         </div>
         <div>
-          <Loading message={message} maxValue={maxValue} perc={perc} inlineStyling={{ width: "120px", alignSelf: "center", margin: "auto" }}></Loading>
+          <Loading
+            message={message}
+            maxValue={maxValue}
+            perc={perc}
+            inlineStyling={{
+              width: "120px",
+              alignSelf: "center",
+              margin: "auto",
+            }}
+          ></Loading>
         </div>
-        <div style={{ textAlign: "center", fontSize: "1.3rem", color: "var(--comment-color)" }}>{`depth = ${depth}`}</div>
+        <div
+          style={{
+            textAlign: "center",
+            fontSize: "1.3rem",
+            color: "var(--comment-color)",
+          }}
+        >{`depth = ${depth}`}</div>
       </div>
     </>
   );
