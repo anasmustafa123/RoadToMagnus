@@ -6,11 +6,11 @@ export interface UserContextType {
   setIsUser: React.Dispatch<React.SetStateAction<boolean>>;
   setUiTheme: React.Dispatch<React.SetStateAction<'light' | 'dark'>>;
   setUserId: React.Dispatch<React.SetStateAction<number>>;
-  chessDCAvatarLink?: string;
-  username?: string;
-  isUser?: boolean;
-  usernameChessDC?: string;
-  usernameLichess?: string;
-  uiTheme?: 'light' | 'dark';
-  userId?: number;
+  chessDCAvatarLink: string;
+  username: string;
+  isUser: boolean;
+  usernameChessDC: string;
+  usernameLichess: string;
+  uiTheme: 'light' | 'dark';
+  userId: number;
 }

@@ -11,3 +11,11 @@ export interface NewUser extends User {
   confirmPassword: string;
   IsAccepted: boolean;
 }
+export interface UserInfo {
+  username: string;
+  rating: number;
+  avatar?: string;
+  flagAvatar?: string;
+  lichess?: string;
+  'chess.com'?: string;
+}
