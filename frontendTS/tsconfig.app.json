@@ -23,5 +23,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "src/types", "src/**/*"]
+  "include": ["src", "src/types", "src/**/*","/src/types/React-augmentation.d.ts"]
 }

@@ -1,40 +1,59 @@
-import React, { useState, useEffect, useMemo, useContext } from "react";
-import { Chessboard } from "react-chessboard";
-import "../styles/chessboard.css";
-import "react-toastify/dist/ReactToastify.css";
-import { GameboardContext } from "../contexts/GameBoardContext";
-export default function ChessBoard({ classifications, movesIndex }) {
-  const [customArrows, setCustomArrows] = useState([]);
-  const [currentClassif, setCurrentClassifi] = useState("null");
-  const [currentMove, setCurrentMove] = useState({ to: "" });
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useContext,
+  ReactNode,
+} from 'react';
+import { Chessboard } from 'react-chessboard';
+import '../styles/chessboard.css';
+import 'react-toastify/dist/ReactToastify.css';
+import { GameboardContext } from '../contexts/GameBoardContext';
+import { ShortMove, Square } from 'chess.js';
+import { ClassName, ClassificationRes } from '../types/GameReview';
+import { Move } from '../types/Game';
+import { Piece } from 'react-chessboard/dist/chessboard/types';
+import {
+  Arrow,
+  CustomSquareStyles,
+  PromotionPieceOption,
+} from 'react-chessboard/dist/chessboard/types';
+const ChessBoard: React.FC<{
+  moves: Move[];
+  classifications: ClassificationRes[];
+  movesIndex: number;
+}> = ({ moves, classifications, movesIndex }) => {
+  const [customArrows, setCustomArrows] = useState<Arrow[]>([]);
+  const [currentClassif, setCurrentClassifi] = useState<ClassName>();
+  const [currentMove, setCurrentMove] = useState({ to: '' });
   useEffect(() => {
     if (movesIndex) {
-      const moves = game.history({ verbose: true });
+      const moves = game ? game.history({ verbose: true }) : [];
       if (movesIndex > moves.length) {
         throw new Error(
-          `error ${{ movesIndex, movesdotlength: moves.length }}`
+          `error ${{ movesIndex, movesdotlength: moves.length }}`,
         );
       }
       if (moves.length == movesIndex) {
         let themove = moves[movesIndex - 1];
-        let theclassification = getClassification(
-          classifications[movesIndex - 1]
-        );
+        let className = getClassification(classifications[movesIndex - 1].sym);
         setCurrentMove(themove);
-        console.log({ themove, theclassification });
-        setCurrentClassifi(theclassification);
+        console.log({ themove, className });
+        setCurrentClassifi(className);
         setCustomArrows([
           [
             themove.from,
             themove.to,
-            classificationInfo[theclassification].color,
+            classificationInfo.find(
+              (classiInfo) => classiInfo.name == className,
+            )?.color,
           ],
         ]);
       }
     } else {
       setCustomArrows([]);
-      setCurrentMove({ to: "" });
-      setCurrentClassifi("null");
+      setCurrentMove({ to: '' });
+      setCurrentClassifi('unknown');
     }
   }, [movesIndex]);
   const {
@@ -52,11 +71,13 @@ export default function ChessBoard({ classifications, movesIndex }) {
     setOptionSquares,
     classificationInfo,
     getClassification,
+    getClassificationByName,
   } = useContext(GameboardContext);
-  const [moveFrom, setMoveFrom] = useState("");
-  const [moveTo, setMoveTo] = useState(null);
-  const [showPromotionDialog, setShowPromotionDialog] = useState(false);
-  const [chessboardwidth, setChessboardWidth] = useState(1000);
+  const [moveFrom, setMoveFrom] = useState<Square>();
+  const [moveTo, setMoveTo] = useState<Square>();
+  const [showPromotionDialog, setShowPromotionDialog] =
+    useState<boolean>(false);
+  const [chessboardwidth, setChessboardWidth] = useState<number>(1000);
 
   useEffect(() => {
     const handleResize = () => {
@@ -76,7 +97,7 @@ export default function ChessBoard({ classifications, movesIndex }) {
     };
 
     // Add event listener
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
 
     // Call handler right away so state gets updated with initial window size
     if (window.innerWidth > 1970) {
@@ -94,40 +115,47 @@ export default function ChessBoard({ classifications, movesIndex }) {
     }
 
     // Remove event listener on cleanup
-    return () => window.removeEventListener("resize", setChessboardWidth);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // style possible moves
-  function getMoveOptions(square) {
-    const moves = game.moves({
-      square,
-      verbose: true,
-    });
+  function getMoveOptions(square: Square) {
+    if (game) {
+      const moves = game.moves({
+        square,
+        verbose: true,
+      });
+    } else {
+      setOptionSquares({});
+      return false;
+    }
     if (moves.length === 0) {
       setOptionSquares({});
       return false;
     }
-
-    const newSquares = {};
+    let newSquares: CustomSquareStyles = {};
     moves.map((move) => {
+      const targetPiece = game.get(move.to);
+      const currentPiece = game.get(square);
       newSquares[move.to] = {
         background:
-          game.get(move.to) &&
-          game.get(move.to).color !== game.get(square).color
-            ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
-            : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
-        borderRadius: "50%",
+          targetPiece &&
+          currentPiece &&
+          targetPiece.color !== currentPiece.color
+            ? 'radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)'
+            : 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
+        borderRadius: '50%',
       };
       return move;
     });
     newSquares[square] = {
-      background: "rgba(255, 255, 0, 0.4)",
+      background: 'rgba(255, 255, 0, 0.4)',
     };
     setOptionSquares(newSquares);
     return true;
   }
 
-  function onSquareClick(square) {
+  function onSquareClick(square: Square) {
     // no clicked squares yet
     setRightClickedSquares({});
     // responsible for showing the possible move styling
@@ -144,36 +172,36 @@ export default function ChessBoard({ classifications, movesIndex }) {
       // if u already clicked on a square aka (movefrom)
       // retrive all possible moves from it
       const moves = game.moves({
-        moveFrom,
+        square: moveFrom,
         verbose: true,
       });
       // if the square is a possible move of movefrom
       const foundMove = moves.find(
-        (m) => m.from === moveFrom && m.to === square
+        (m) => m.from === moveFrom && m.to === square,
       );
       // if the clicke move is not a possibe move of the movefrom
       if (!foundMove) {
         const hasMoveOptions = getMoveOptions(square);
         // if clicked on another piece
-        setMoveFrom(hasMoveOptions ? square : "");
+        setMoveFrom(hasMoveOptions ? square : undefined);
         return;
       }
       setMoveTo(square);
       if (
-        (foundMove.color === "w" &&
-          foundMove.piece === "p" &&
-          square[1] === "8") ||
-        (foundMove.color === "b" &&
-          foundMove.piece === "p" &&
-          square[1] === "1")
+        (foundMove.color === 'w' &&
+          foundMove.piece === 'p' &&
+          square[1] === '8') ||
+        (foundMove.color === 'b' &&
+          foundMove.piece === 'p' &&
+          square[1] === '1')
       ) {
         setShowPromotionDialog(true);
         return;
       }
-      const move = {
+      const move: ShortMove = {
         from: moveFrom,
         to: square,
-        promotion: "q",
+        promotion: 'q',
       };
       makeAMove(move);
       if (move === null) {
@@ -181,84 +209,99 @@ export default function ChessBoard({ classifications, movesIndex }) {
         if (hasMoveOptions) setMoveFrom(square);
         return;
       }
-      setMoveFrom("");
-      setMoveTo(null);
+      setMoveFrom(undefined);
+      setMoveTo(undefined);
       setOptionSquares({});
       return;
     }
   }
 
-  function onPromotionPieceSelect(piece) {
+  function onPromotionPieceSelect(piece: PromotionPieceOption | undefined) {
     if (piece) {
-      const move = {
-        from: moveFrom,
-        to: moveTo,
-        promotion: piece[1].toLowerCase() ?? "q",
-      };
-      makeAMove(move);
+      let promotionPiece = piece[1].toLowerCase() ?? 'q';
+      if (
+        moveFrom &&
+        moveTo &&
+        (promotionPiece == 'b' ||
+          promotionPiece == 'n' ||
+          promotionPiece == 'r' ||
+          promotionPiece == 'q')
+      ) {
+        const move: ShortMove = {
+          from: moveFrom,
+          to: moveTo,
+          promotion: promotionPiece,
+        };
+        makeAMove(move);
+      }
+      setMoveFrom(undefined);
+      setMoveTo(undefined);
+      setShowPromotionDialog(false);
+      setOptionSquares({});
+      return true;
     }
-    setMoveFrom("");
-    setMoveTo(null);
-    setShowPromotionDialog(false);
-    setOptionSquares({});
-    return true;
+    return false;
   }
 
-  function onSquareRightClick(square) {
-    const colour = "rgba(0, 0, 255, 0.4)";
+  function onSquareRightClick(square: Square) {
+    const colour = 'rgba(0, 0, 255, 0.4)';
+    let squares = rightClickedSquares[square];
     setRightClickedSquares({
       ...rightClickedSquares,
       [square]:
-        rightClickedSquares[square] &&
-        rightClickedSquares[square].backgroundColor === colour
+        squares && squares.backgroundColor === colour
           ? undefined
           : { backgroundColor: colour },
     });
   }
 
-  function onDrop(sourceSquare, targetSquare) {
+  function onDrop(sourceSquare: Square, targetSquare: Square) {
     const move = makeAMove({
       from: sourceSquare,
       to: targetSquare,
-      promotion: "q", // always promote to a queen for example simplicity
+      promotion: 'q', // always promote to a queen for example simplicity
     });
 
     // illegal move
     if (move === null) return false;
     return true;
   }
-  const pieces = [
-    "wP",
-    "wN",
-    "wB",
-    "wR",
-    "wQ",
-    "wK",
-    "bP",
-    "bN",
-    "bB",
-    "bR",
-    "bQ",
-    "bK",
+  const pieces: Piece[] = [
+    'wP',
+    'wN',
+    'wB',
+    'wR',
+    'wQ',
+    'wK',
+    'bP',
+    'bN',
+    'bB',
+    'bR',
+    'bQ',
+    'bK',
   ];
 
   const customPieces = useMemo(() => {
-    const pieceComponents = {};
-    pieces.forEach((piece) => {
+    let pieceComponents: {
+      [key: string]: React.FC<{ square: Square; squareWidth: number }>;
+    } = {};
+    pieces.forEach((piece: Piece) => {
       pieceComponents[piece] = ({ square, squareWidth }) => {
         return showClassification && currentMove.to == square ? (
           <div
             style={{
-              position: "relative",
-              backgroundColor: classificationInfo[currentClassif].color,
+              position: 'relative',
+              backgroundColor: getClassificationByName(
+                currentClassif || 'unknown',
+              )?.color,
             }}
           >
             <img
               style={{
-                position: "absolute",
-                width: "40%",
-                right: "-10px ",
-                top: "-10px",
+                position: 'absolute',
+                width: '40%',
+                right: '-10px ',
+                top: '-10px',
               }}
               src={`/classification/${currentClassif}.png`}
               alt="move classification"
@@ -267,8 +310,8 @@ export default function ChessBoard({ classifications, movesIndex }) {
               style={{
                 width: squareWidth,
                 height: squareWidth,
-                backgroundImage: `url(/${avaliblePieceThemes[selectedPieceTheme]}/${piece}.svg)`,
-                backgroundSize: "100%",
+                backgroundImage: `url(/${selectedPieceTheme}/${piece}.svg)`,
+                backgroundSize: '100%',
               }}
             />
           </div>
@@ -277,8 +320,8 @@ export default function ChessBoard({ classifications, movesIndex }) {
             style={{
               width: squareWidth,
               height: squareWidth,
-              backgroundImage: `url(/${avaliblePieceThemes[selectedPieceTheme]}/${piece}.svg)`,
-              backgroundSize: "100%",
+              backgroundImage: `url(/${selectedPieceTheme}/${piece}.svg)`,
+              backgroundSize: '100%',
             }}
           />
         );
@@ -301,8 +344,8 @@ export default function ChessBoard({ classifications, movesIndex }) {
         onSquareRightClick={onSquareRightClick}
         onPromotionPieceSelect={onPromotionPieceSelect}
         customBoardStyle={{
-          borderRadius: "4px",
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
+          borderRadius: '4px',
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
         }}
         customSquareStyles={{
           ...moveSquares,
@@ -312,15 +355,17 @@ export default function ChessBoard({ classifications, movesIndex }) {
         promotionToSquare={moveTo}
         showPromotionDialog={showPromotionDialog}
         customDarkSquareStyle={{
-          backgroundColor: avalibleBoardThemes[selectedBoardTheme].dark,
+          backgroundColor: selectedBoardTheme.dark,
         }}
         customLightSquareStyle={{
-          backgroundColor: avalibleBoardThemes[selectedBoardTheme].light,
+          backgroundColor: selectedBoardTheme.light,
         }}
         customPieces={customPieces}
         customArrows={customArrows}
       />
-      <div style={{ display: "flex", gap: "1rem" }}></div>
+      <div style={{ display: 'flex', gap: '1rem' }}></div>
     </div>
   );
-}
+};
+
+export default ChessBoard;

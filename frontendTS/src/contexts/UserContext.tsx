@@ -2,15 +2,20 @@ import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { UserContextType } from '../types/UserContextType';
 
 const defaultValue: UserContextType = {
-  setChessDCAvatarLink: () => { },
-  setUserLicehessname: () => { },
-  setUsername: () => { },
-  setChessDCUsername: () => { },
-  setUserId: () => { },
-  setIsUser: () => { },
-  setUiTheme: function (value: React.SetStateAction<'light' | 'dark'>): void {
-    throw new Error('Function not implemented.');
-  },
+  setChessDCAvatarLink: () => {},
+  setUserLicehessname: () => {},
+  setUsername: () => {},
+  setChessDCUsername: () => {},
+  setUserId: () => {},
+  setIsUser: () => {},
+  setUiTheme: () => {},
+  chessDCAvatarLink: '',
+  username: '',
+  isUser: false,
+  usernameChessDC: '',
+  usernameLichess: '',
+  uiTheme: 'light',
+  userId: 0,
 };
 const UserContext = createContext<UserContextType>(defaultValue);
 
