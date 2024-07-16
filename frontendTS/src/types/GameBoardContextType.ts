@@ -1,11 +1,9 @@
 import { ChessInstance, ShortMove } from 'chess.js';
-import { ClassName, ClassSymbol, ClassificationRes } from './GameReview';
+import { ClassName, ClassSymbol, Classification } from './Review';
 import { CustomSquareStyles } from 'react-chessboard/dist/chessboard/types';
 
 export interface GameBoardContextType {
-  setClassificationInfo: React.Dispatch<
-    React.SetStateAction<ClassificationRes[]>
-  >;
+  setClassificationInfo: React.Dispatch<React.SetStateAction<Classification[]>>;
   setGame: React.Dispatch<React.SetStateAction<ChessInstance>>;
   setShowClassification: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedPieceTheme: React.Dispatch<React.SetStateAction<PieceTheme>>;
@@ -17,7 +15,7 @@ export interface GameBoardContextType {
   >;
   setMoveSquares: React.Dispatch<React.SetStateAction<CustomSquareStyles>>;
   setOptionSquares: React.Dispatch<React.SetStateAction<CustomSquareStyles>>;
-  classificationInfo: ClassificationRes[];
+  classificationInfo: Classification[];
   optionSquares: CustomSquareStyles;
   moveSquares: CustomSquareStyles;
   rightClickedSquares: CustomSquareStyles;
@@ -30,9 +28,7 @@ export interface GameBoardContextType {
   selectedBoardTheme: BoardTheme;
   selectedPieceTheme: PieceTheme;
   showClassification: boolean;
-  getClassificationByName: (
-    className: ClassName,
-  ) => ClassificationRes | undefined;
+  getClassificationByName: (className: ClassName) => Classification | undefined;
 }
 
 export interface BoardTheme {

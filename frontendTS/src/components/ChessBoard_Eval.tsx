@@ -2,9 +2,8 @@ import React, { useState, useContext } from 'react';
 import ChessBoard from './ChessBoard';
 import EvaluationBar from './EvaluationBar';
 import { GameboardContext } from '../contexts/GameBoardContext';
+import { ReviewGameContext } from '../contexts/ReviewGameContext';
 import styles from '../styles/ChessBoard_Eval.module.css';
-import { Evaluation, Move } from '../types/Game';
-import { ClassificationRes } from '../types/GameReview';
 import { ChessInstance } from 'chess.js';
 export default function ChessBoard_Eval() {
   const {
@@ -14,17 +13,9 @@ export default function ChessBoard_Eval() {
     setOptionSquares,
     setRightClickedSquares,
   } = useContext(GameboardContext);
-  const [moves, setMoves] = useState<Move[]>([]);
+  const { classifications, evaluations, moves } = useContext(ReviewGameContext);
 
   const [movesIndex, setMovesIndex] = useState(0);
-
-  const [classifications, setclassifications] = useState<ClassificationRes[]>(
-    [],
-  );
-
-  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-
-  const [numOfGames, setNumOfGames] = useState(5);
 
   return (
     <div className={styles.chessboard_eval}>
@@ -57,7 +48,7 @@ export default function ChessBoard_Eval() {
         <button
           onClick={() => {
             setMovesIndex(0);
-            safeGameMutate((update:ChessInstance) => {
+            safeGameMutate((update: ChessInstance) => {
               update.reset();
               return update;
             });
@@ -72,7 +63,9 @@ export default function ChessBoard_Eval() {
           onClick={() => {
             const currentIndex = movesIndex;
             if (moves.length > currentIndex) {
-              const res = (makeAMove) ? makeAMove(moves[currentIndex].san) : undefined;
+              const res = makeAMove
+                ? makeAMove(moves[currentIndex].san)
+                : undefined;
               if (res) setMovesIndex((old) => old + 1);
             }
           }}

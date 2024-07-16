@@ -1,13 +1,8 @@
-export interface User {
-  name?: string;
-  id?: string;
-  email: string;
-  password: string;
-  lichess?: string;
-  'chess.com'?: string;
-}
-export interface NewUser extends User {
-  name: string;
+import { LoginUser, RegisterUser } from '../../../shared/types';
+
+export type OldUser = LoginUser;
+
+export interface NewUser extends RegisterUser {
   confirmPassword: string;
   IsAccepted: boolean;
 }

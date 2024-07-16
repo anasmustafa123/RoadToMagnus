@@ -1,18 +1,12 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useContext,
-  ReactNode,
-} from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { Chessboard } from 'react-chessboard';
 import '../styles/chessboard.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { GameboardContext } from '../contexts/GameBoardContext';
 import { ShortMove, Square } from 'chess.js';
-import { ClassName, ClassificationRes } from '../types/GameReview';
-import { Move } from '../types/Game';
-import { Piece } from 'react-chessboard/dist/chessboard/types';
+import type { ClassName, Classification } from '../types/Review';
+import type { Move } from '../types/Game';
+import type { Piece } from 'react-chessboard/dist/chessboard/types';
 import {
   Arrow,
   CustomSquareStyles,
@@ -20,7 +14,7 @@ import {
 } from 'react-chessboard/dist/chessboard/types';
 const ChessBoard: React.FC<{
   moves: Move[];
-  classifications: ClassificationRes[];
+  classifications: Classification[];
   movesIndex: number;
 }> = ({ moves, classifications, movesIndex }) => {
   const [customArrows, setCustomArrows] = useState<Arrow[]>([]);

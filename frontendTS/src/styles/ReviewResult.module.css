@@ -54,17 +54,22 @@
 .ReviewContainer > div {
   margin-bottom: 1rem;
 }
-.wblock {
+.block {
   border: 2px solid;
   border-radius: 0.7rem;
   padding: 5px 15px 5px 15px;
+  border-color: 'var(--block-border)';
+  width: '92px';
+  font-size: '22px';
+  font-weight: '700';
+  text-align: 'center';
+}
+.wblock {
+  border-radius: 0.7rem;
 }
 .bblock {
-  border: 2px solid;
-  border-radius: 0.7rem;
   background-color: var(--text-color);
   color: var(--bg-color);
-  padding: 5px 15px 5px 15px;
 }
 .reviewStatics {
   margin-top: 1rem;

@@ -1,8 +1,8 @@
-import { PlayerInfo, GameResult } from '../types/Game';
-
+import { GameResult } from '../types/Game';
+import { UserInfo } from '../types/User';
 const constructPgn = (
-  wplayer: PlayerInfo,
-  bplayer: PlayerInfo,
+  wplayer: UserInfo,
+  bplayer: UserInfo,
   result: GameResult,
   moves: [string],
   clks: [string],

@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { notify } from '../scripts/toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { validateEmail, validatePassword } from '../scripts/validate';
-import { User } from '../types/User';
+import { OldUser } from '../types/User';
 const Login = () => {
   const navigate = useNavigate();
   const {
@@ -30,7 +30,7 @@ const Login = () => {
     if (isUser) navigate('/games');
   }, [isUser]);
 
-  const loginReq = async (obj: User) => {
+  const loginReq = async (obj: OldUser) => {
     const res = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/users/auth`,
       {

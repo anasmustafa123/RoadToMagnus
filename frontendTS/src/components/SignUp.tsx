@@ -8,7 +8,7 @@ import { validateEmail, validatePassword } from '../scripts/validate.ts';
 import { Link, useNavigate } from 'react-router-dom';
 import { getUserInfo as lichessVerify } from '../api/lichessApiAccess.ts';
 import { getUserInfo as chessVerify } from '../api/chessApiAccess.ts';
-import { NewUser, User } from '../types/User';
+import { NewUser, OldUser } from '../types/User';
 const SignUp = () => {
   const navigate = useNavigate();
   const {
@@ -24,7 +24,6 @@ const SignUp = () => {
   //0: no loading, 1: loading
   const [loading, setloading] = useState({ 'chess.com': 0, lichess: 0 });
   const [data, setData] = useState<NewUser>({
-    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -49,7 +48,7 @@ const SignUp = () => {
     return event.target.value;
   };
 
-  const register = async (obj: User) => {
+  const register = async (obj) => {
     const res = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/users/register`,
       {
@@ -66,7 +65,6 @@ const SignUp = () => {
   const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (
-      data.name !== '' &&
       data.email != '' &&
       errors.name == '' &&
       errors.email == '' &&
@@ -82,13 +80,11 @@ const SignUp = () => {
         );
       } else {
         register({
-          name: data.name,
           email: data.email,
           password: data.password,
           lichess: data.lichess ? data.lichess : '',
           'chess.com': data['chess.com'] ? data['chess.com'] : '',
         }).then((response) => {
-          setUsername(data.name);
           console.log({ response });
           navigate('/');
           response.ok
@@ -109,38 +105,6 @@ const SignUp = () => {
         autoComplete="off"
       >
         <h2>Sign Up</h2>
-        <div>
-          <div
-            className={
-              !data.name
-                ? styles.unCompleted
-                : errors.name
-                  ? styles.unCompleted_error
-                  : styles.completed
-            }
-          >
-            <input
-              type="text"
-              name="name"
-              value={data.name}
-              placeholder="Name"
-              onChange={(e) => {
-                let newname = changeHandler(e);
-                let newerr = '';
-                if (!newname.trim()) {
-                  newerr = 'Username is Required!';
-                }
-                setErrors((old) => {
-                  old.name = newerr;
-                  return old;
-                });
-              }}
-              autoComplete="off"
-            />
-            <i className="bx bx-user-circle"></i>
-          </div>
-          {errors.name && <span className={styles.error}>{errors.name}</span>}
-        </div>
         <div>
           <div
             className={
@@ -328,14 +292,14 @@ const SignUp = () => {
                         });
                         setloading((old) => {
                           const copy = { ...old };
-                          old.lichess = 2;
+                          copy.lichess = 2;
                           return copy;
                         });
                       } else {
                         notify('wrong lichess username', 'error');
                         setloading((old) => {
                           const copy = { ...old };
-                          old.lichess = 0;
+                          copy.lichess = 0;
                           return copy;
                         });
                         setErrors((old) => {

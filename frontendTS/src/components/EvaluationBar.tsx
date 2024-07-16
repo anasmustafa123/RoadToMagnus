@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from '../styles/evaluation.module.css';
-import { Evaluation } from '../types/Game';
+import type { Evaluation } from '../types/Game';
 const EvaluationBar: React.FC<{ evaluation: Evaluation }> = ({
   evaluation,
 }) => {

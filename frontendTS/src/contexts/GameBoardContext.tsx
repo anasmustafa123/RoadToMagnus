@@ -1,6 +1,6 @@
 import { Chess, ChessInstance, ShortMove } from 'chess.js';
 import React, { ReactNode, createContext, useState } from 'react';
-import { ClassSymbol, ClassName, ClassificationRes } from '../types/GameReview';
+import { ClassSymbol, ClassName, Classification } from '../types/Review';
 import {
   BoardTheme,
   GameBoardContextType,
@@ -51,7 +51,7 @@ const ChessBoardContextProvider: React.FC<{ children: ReactNode }> = ({
     'pieces_2',
   ]);
   const [classificationInfo, setClassificationInfo] = useState<
-    ClassificationRes[]
+    Classification[]
   >([
     { color: '#897e30d6', sym: '!$', name: 'book' },
     { color: '#00989dba', sym: '$$', name: 'brilliant' },
@@ -69,7 +69,7 @@ const ChessBoardContextProvider: React.FC<{ children: ReactNode }> = ({
 
   function getClassificationByName(
     className: ClassName,
-  ): ClassificationRes | undefined {
+  ): Classification | undefined {
     let classification = classificationInfo.find(
       (classiInfo) => classiInfo.name == className,
     );
