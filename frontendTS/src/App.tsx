@@ -3,13 +3,11 @@ import { fetchChessGamesonMonth } from './api/chessApiAccess';
 import Games from './pages/Games';
 import { ChessBoardContextProvider } from './contexts/GameBoardContext';
 import {
-  BrowserRouter,
-  Route,
-  Routes,
   RouterProvider,
   createBrowserRouter,
   Navigate,
 } from 'react-router-dom';
+import { ReviewGameContextProvider } from './contexts/ReviewGameContext';
 import SignUp from './components/SignUp';
 import Login from './components/Login';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -246,7 +244,14 @@ function App() {
         <ProtectedRoute component={<Profile></Profile>}></ProtectedRoute>
       ),
     },
-    { path: '/review:gameid', element: <reviewGame></reviewGame> },
+    {
+      path: '/review:gameid',
+      element: (
+        <ReviewGameContextProvider>
+          <NewReview></NewReview>
+        </ReviewGameContextProvider>
+      ),
+    },
     { path: '/explore:userid', element: <></> },
     { path: '*', element: <div>u got lost my friend</div> },
   ]);
