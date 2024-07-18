@@ -1,16 +1,33 @@
+declare global {
+  namespace Express {
+    interface Request {
+      user?: IUser; // Assuming UserDocument is the type of your user object
+      /* dbClient?: string;
+      originalUrl: string; */
+      cookies: Record<string, any>;
+      secret?: string | undefined;
+      signedCookies: Record<string, any>;
+      originalUrl: string;
+    }
+  }
+}
+
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import cors from "cors";
 import path from "path";
-//import run from "./config/db.js";
-import connectDB from './config/db.js';
+import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
-let client;
+import { IUser } from "./@types";
 
+/* declare  module "express" {
+  interface Request {
+    user?: IUser;
+  }
+} */
 connectDB();
-
 /* import connectDb from "./config/db.js";
 import { getUser } from "./models/userModel.js";
  */
@@ -24,18 +41,6 @@ import officeRoutes from "./routes/officeRoutes.js";
 
 //adding the .env const to process.env
 dotenv.config();
-
-//setting up the database
-/* (async () => {
-  console.log("middleware");
-  try {
-    console.log("before");
-    client = await run();
-    console.log("after");
-  } catch (e) {
-    console.error(e);
-  }
-})(); */  
 
 let port = process.env.PORT || 5200;
 const app = express();
@@ -52,9 +57,9 @@ app.use(
     credentials: true,
   })
 );
+
 // Middleware to attach the db client to the request object
-app.use((req, res, next) => {
-  req.dbClient = client;
+app.use((req: Express.Request, res, next) => {
   console.log("req");
   next();
 });

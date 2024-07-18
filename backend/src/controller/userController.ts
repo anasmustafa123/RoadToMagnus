@@ -1,10 +1,11 @@
 import asyncHandler from "express-async-handler";
 import generateToken from "../utils/generateToken.js";
 import User from "../models/userModel.js";
+import { RegisterUser } from "../@types";
 
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email }); 
+  const user = await User.findOne({ email });
   if (user && (await user.matchPassword(password))) {
     generateToken(res, user.email);
     res.status(201).json({
@@ -14,7 +15,7 @@ const authUser = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email,
         "chess.com": user.chessDCusername,
-        "lichess": user.lichessusername,
+        lichess: user.lichessusername,
       },
     });
   } else {
@@ -24,19 +25,27 @@ const authUser = asyncHandler(async (req, res) => {
 });
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, lichessUsername, chessUsername } = req.body;
+  const {
+    email,
+    password,
+    lichess,
+    "chess.com": chessdotcom,
+  }: RegisterUser = req.body;
   const userExists = await User.findOne({ email });
   if (userExists) {
     res.status(400);
     throw new Error("User already exists");
   }
-
+  if (!lichess && !chessdotcom) {
+    res.status(410);
+    throw new Error("Must Join By chess.com or lichess");
+  }
   const user = await User.create({
-    name,
+    name: (lichess ? lichess : "") + "-" + (chessdotcom ? chessdotcom : ""),
     email,
     password,
-    chessDCusername: chessUsername,
-    lichessusername: lichessUsername,
+    "chess.com": chessdotcom,
+    lichess: lichess,
   });
 
   if (user) {

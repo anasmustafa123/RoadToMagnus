@@ -1,10 +1,18 @@
-const notFound = (req, res, next) => {
-  const error = new Error(`not found - ${req.originalUrl} -`);
+import { NextFunction, Request, Response } from "express";
+import { ErrorRes } from "../@types";
+
+const notFound = (req: Express.Request, res: Response, next: NextFunction) => {
+  const error = new Error(`not found - ${req.originalUrl as string} -`);
   res.status(404);
   next(error);
 };
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (
+  err: ErrorRes,
+  req: Express.Request,
+  res: Response,
+  next: NextFunction
+) => {
   console.log(err);
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   let message = err.message;

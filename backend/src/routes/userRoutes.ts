@@ -5,6 +5,7 @@ import {
   authUser,
   logoutUser,
 } from "../controller/userController.js";
+
 import { protect } from "../middleware/authMiddleware.js";
 router.post("/auth", authUser);
 router.post("/register", registerUser);
