@@ -119,7 +119,7 @@ export default function ChessBoard_Eval() {
     "Rg8#",
   ]);
   const [movesIndex, setMovesIndex] = useState(0);
-  const [classNameifications, setclassNameifications] = useState([
+  const [classifications, setclassifications] = useState([
     "?!",
     "!",
     "?$",
@@ -236,13 +236,13 @@ export default function ChessBoard_Eval() {
   ]);
   const [numOfGames, setNumOfGames] = useState(5);
   return (
-    <div classNameName={styles.chessboard_eval}>
+    <div className={styles.chessboard_eval}>
       <div style={{ display: "flex" }}>
         <EvaluationBar evaluation={evaluations[movesIndex]}></EvaluationBar>
         <ChessBoard
           moves={moves}
           movesIndex={movesIndex}
-          classNameifications={classNameifications}
+          classifications={classifications}
         ></ChessBoard>
       </div>
       <div

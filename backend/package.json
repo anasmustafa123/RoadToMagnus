@@ -2,12 +2,13 @@
   "name": "roadtomagnusapi",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "nodemon backend/server.js",
-    "start": "node server.js"
+    "build": "tsc",
+    "test": "tsc src/test.ts",
+    "start": "ts-node -r tsconfig-paths/register server.js",
+    "serve": "node dist/server.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -20,7 +21,16 @@
     "mongoose": "^8.4.5"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/mongoose": "^5.11.97",
+    "@types/node": "^20.14.10",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
   },
   "author": "",
   "license": "ISC"

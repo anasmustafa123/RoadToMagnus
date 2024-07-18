@@ -1,20 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import { UserContext } from "../contexts/UserContext";
 import styles from "../styles/SignUp.module.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { notify } from "../scripts/toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { validateEmail, validatePassword } from "../scripts/validate";
 const Login = () => {
+  const navigate = useNavigate();
+  const {
+    isUser,
+    setIsUser,
+    setChessDCUsername,
+    setUsername,
+    setUserLicehessname,
+  } = useContext(UserContext);
   const [passwordInputType, setPasswordInputType] = useState("password");
   const [data, setData] = useState({
-    email: "",
-    password: "",
+    email: "anasanas@gma.com",
+    password: "anasanas@gma.com",
   });
   const [errors, setErrors] = useState({
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if (isUser) navigate("/games");
+  }, [isUser]);
 
   const loginReq = async (obj) => {
     const res = await fetch(
@@ -41,11 +54,16 @@ const Login = () => {
   const submitHandler = (event) => {
     event.preventDefault();
     if (errors.email == "" && errors.password == "") {
-      loginReq(data).then((data) => {
-        console.log(data);
-        data.ok
-          ? notify("You login to your account successfully", "success")
-          : notify(data.message, "error");
+      loginReq(data).then((res) => {
+        console.log(res);
+        console.log(res.data["chess.com"])
+        if (res.ok) {
+          setIsUser(1);
+          res.data["chess.com"] ? setChessDCUsername(res.data["chess.com"]) : "";
+          res.data["lichess"] ? setUserLicehessname(res.data["lichess"]) : "";
+          setUsername(res.data.name);
+          notify("You login to your account successfully", "success");
+        } else notify(data.message, "error");
       });
     }
   };

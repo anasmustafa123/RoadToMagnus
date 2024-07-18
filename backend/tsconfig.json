@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "dist/@types",
+    "outDir": "dist",
+    "target": "ES2015",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ES6",
+    "moduleResolution": "Bundler" 
+  },
+  "include": [
+    "./node_modules/@types",
+    "src/@types/custom-express.d.ts",
+    "src/**/*",
+    "src/*",
+    "src/@types",
+    "src/@types/*",
+    "src/@types/index.ts"
+  ],
+  "exclude": ["node_modules"]
+}
