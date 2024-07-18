@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import { useState, useContext } from 'react';
 import ChessBoard from './ChessBoard';
 import EvaluationBar from './EvaluationBar';
 import { GameboardContext } from '../contexts/GameBoardContext';
@@ -7,7 +7,7 @@ import styles from '../styles/ChessBoard_Eval.module.css';
 import { ChessInstance } from 'chess.js';
 export default function ChessBoard_Eval() {
   const {
-    makeAMove,
+    makeAMove,   
     safeGameMutate,
     setMoveSquares,
     setOptionSquares,

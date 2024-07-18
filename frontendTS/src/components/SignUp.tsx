@@ -8,14 +8,13 @@ import { validateEmail, validatePassword } from '../scripts/validate.ts';
 import { Link, useNavigate } from 'react-router-dom';
 import { getUserInfo as lichessVerify } from '../api/lichessApiAccess.ts';
 import { getUserInfo as chessVerify } from '../api/chessApiAccess.ts';
-import { NewUser, OldUser } from '../types/User';
+import { NewUser } from '../types/User';
 const SignUp = () => {
   const navigate = useNavigate();
   const {
     setChessDCUsername,
     setChessDCAvatarLink,
     setUserLicehessname,
-    setUsername,
   } = useContext(UserContext);
 
   const [passwordInputType, setPasswordInputType] = useState('password');
@@ -23,7 +22,7 @@ const SignUp = () => {
     useState('password');
   //0: no loading, 1: loading
   const [loading, setloading] = useState({ 'chess.com': 0, lichess: 0 });
-  const [data, setData] = useState<NewUser>({
+  const [data, setData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
@@ -48,7 +47,7 @@ const SignUp = () => {
     return event.target.value;
   };
 
-  const register = async (obj) => {
+  const register = async (obj:NewUser) => {
     const res = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/api/users/register`,
       {

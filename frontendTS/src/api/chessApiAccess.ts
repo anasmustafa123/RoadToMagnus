@@ -1,7 +1,14 @@
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getMovesNum } from '../scripts/pgn';
-import { Game, Vendor } from '../types/Api';
+import { ChessComGame, Vendor } from '../types/Api';
+import type {
+  Game,
+  GameResult,
+  GamesCount,
+  GameType,
+  GameTypes,
+} from '../types/Game';
 async function getUserInfo(username: string) {
   const url = `https://api.chess.com/pub/player/${username}`;
   const res = await fetch(url);
@@ -42,61 +49,27 @@ async function fetchChessGamesonMonth(
   }
 }
 
-const minimizeData = (username: string, monthGames: any) => {
-  let minimizedData;
-  let sample = {
-    result: '',
-    color: '',
-    pgn: '',
-    opponentRating: 0,
-    time_class: '',
+const reduceGamesOfMonth = (
+  vendor: Vendor,
+  username: string,
+  monthGames: ChessComGame[],
+): Game[] => {
+  let gamesCount: GamesCount = {
+    rapid: 0,
+    blitz: 0,
+    bullet: 0,
+    daily: 0,
   };
-  monthGames.forEach((game:any) => {
-    sample = {
-      result: '',
-      color: '',
-      pgn: '',
-      opponentRating: 0,
-      time_class: '',
-    };
-    if (game.black.result.toLowerCase() === 'win') {
-      sample.result = 'black';
-    } else if (
-      game.black.result.toLowerCase() === 'agreed' ||
-      game.black.result.toLowerCase() === 'repetition' ||
-      game.black.result.toLowerCase() === 'stalemate' ||
-      game.black.result.toLowerCase() === 'timevsinsufficient' ||
-      game.black.result.toLowerCase() === 'insufficient'
-    ) {
-      sample.result = 'draw';
-    } else {
-      sample.result = 'white';
-    }
-    if (game.black.username.toLowerCase() === username.toLowerCase()) {
-      sample.color = 'black';
-      sample.opponentRating = game.white.rating;
-    } else {
-      sample.color = 'white';
-      sample.opponentRating = game.black.rating;
-    }
-    sample.time_class = game.time_class;
-    sample.pgn = game.pgn;
-
-    minimizedData.push(sample);
-  });
-  return minimizedData;
-};
-
-const reduceGamesOfMonth = (vendor: Vendor, monthGames: any): [Game] => {
-  return monthGames.map((game: any) => {
-    let gameResult =
+  return monthGames.map((game) => {
+    let gameResult: GameResult =
       game.black.result.toLowerCase() === 'win'
         ? -1
         : game.white.result.toLowerCase() === 'win'
           ? 1
           : 0;
+    let drawType;
     if (!gameResult) {
-      var drawType =
+      drawType =
         game.black.result.toLowerCase() === 'agreed' ||
         game.black.result.toLowerCase() === 'repetition' ||
         game.black.result.toLowerCase() === 'stalemate' ||
@@ -105,31 +78,27 @@ const reduceGamesOfMonth = (vendor: Vendor, monthGames: any): [Game] => {
           ? game.black.result.toLowerCase()
           : '';
     }
-   
-    return {
+    const gameTypee: GameType = game.time_class.toLowerCase();
+    gamesCount[gameTypee as GameTypes]++;
+    console.log(gamesCount);
+    let resgame: Game = {
       wuser: { username: game.white.username, rating: game.white.rating },
       buser: { username: game.black.username, rating: game.black.rating },
       gameType: game.time_class.toLowerCase(),
       site: vendor,
       gameResult,
+      playerColor: game.white.username == username ? 1 : -1,
+      gameId: 1,
       drawType: drawType ? drawType : '',
-      pgn: game.pgn,
       isReviewed: false,
       date: getYearAndMonth(game.end_time).date,
       movesCount: getMovesNum(game.pgn),
+      gamesCount,
     };
+    return resgame;
   });
 };
-/**
- * @param {String} username
- * @param {Number} smonth
- * @param {Number} syear
- * @param {Number} emonth
- * @param {Number} eyear
- * @param {callback} callback1 (require no params) will be called each month
- * @param {callback} callback2 (takes games loaded in this month) will be called each month
- * @returns {Array} allGames
- */
+
 /* async function getAllPlayerGames(
   username,
   smonth,
@@ -176,7 +145,9 @@ const reduceGamesOfMonth = (vendor: Vendor, monthGames: any): [Game] => {
   return { allGames, allMoves };
 } */
 
-const getYearAndMonth = (joinDate:number) => {
+const getYearAndMonth = (
+  joinDate: number,
+): { year: number; month: number; date: `${string}-${string}` } => {
   // convert to Unix timestamp to milliseconds
   const date = new Date(joinDate * 1000);
   // Get year and month

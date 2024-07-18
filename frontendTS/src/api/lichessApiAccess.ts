@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-async function fetchLichesssGames(username) {
+async function fetchLichesssGames(username:string) {
   const url = `https://lichess.org/api/games/user/${username}`;
   const response = await fetch(url);
   if (!response.ok) {
@@ -11,7 +11,7 @@ async function fetchLichesssGames(username) {
   return data;
 }
 
-const getUserInfo = async (username) => {
+const getUserInfo = async (username:string) => {
   const url = `https://lichess.org/api/user/${username}`;
   const res = await fetch(url);
   console.log(res);

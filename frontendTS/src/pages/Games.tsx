@@ -1,20 +1,16 @@
-import React, { useContext, useState } from "react";
-import Game from "../components/Game";
-import { getMovesNum } from "../scripts/pgn";
-import styles from "../styles/Games.module.css";
+import React, { CSSProperties, useContext, useState } from 'react';
+import Game from '../components/Game';
+import styles from '../styles/Games.module.css';
 import {
-  fetchChessGamesonMonth as chessDCGamesOMonth,
   fetchChessGamesonMonth,
-  getYearAndMonth,
   reduceGamesOfMonth as reducechessDC,
-} from "../api/chessApiAccess";
-import { UserContext } from "../contexts/UserContext";
-import { GameContext } from "../contexts/GamesContext";
+} from '../api/chessApiAccess';
+import { UserContext } from '../contexts/UserContext';
+import { GameContext } from '../contexts/GamesContext';
 
-export default function Games({ inlineStyles }) {
-  const { usernameChessDC, usernameLichess, chessDCAvatarLink, username } =
-    useContext(UserContext);
-  const [animation, setanimation] = useState("");
+const Games: React.FC<{ inlineStyles: CSSProperties }> = ({ inlineStyles }) => {
+  const { usernameChessDC } = useContext(UserContext);
+  const [animation, setanimation] = useState('');
   const { allGames, updateAllGames } = useContext(GameContext);
   const date = new Date();
   const [month, setmonth] = useState(date.getMonth());
@@ -26,9 +22,9 @@ export default function Games({ inlineStyles }) {
           <h2>All Games</h2>
           <i
             onClick={() => {
-              setanimation("bx-spin");
+              setanimation('bx-spin');
               setTimeout(() => {
-                setanimation("");
+                setanimation('');
               }, 2000);
               console.log({
                 uname: usernameChessDC,
@@ -43,21 +39,29 @@ export default function Games({ inlineStyles }) {
                   console.log(`time: ${(end - st) / 1000}sec`);
                   console.log(res);
                   console.log({
-                    reduced: reducechessDC("chessdotcom", res.games),
+                    reduced: reducechessDC(
+                      'chess.com',
+                      usernameChessDC,
+                      res.games,
+                    ),
                   });
-                  updateAllGames(reducechessDC("chessdotcom", res.games));
-                }
+                  updateAllGames(
+                    reducechessDC('chess.com', usernameChessDC, res.games),
+                  );
+                },
               );
             }}
             className={`${animation} bx bx-repost`}
           ></i>
         </div>
         {true ? (
-          allGames.map((value, i) => <Game pass={i} data={value}></Game>)
+          allGames.map((value, i) => <Game id={i} gameData={value}></Game>)
         ) : (
           <></>
         )}
       </div>
     </>
   );
-}
+};
+
+export default Games;

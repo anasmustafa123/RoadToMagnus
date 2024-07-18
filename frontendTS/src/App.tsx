@@ -29,11 +29,12 @@ function App() {
   const [fenArr, setFenArr] = useState([]);
   const [diffArr, setDiffArr] = useState([]);
   const [engineRes, setEngineRes] = useState([]);
-  useEffect(() => {
+  const { userId, isUser } = useContext(UserContext);
+  /* useEffect(() => {
     if (engineRes) {
       console.log({ engineRes });
     }
-  }, [engineRes]);
+  }, [engineRes]); */
   /**
    *
    * @param {String} response
@@ -41,7 +42,7 @@ function App() {
    * @param {boolean} verbose
    * @returns
    */
-  async function waitFor(
+  /* async function waitFor(
     stockfish,
     response,
     errormsg = 'error',
@@ -63,7 +64,7 @@ function App() {
         reject(new Error(errormsg));
       }, 20000); // Adjust timeout as needed
     });
-  }
+  } */
 
   /**
    *
@@ -71,7 +72,7 @@ function App() {
    * @param {number} targetDepth
    * @returns
    */
-  async function evaluatePosition(stockfish, fen, targetDepth, verbose = true) {
+  /*  async function evaluatePosition(stockfish, fen, targetDepth, verbose = true) {
     stockfish.postMessage(`position fen ${fen}`);
     stockfish.postMessage(`go depth ${targetDepth}`);
 
@@ -143,7 +144,7 @@ function App() {
         resolve({ id: 0, depth: 0, evaluation: 0, moveUCI: 0 });
       }, 20000); // Adjust timeout as needed
     });
-  }
+  } */
 
   /**
    *  @param {number} maxDepth
@@ -151,7 +152,7 @@ function App() {
    * @param {boolean} verbose
    * @returns {Promise<[Lines]>}
    */
-  async function reviewGame(maxDepth, pgn, verbose = false) {
+  /* async function reviewGame(maxDepth, pgn, verbose = false) {
     const workerUrl = new URL(
       './scripts/stockfish/stockfish-worker.js',
       import.meta.url,
@@ -203,14 +204,14 @@ function App() {
       stockfish.terminate();
       resolve(gameeval);
     });
-  }
+  } */
   const ProtectedRoutes = [
     {
       path: '/',
       element: isUser ? (
-        <Navigate to={`/profile/:${userId}`} replace={true}></Navigate>
+        <Navigate to={`/games`} replace={true}></Navigate>
       ) : (
-        <Navigate to="/login" replace={true}></Navigate>
+        <Navigate to="/games" replace={true}></Navigate>
       ),
     },
     {
@@ -237,13 +238,6 @@ function App() {
     },
     { path: '/login', element: <Login></Login> },
     { path: '/register', element: <SignUp></SignUp> },
-
-    {
-      path: '/profile:userid',
-      element: (
-        <ProtectedRoute component={<Profile></Profile>}></ProtectedRoute>
-      ),
-    },
     {
       path: '/review:gameid',
       element: (

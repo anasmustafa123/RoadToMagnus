@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
 import styles from '../styles/LinesReview.module.css';
 export default function LinesReview() {
-  const { moves, classifications } = useContext(ReviewGameContext);
+  const { moves } = useContext(ReviewGameContext);
   const bgColors = ['#fffefe', '#efefef'];
 
   /*  const getClassification = (classiSym) => {

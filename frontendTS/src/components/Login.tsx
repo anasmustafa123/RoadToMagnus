@@ -27,7 +27,11 @@ const Login = () => {
   });
 
   useEffect(() => {
-    if (isUser) navigate('/games');
+    console.log('isUser');
+    if (isUser) {
+      console.log('navigating');
+      navigate('games', { replace: true });
+    }
   }, [isUser]);
 
   const loginReq = async (obj: OldUser) => {
@@ -51,8 +55,6 @@ const Login = () => {
     event.preventDefault();
     if (errors.email == '' && errors.password == '') {
       loginReq(data).then((res) => {
-        console.log(res);
-        console.log(res.data['chess.com']);
         if (res.ok) {
           setIsUser(true);
           res.data['chess.com']
@@ -60,7 +62,10 @@ const Login = () => {
             : '';
           res.data['lichess'] ? setUserLicehessname(res.data['lichess']) : '';
           setUsername(res.data.name);
-          notify('You login to your account successfully', 'success');
+          notify(
+            `${res.data['chess.com']} you logged to your account successfully`,
+            'success',
+          );
         } else notify(res.message, 'error');
       });
     }
