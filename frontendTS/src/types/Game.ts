@@ -1,16 +1,24 @@
-import { Move as GameMove, PieceType, Square } from 'chess.js';
+import { Move as GameMove, Square } from 'chess.js';
 import { Piece } from 'react-chessboard/dist/chessboard/types';
 import { UserInfo } from './User';
 import { Vendor } from './Api';
 
 export type MoveType = 'n' | 'c' | 'p';
 
-export type GameType = 'rapid' | 'blitz' | 'bullet' | 'daily';
+export type GameTypes = 'rapid' | 'blitz' | 'bullet' | 'daily';
+
+export interface GameType {
+  toLowerCase(): GameType; 
+}
+
+export type GamesCount = {
+  [key in GameTypes]: number;
+};
 
 export type Lan = `${Square}${Square}`;
 
 export interface Move
-  extends Pick<GameMove, 'from' | 'to' | 'promotion'  | 'san'> {
+  extends Pick<GameMove, 'from' | 'to' | 'promotion' | 'san'> {
   lan?: Lan;
   type: MoveType;
   piece: Piece;
@@ -32,6 +40,7 @@ export interface Game {
   waccuracy?: number;
   baccuracy?: number;
   fen?: string;
+  gamesCount: GamesCount
 }
 
 export interface Evaluation {
