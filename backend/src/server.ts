@@ -53,10 +53,10 @@ app.use(cookieParser());
 app.use(
   cors({
     origin:
-      process.env.NODE_ENV != "development" ? "" : "http://localhost:5173",
+      process.env.NODE_ENV != "development" ? "" : "http://localhost:5174",
     credentials: true,
   })
-);
+);  
 
 // Middleware to attach the db client to the request object
 app.use((req: Express.Request, res, next) => {
