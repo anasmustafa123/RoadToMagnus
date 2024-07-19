@@ -3,16 +3,14 @@ import { Piece } from 'react-chessboard/dist/chessboard/types';
 import { UserInfo } from './User';
 import { Vendor } from './Api';
 
+export const GameTypes = ['rapid', 'blitz', 'bullet', 'daily'];
+
 export type MoveType = 'n' | 'c' | 'p';
 
-export type GameTypes = 'rapid' | 'blitz' | 'bullet' | 'daily';
-
-export interface GameType {
-  toLowerCase(): GameType; 
-}
+export type GameType = 'rapid' | 'blitz' | 'bullet' | 'daily';
 
 export type GamesCount = {
-  [key in GameTypes]: number;
+  [key in GameType]: number;
 };
 
 export type Lan = `${Square}${Square}`;
@@ -32,7 +30,7 @@ export interface Game {
   playerColor: PlayerColor;
   date: `${string}-${string}`;
   gameResult: GameResult;
-  gameType: GameType;
+  gameType: GameType | null;
   drawType?: string;
   site: Vendor;
   movesCount: number;
@@ -40,7 +38,7 @@ export interface Game {
   waccuracy?: number;
   baccuracy?: number;
   fen?: string;
-  gamesCount: GamesCount
+  gamesCount: GamesCount;
 }
 
 export interface Evaluation {

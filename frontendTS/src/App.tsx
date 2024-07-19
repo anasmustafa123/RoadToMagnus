@@ -19,6 +19,7 @@ import ReviewResult from './components/ReviewResult';
 import NewReview from './components/NewReview';
 import Profile from './pages/Profile';
 import { UserContext } from './contexts/UserContext';
+import  Stats  from './components/LineChart';
 
 function App() {
   const [finalDepth, setFinalDepth] = useState(18);
@@ -209,7 +210,7 @@ function App() {
     {
       path: '/',
       element: isUser ? (
-        <Navigate to={`/games`} replace={true}></Navigate>
+        <Navigate to={`/login`} replace={true}></Navigate>
       ) : (
         <Navigate to="/games" replace={true}></Navigate>
       ),
