@@ -27,10 +27,10 @@ const Login = () => {
   });
 
   useEffect(() => {
-    console.log('isUser');
+    console.log(`is user changed ${isUser}`);
     if (isUser) {
       console.log('navigating');
-      navigate('games', { replace: true });
+      navigate('/games', { replace: true });
     }
   }, [isUser]);
 
@@ -56,7 +56,10 @@ const Login = () => {
     if (errors.email == '' && errors.password == '') {
       loginReq(data).then((res) => {
         if (res.ok) {
+          console.log('before');
           setIsUser(true);
+          console.log('after');
+          console.log(res)
           res.data['chess.com']
             ? setChessDCUsername(res.data['chess.com'])
             : '';

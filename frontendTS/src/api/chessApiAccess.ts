@@ -2,13 +2,8 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getMovesNum } from '../scripts/pgn';
 import { ChessComGame, Vendor } from '../types/Api';
-import type {
-  Game,
-  GameResult,
-  GamesCount,
-  GameType,
-  GameTypes,
-} from '../types/Game';
+import type { Game, GameResult, GamesCount, GameType } from '../types/Game';
+import { GameTypes } from '../types/Game';
 async function getUserInfo(username: string) {
   const url = `https://api.chess.com/pub/player/${username}`;
   const res = await fetch(url);
@@ -78,13 +73,16 @@ const reduceGamesOfMonth = (
           ? game.black.result.toLowerCase()
           : '';
     }
-    const gameTypee: GameType = game.time_class.toLowerCase();
-    gamesCount[gameTypee as GameTypes]++;
+    const timeClass =
+      game.time_class.toLowerCase() in GameTypes
+        ? (game.time_class.toLowerCase() as GameType)
+        : undefined;
+    timeClass ? gamesCount[timeClass]++ : '';
     console.log(gamesCount);
     let resgame: Game = {
       wuser: { username: game.white.username, rating: game.white.rating },
       buser: { username: game.black.username, rating: game.black.rating },
-      gameType: game.time_class.toLowerCase(),
+      gameType: timeClass ? timeClass : null,
       site: vendor,
       gameResult,
       playerColor: game.white.username == username ? 1 : -1,

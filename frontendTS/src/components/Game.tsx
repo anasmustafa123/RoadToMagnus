@@ -156,7 +156,7 @@ const Game: React.FC<{
         ) : (
           <i
             style={{
-              '--hover-color': `${hoverColor[gameData.gameType]}`,
+              '--hover-color': `${gameData.gameType ? hoverColor[gameData.gameType] : 'red'}`,
               margin: 'auto',
               color: 'var(--text-color)',
             }}
