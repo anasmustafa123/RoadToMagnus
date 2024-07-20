@@ -73,12 +73,12 @@ const reduceGamesOfMonth = (
           ? game.black.result.toLowerCase()
           : '';
     }
-    const timeClass =
-      game.time_class.toLowerCase() in GameTypes
-        ? (game.time_class.toLowerCase() as GameType)
-        : undefined;
-    timeClass ? gamesCount[timeClass]++ : '';
-    console.log(gamesCount);
+    const timeClass = GameTypes.find((v) => game.time_class.toLowerCase() == v)
+      ? (game.time_class.toLowerCase() as GameType)
+      : undefined;
+    console.log(game.time_class.toLowerCase() as GameType);
+    timeClass ? (gamesCount[timeClass] = gamesCount[timeClass] + 1) : '';
+    console.log(game.time_class.toLowerCase() in GameTypes);
     let resgame: Game = {
       wuser: { username: game.white.username, rating: game.white.rating },
       buser: { username: game.black.username, rating: game.black.rating },
