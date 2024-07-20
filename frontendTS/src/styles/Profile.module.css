@@ -1,0 +1,71 @@
+body {
+  min-height: 100vh;
+}
+.profile {
+}
+.header {
+  display: flex;
+  max-height: 300px;
+  min-height: 200px;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  padding: 5px 15px 5px 15px;
+}
+.header > div {
+  display: flex;
+  flex-direction: column;
+  margin: 5px;
+}
+.header > div > div {
+  margin-top: 15px;
+  margin-bottom: auto;
+}
+
+.header input[type='file'] {
+  position: absolute;
+  left: 0px;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+}
+.header > span:first-child {
+  position: relative;
+  margin: 4rem 1rem 4rem 10px;
+}
+.header > div > :last-child {
+  margin-top: auto;
+}
+.header .headerLogo {
+  width: 150px;
+  height: 150px;
+  align-self: center;
+  border: 1px solid white;
+  border-radius: 6px;
+}
+h1.username {
+  margin: 0px;
+  padding: 0px;
+}
+
+.header > div > img:first-child {
+  /* width: 50px;  */
+}
+.header > div img {
+  width: 40px;
+  height: auto;
+  margin-right: 14px;
+}
+
+.header > div > div {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.header > div {
+}
+.header > div > div:first-child {
+}
+
+.header > div > div > div {
+}

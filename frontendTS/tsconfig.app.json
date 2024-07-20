@@ -28,5 +28,6 @@
     "src/types",
     "src/**/*",
     "/src/types/React-augmentation.d.ts"
-  ]
+  ],
+  "exclude": ["node_modules"]
 }

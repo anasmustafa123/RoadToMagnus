@@ -45,3 +45,11 @@ a:hover {
   color: var(--main-color-hover);
 }
 
+#root{
+  height: 100%;
+}
+
+:root{
+  padding: 0px !important;
+  margin: 0px !important;
+}

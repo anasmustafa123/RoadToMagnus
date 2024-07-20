@@ -19,7 +19,7 @@ import ReviewResult from './components/ReviewResult';
 import NewReview from './components/NewReview';
 import Profile from './pages/Profile';
 import { UserContext } from './contexts/UserContext';
-import  Stats  from './components/LineChart';
+import  Stats  from './components/stats/LineChart';
 
 function App() {
   const [finalDepth, setFinalDepth] = useState(18);
@@ -252,7 +252,8 @@ function App() {
   ]);
   return (
     <>
-      <RouterProvider router={Router}></RouterProvider>
+      {/* <RouterProvider router={Router}></RouterProvider> */}
+      <Profile></Profile>
     </>
   );
 }
