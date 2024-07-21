@@ -4,7 +4,7 @@
     grid-template-rows: 1fr;
     width: 100%;
     min-height: 100vh;
-    background-color: var(--light-black);
+    background-color: var(--bg-color);
     scrollbar-width: thin;
     scroll-behavior: smooth;
     scroll-snap-align: 5px;
