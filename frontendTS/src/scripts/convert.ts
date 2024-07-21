@@ -1,7 +1,6 @@
 import { Chess, ChessInstance } from 'chess.js';
-import { Move } from '../types/Game';
 
-const getFenArr = (moves:Move[]) => {
+const getFenArr = (moves:string[]) => {
   let game = new Chess();
   let fens:string[] = [];
   moves.forEach((move) => {
@@ -16,9 +15,9 @@ const getFenArr = (moves:Move[]) => {
   return fens;
 };
 
-function makeAMove(move:Move, game:ChessInstance): 0 | {game: ChessInstance, fen: string} {
+function makeAMove(moveSan:string, game:ChessInstance): 0 | {game: ChessInstance, fen: string} {
   const gameCopy = { ...game };
-  const result = gameCopy.move(move);
+  const result = gameCopy.move(moveSan);
   if (result) {
     return { fen: gameCopy.fen(), game: gameCopy };
   }
