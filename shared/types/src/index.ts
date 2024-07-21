@@ -6,3 +6,5 @@ export interface RegisterUser extends LoginUser {
   lichess?: string;
   "chess.com"?: string;
 }
+
+export type GetGameById = (gameId: number | `${number}`) => any;
