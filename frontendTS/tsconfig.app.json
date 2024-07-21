@@ -23,10 +23,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": [
-    "src",
-    "src/types",
-    "src/**/*",
-    "/src/types/React-augmentation.d.ts"
-  ]
+  "include": ["api/**/*.ts", "src", "src/types/chess-web-api/@types.ts"]
 }

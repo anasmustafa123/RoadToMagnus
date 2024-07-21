@@ -50,6 +50,8 @@ export interface EngineLine {
   evaluation: Evaluation;
   /** its in lan format */
   bestMove: Lan;
+  id: number;
+  depth: number;
 }
 /**
  * 1: white won, -1: black won, 0: draw
