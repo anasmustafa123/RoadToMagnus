@@ -7,14 +7,16 @@ import {
 } from '../api/chessApiAccess';
 import { UserContext } from '../contexts/UserContext';
 import { GameContext } from '../contexts/GamesContext';
-
+import { ReviewGameContext } from '../contexts/ReviewGameContext';
+import { Await, useLoaderData, defer } from 'react-router-dom';
 const Games: React.FC<{ inlineStyles: CSSProperties }> = ({ inlineStyles }) => {
   const { usernameChessDC } = useContext(UserContext);
   const [animation, setanimation] = useState('');
+  const { setGameInfo } = useContext(ReviewGameContext);
   const { allGames, updateAllGames } = useContext(GameContext);
   const date = new Date();
   const [month, setmonth] = useState(date.getMonth());
-
+  const data = useLoaderData() as { gameData: Game[] };
   return (
     <>
       <div className={styles.gamesContainer} style={inlineStyles}>
@@ -54,11 +56,23 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = ({ inlineStyles }) => {
             className={`${animation} bx bx-repost`}
           ></i>
         </div>
-        {true ? (
-          allGames.map((value, i) => <Game id={i} gameData={value}></Game>)
-        ) : (
-          <></>
-        )}
+        <React.Suspense fallback={<div>Loading...</div>}>
+          <Await
+            resolve={data.gameData}
+            errorElement={<p>Error loading Games!</p>}
+          >
+            {(gameData:Game[]) => gameData.map((value, i) => (
+              <Game
+                onClick={(gameData) => {
+                  console.log(gameData);
+                  setGameInfo(gameData);
+                }}
+                id={i}
+                gameData={value}
+              ></Game>
+            ))}
+          </Await>
+        </React.Suspense>
       </div>
     </>
   );
