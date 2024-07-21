@@ -1,5 +1,3 @@
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { getMovesNum } from '../scripts/pgn';
 import { ChessComGame, Vendor } from '../types/Api';
 import type { Game, GameResult, GamesCount, GameType } from '../types/Game';
@@ -22,6 +20,23 @@ async function getUserInfo(username: string) {
     url: info["url"],
   };
 } */
+const getAvalibleArchieves = async (username: string) => {
+  console.log('getAvalibleArchieves');
+  const url = `https://api.chess.com/pub/player/${username}/games/archives`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Error fetching games: ${response.status}`);
+    }
+    const data = await response.json();
+    console.debug(data);
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error('enter correct chess.com username');
+    return null; // Or handle the error differently
+  }
+};
 
 async function fetchChessGamesonMonth(
   username: string,
@@ -34,16 +49,27 @@ async function fetchChessGamesonMonth(
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      toast.error('Error Enter correct chess.com username..');
       throw new Error(`Error fetching games: ${response.status}`);
     }
     const data = await response.json();
     return data;
   } catch (error) {
-    toast.error('Error Enter correct chess.com username...');
     return null; // Or handle the error differently
   }
 }
+
+const getGamesOfMonth = async (
+  username: string,
+  year: number,
+  month: number,
+) => {
+  return new Promise(async (resolve) => {
+    console.log(`get game of month usernamae: ${username}`);
+    fetchChessGamesonMonth(username, year, month).then((games) => {
+      resolve(reduceGamesOfMonth('chess.com', username, games.games));
+    });
+  });
+};
 
 const reduceGamesOfMonth = (
   vendor: Vendor,
@@ -56,9 +82,13 @@ const reduceGamesOfMonth = (
     bullet: 0,
     daily: 0,
   };
+  monthGames = monthGames.filter((game, i) => {
+    return game.pgn;
+  });
   return monthGames.map((game) => {
+    console.log(game);
     let gameResult: GameResult =
-      game.black.result.toLowerCase() === 'win'
+      game.black.result.toLowerCase() === 'win['
         ? -1
         : game.white.result.toLowerCase() === 'win'
           ? 1
@@ -156,9 +186,10 @@ const getYearAndMonth = (
   return { year: year, month: month, date: `${month}-${year}` };
 };
 
-
 const getGameById: GetGameById = async (gameId) => {
-  return await fetch(`${import.meta.env.VITE_BACKEND_URL}/chess.com/game/${gameId}`);
+  return await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/chess.com/game/${gameId}`,
+  );
 };
 
 export {
@@ -167,4 +198,6 @@ export {
   fetchChessGamesonMonth,
   getYearAndMonth,
   reduceGamesOfMonth,
+  getAvalibleArchieves,
+  getGamesOfMonth,
 };

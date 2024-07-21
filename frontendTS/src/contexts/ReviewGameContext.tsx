@@ -1,7 +1,7 @@
 import React, { useState, createContext } from 'react';
 import { Chess, Square } from 'chess.js';
 import type { ReviewGameContext } from '../types/ReviewGameContext';
-import {
+import type {
   EngineLine,
   Evaluation,
   Move,
@@ -26,10 +26,6 @@ const initialContext = {
   setEvaluations: () => {},
   moves: [] as unknown as Move[],
   setMoves: () => {},
-  setwUser: () => {},
-  setbUser: () => {},
-  setGameResult: () => {},
-  setPlayerColor: () => {},
   getClassification: () => 'unknown' as ClassName,
   gameInfo: {} as GameType,
   setGameInfo: () => {},

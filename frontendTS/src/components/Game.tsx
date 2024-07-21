@@ -5,7 +5,8 @@ import type { Game } from '../types/Game';
 const Game: React.FC<{
   id: number;
   gameData: Game;
-}> = ({ id, gameData }) => {
+  onClick: (gameData: Game) => void;
+}> = ({ id, gameData, onClick }) => {
   let largeScreen = true;
   const hoverColor = {
     rapid: 'green',
@@ -24,7 +25,13 @@ const Game: React.FC<{
         : -1;
   return (
     <>
-      <div key={id} className={styles.game_container}>
+      <div
+        onClick={() => {
+          onClick(gameData);
+        }}
+        key={id}
+        className={styles.game_container}
+      >
         <img
           className={styles.logo}
           src={`/logos/${gameData.site}.png`}
