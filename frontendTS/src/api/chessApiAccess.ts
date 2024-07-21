@@ -4,6 +4,7 @@ import { getMovesNum } from '../scripts/pgn';
 import { ChessComGame, Vendor } from '../types/Api';
 import type { Game, GameResult, GamesCount, GameType } from '../types/Game';
 import { GameTypes } from '../types/Game';
+import { GetGameById } from '../../../shared/types/dist';
 async function getUserInfo(username: string) {
   const url = `https://api.chess.com/pub/player/${username}`;
   const res = await fetch(url);
@@ -155,22 +156,13 @@ const getYearAndMonth = (
   return { year: year, month: month, date: `${month}-${year}` };
 };
 
-/* const getPgnsOfMonth = async (username, year, month) => {
-  const apiUrl = `https://api.chess.com/pub/player/${username}/games/${year}/${month}/pgn`;
-  try {
-    const response = await fetch(apiUrl);
-    if (!response.ok) {
-      toast.error('Error Enter correct chess.com username..');
-      throw new Error(`Error fetching games: ${response.status}`);
-    }
-    let pgnData = await response.text();
-    return pgnData;
-  } catch (error) {
-    console.error('Error fetching PGN data:', error);
-  }
-}; */
+
+const getGameById: GetGameById = async (gameId) => {
+  return await fetch(`${import.meta.env.VITE_BACKEND_URL}/chess.com/game/${gameId}`);
+};
 
 export {
+  getGameById,
   getUserInfo,
   fetchChessGamesonMonth,
   getYearAndMonth,

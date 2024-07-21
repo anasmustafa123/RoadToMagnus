@@ -11,7 +11,7 @@ declare global {
     }
   }
 }
-
+import fetch from "node-fetch";
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -21,7 +21,8 @@ import path from "path";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import { IUser } from "./@types";
-
+// @ts-ignore
+import { getGameById } from "./utils/getGameById.js";
 /* declare  module "express" {
   interface Request {
     user?: IUser;
@@ -49,14 +50,22 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV != "development" ? "" : "http://localhost:5174",
+    origin: (origin, callback) => {
+      if (!origin || process.env.NODE_ENV === "development") {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        // and in development environment from localhost
+        callback(null, true);
+      } else {
+        // Allow all other origins
+        callback(null, origin);
+      }
+    },
+    //process.env.NODE_ENV != "development" ? "" : "http://localhost:5174",
     credentials: true,
   })
-);  
+);
 
 // Middleware to attach the db client to the request object
 app.use((req: Express.Request, res, next) => {
@@ -64,7 +73,12 @@ app.use((req: Express.Request, res, next) => {
   next();
 });
 app.use("/api/users", userRoutes);
-
+app.get("/chess.com/game/:id", async (req, res) => {
+  const gameId = parseInt(req.params.id);
+  getGameById(gameId).then((game: any) => {
+    res.send(JSON.stringify(game));
+  });
+});
 //app.options("/api/users/auth", cors());
 /* 
 app.use("/api/customers", customerRoutes);
