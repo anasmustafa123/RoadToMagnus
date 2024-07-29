@@ -1,5 +1,6 @@
 .reviewResult {
   padding: 15px 15% 15px 15%;
+  grid-column: 2 / 3;
 }
 .line,
 .reviewHeader {

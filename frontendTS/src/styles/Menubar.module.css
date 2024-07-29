@@ -1,0 +1,96 @@
+.sidebar > .logo_container {
+  padding-bottom: 1.5rem;
+}
+
+.sidebar .logo_container .main_logo {
+  width: 83%;
+  margin: auto;
+  display: block;
+}
+
+.sidebar.min {
+  max-width: 80px;
+}
+
+.sidebar {
+  max-width: 200px;
+  padding: 1.5rem 0rem 1.5rem 0px;
+  background-color: #2f2e2b;
+  color: #f5f5f5;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+}
+
+.sidebar > .option_container > div > i {
+  font-size: 2.2rem;
+  margin-left: 1rem;
+}
+.sidebar > .option_container > div {
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 0rem 0.7rem 0rem;
+}
+.sidebar > .option_container > div:hover {
+  cursor: pointer;
+  color: var(--hover-color);
+  background-color: rgb(88, 88, 88);
+}
+
+.sidebar > .option_container > div > h2 {
+  font-size: 1.3rem;
+  font-weight: 900;
+  min-width: 86px;
+  text-align: center;
+  margin: auto;
+}
+.sidebar > .option_container {
+  padding-top: 1.5rem;
+  border: 0px #2f2e2b;
+  border-top: 1px solid !important;
+  flex-direction: column;
+  height: -webkit-fill-available;
+  display: flex;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 5px 35px 5px 15px;
+  max-height: 90px;
+  background-color: #2f2e2b;
+}
+
+.header > .option_container {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  height: 100%;
+  margin-left: 2rem;
+}
+
+.header .logo_container .main_logo {
+  width: 90px;
+  height: auto;
+}
+
+.header > .option_container > div > h2 {
+  display: none;
+}
+.header > .option_container > div > i {
+  font-size: 2.2rem;
+}
+.header > .option_container > div:hover {
+  cursor: pointer;
+  color: var(--hover-color);
+}
+
+@media screen and (max-width: 1200px) {
+  .sidebar {
+    max-width: 73px !important;
+  }
+  .option_container > div > h2 {
+    display: none;
+  }
+}
