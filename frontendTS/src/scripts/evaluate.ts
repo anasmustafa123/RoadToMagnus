@@ -3,11 +3,17 @@ import {
   AttackPiece,
   EngineLine,
   Evaluation,
+  Game,
   Move,
   PlayerColor,
 } from '../types/Game';
 import { Piece } from 'react-chessboard/dist/chessboard/types';
-import { ClassName } from '../types/Review';
+import {
+  Classification,
+  ClassificationScores,
+  ClassName,
+  emptyClassificationScores,
+} from '../types/Review';
 
 const getAttackers = (
   square: Square,
@@ -168,10 +174,24 @@ const getNormalClassification = (
   plColor: PlayerColor,
   plRating: number,
   opponentRating: number,
-):ClassName => {
+): ClassName => {
   const cAccuracy = getAccuracy(cEvaluation, plRating, opponentRating);
+
+  console.log(cEvaluation);
+  console.log({
+    cEvaluation,
+    prevEvaluation,
+    plColor,
+    plRating,
+    opponentRating,
+  });
+  console.log({ cAccuracy });
   const prevAccuracy = getAccuracy(prevEvaluation, plRating, opponentRating);
-  const accuracyDiff = (prevAccuracy - cAccuracy) * plColor;
+  console.log(prevEvaluation);
+  console.log({ prevAccuracy });
+  const accuracyDiff = (cAccuracy - prevAccuracy) * plColor;
+  console.log({ accuracyDiff });
+  console.log(cEvaluation, prevEvaluation, plColor, plRating, opponentRating);
   return getClassifiValue(accuracyDiff);
 };
 
@@ -194,7 +214,9 @@ const getAccuracy = (
   opponnetRating: number,
 ) => {
   if (evaluation.type == 'cp') {
-    let normalizedEval = 1.0 / (1.0 + Math.exp(-0.4 * evaluation.value));
+    let normalizedEval =
+      1.0 / (1.0 + Math.exp(-0.4 * (evaluation.value / 200)));
+    console.log({ normalizedEval: normalizedEval.toFixed(3) });
     let accuracyExp =
       1.0 / (1.0 + Math.pow(10, (opponnetRating - plRating) / 400));
     return Number((normalizedEval * accuracyExp * 2).toFixed(3));
@@ -204,14 +226,14 @@ const getAccuracy = (
 const minwining = (rating: number, plColor: PlayerColor) => {
   const wineval =
     rating <= 600
-      ? 3.0
+      ? 300.0
       : rating > 600 && rating <= 1000
-        ? 2.5
+        ? 250.0
         : rating > 1000 && rating <= 1400
-          ? 2
+          ? 200.0
           : rating > 1400 && rating <= 1800
-            ? 1.5
-            : 1;
+            ? 150.0
+            : 100.0;
   return wineval * plColor;
 };
 
@@ -386,7 +408,9 @@ const getPieceValue = (piece: Piece) => {
   switch (piece[1].toLowerCase()) {
     case 'p':
       return 1;
-    case 'b' || 'n':
+    case 'n':
+      return 3;
+    case 'b':
       return 3;
     case 'r':
       return 5;
@@ -399,122 +423,71 @@ const getPieceValue = (piece: Piece) => {
   }
 };
 
-/* let moves = [
-  {
-    san: 'Nxe5',
-    lan: 'f3e5',
-    from: 'f3',
-    to: 'd5',
-    piece: 'wN',
-    type: 'c',
-    captured: 'bP',
-  },
-  {
-    san: 'Bxe5',
-    to: 'e5',
-    from: 'd6',
-    piece: 'bB',
-    lan: 'd6e5',
-    type: 'c',
-    captured: 'wN',
-  },
-]; */
-
-/* let evaluations = [
-  { type: 'cp', value: 0.67 },
-  { type: 'cp', value: 3.2 },
-];
-let wuser = { rating: 1200 };
-let buser = { rating: 1200 };
- */
-/* const getClassification = (
-  engineResponse: EngineLine[],
-  evaluation: Evaluation,
-  game: ChessInstance,
-) => {
-  console.log(`lines got from stockfish: ${engineResponse.length} lines`);
-  const moveNum = moves.length;
-  let tempmove = moves[moveNum];
-  let move: Move = {
-    type: tempmove.flags as MoveType,
-    piece: `${tempmove.color}${tempmove.piece.toUpperCase()}` as Piece,
-    from: tempmove.from,
-    to: tempmove.to,
-    san: tempmove.san,
-    lan: `${tempmove.from}${tempmove.to}`,
-    captured: `${tempmove.color}${tempmove.captured?.toUpperCase()}` as Piece,
-  };
-  let plColor:PlayerColor, opponent:UserInfo, player:UserInfo;
-  if (moveNum % 2) {
-     player = wuser;
-     opponent = buser;
-     plColor = 1;
-  } else {
-     player = buser;
-     opponent = wuser;
-     plColor = -1;
+const getClassificationScore = (classificationNames: ClassName[]) => {
+  let temp: ClassificationScores = { ...emptyClassificationScores };
+  for (let i = 1; i < classificationNames.length; i++) {
+    i % 2
+      ? temp[classificationNames[i]][0]++
+      : temp[classificationNames[i]][1]++;
   }
-
-  let maxClassification = 6;
-  let firstMiddleGame = 0;
-  let firsetEndGame = 0;
-  let iswining = isWining(engineResponse[0].evaluation, player.rating, plColor);
-  let waswining = isWining(evaluation, player.rating, plColor);
-  let waslosing = isLosing(evaluation, player.rating, plColor);
-  let islosing = isLosing(engineResponse[0].evaluation, player.rating, plColor);
-  let currentPieceChar = game.get(move.to as Square);
-  let isQueen = currentPieceChar
-    ? currentPieceChar.type.toLowerCase() == 'q'
-    : false;
-
-  let isSacc = isSac(move, game, true);
-  // is best when its one of top lines returned by the engine
-  let isbest = engineResponse.find(
-    (engineLine) => engineLine.bestMove == move.lan,
-  )
-    ? true
-    : false;
-
-  // u set the first move of middle game after last opening move  (book move)
-  if (!firstMiddleGame) {
-    //check book moves
-    console.log('might be book move');
-  }
-
-  let normalClassification = getNormalClassification(
-    engineResponse[0].evaluation,
-    evaluation,
-    plColor,
-    player.rating,
-    opponent.rating,
-  );
-  console.log({
-    waslosing,
-    islosing,
-    iswining,
-    waswining,
-    isQueen,
-    isSacc,
-    isbest,
-    normalClassification,
-  });
-  if (isSacc) {
-    if (((waswining && iswining) || (!waswining && !islosing)) && isbest) {
-      return 'brilliant';
-    }
-    if (islosing && isQueen) {
-      return 'botezgambit';
-    }
-    return normalClassification;
-  } else if (isbest) {
-    return 'best';
-  } else return normalClassification;
+  console.log(temp);
+  return temp;
 };
- */
-/* let temp = getClassification(
-  [{ evaluation: { type: 'cp', value: 0.26 }, bestmoveLan: 'g6h5' }],
-  2,
-  '2kr3r/pbpp1pp1/1p4qp/nP1Nb3/2B1P3/2PP4/P2Q1PPP/R4RK1 w - - 0 15',
-);
-console.log(temp); */
-export { getNormalClassification, isSac, isWining, isLosing };
+
+const isGreat = (
+  prevEngineResponse: EngineLine[],
+  iswining: boolean,
+  islosing: boolean,
+  waswining: boolean,
+  waslosing: boolean,
+  plRating: number,
+  plColor: PlayerColor,
+) => {
+  if (prevEngineResponse.length > 1) {
+    let wasLosing2Line = isLosing(
+      prevEngineResponse[0].evaluation,
+      plRating,
+      plColor,
+    );
+    let wasWining2Line = isWining(
+      prevEngineResponse[0].evaluation,
+      plRating,
+      plColor,
+    );
+    let isDrawing = !iswining && !islosing;
+    let wasDrawing = !waswining && !waslosing;
+    console.log({
+      prevEngineResponse,
+      iswining,
+      islosing,
+      waswining,
+      waslosing,
+      plRating,
+      plColor,
+      wasLosing2Line,
+      wasWining2Line,
+      isDrawing,
+      wasDrawing,
+    });
+    if (
+      (waswining && iswining && !wasWining2Line) ||
+      (waslosing &&
+        ((iswining && !wasWining2Line) || (isDrawing && wasLosing2Line))) ||
+      (wasDrawing &&
+        ((isDrawing && wasLosing2Line) || (iswining && !wasWining2Line)))
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+export {
+  getNormalClassification,
+  isSac,
+  isWining,
+  isLosing,
+  getClassificationScore,
+  isGreat,
+};

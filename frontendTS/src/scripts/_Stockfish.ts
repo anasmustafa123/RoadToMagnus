@@ -1,11 +1,12 @@
 import { getFenArr } from './convert';
 import { parsePgn } from './pgn';
 import type { EngineLine, Evaluation, Lan } from '../types/Game';
+import { resolveObjectKey } from 'chart.js/helpers';
 export class ChessEngine {
-  readonly workerUrl: URL;
-  readonly stockfishWorker: Worker;
-  readonly verbose: boolean;
-  readonly multipv: number;
+  private workerUrl: URL;
+  private stockfishWorker: Worker;
+  private verbose: boolean;
+  private multipv: number;
   targetDepth: number;
 
   async waitFor(response: string, errormsg = 'error') {
@@ -23,21 +24,20 @@ export class ChessEngine {
       // Add a timeout for error handling (optional)
       setTimeout(() => {
         this.stockfishWorker.removeEventListener('message', listener);
-        //stockfish.terminate();
-        reject(new Error(errormsg));
       }, 20000); // Adjust timeout as needed
     });
   }
 
   /**
-   * @returns kickstarts the engine
+   *  kickstarts the engine
    */
   _init(restart = false) {
     return new Promise(async (resolve) => {
+      this.stockfishWorker.onmessageerror = (e) => console.log(e);
       if (!restart) {
         this.stockfishWorker.postMessage('uci');
         await this.waitFor('uciok', 'uci setup error');
-      }
+      } else console.log('Restarting engine...');
       this.stockfishWorker.postMessage(`ucinewgame`);
       this.stockfishWorker.postMessage('isready');
       this.stockfishWorker.postMessage(
@@ -68,7 +68,7 @@ export class ChessEngine {
       const listener = <K extends keyof WorkerEventMap>(
         e: WorkerEventMap[K],
       ) => {
-        console.log('evaluateMove');
+        //console.log('evaluateMove');
         if (this.verbose) console.log(e);
         if (e instanceof MessageEvent) {
           messages.unshift(e.data);
@@ -77,6 +77,7 @@ export class ChessEngine {
           }
           if (e.data.startsWith('bestmove') || e.data.includes('depth 0')) {
             console.log('bestmove');
+            console.log(e.data);
             this.stockfishWorker.removeEventListener('message', listener);
             let searchMessages = messages.filter((msg) =>
               msg.startsWith('info depth'),
@@ -126,16 +127,34 @@ export class ChessEngine {
                 bestMove,
               });
             }
+            clearTimeout(timeoutId); // Clear the timeout if message is received
             resolve(lines);
           }
         }
       };
       this.stockfishWorker.addEventListener('message', listener);
-      setTimeout(() => {
+      const timeoutId = setTimeout(async () => {
         this.stockfishWorker.removeEventListener('message', listener);
-        //stockfish.terminate();
-        reject(new Error('takes alot of timme'));
+
+        reject(new Error('takes alot of time'));
       }, 20000); // Adjust timeout as needed
+    });
+  }
+
+  /**
+   * restart the engine after being stuck for a while
+   */
+  private async restartEngine(fen: string) {
+    return new Promise(async (resolve, reject) => {
+      this.stockfishWorker.terminate();
+      this.stockfishWorker = new Worker(this.workerUrl, { type: 'classic' });
+      try {
+        await this._init();
+        await this.evaluateMove(fen);
+        resolve(true);
+      } catch (error) {
+        reject('Error restarting the engine:' + error);
+      }
     });
   }
 
@@ -146,14 +165,19 @@ export class ChessEngine {
   async evaluatePosition(param: {
     pgn: string;
     moves?: string[];
-    afterMoveCallback: (param: { ok: boolean; lines: EngineLine[] }) => any;
+    afterMoveCallback: (param: {
+      ok: boolean;
+      moveNum: number;
+      sanMove: string;
+      lines: EngineLine[];
+    }) => any;
   }) {
     return new Promise(async (resolve) => {
       let moves: string[] = [];
       if (param.pgn) {
         try {
           const res = parsePgn(param.pgn);
-          console.log(res);
+          //console.log(res);
           moves = res.moves;
         } catch (e) {
           throw new Error("couldn't parse pgn" + e);
@@ -164,12 +188,29 @@ export class ChessEngine {
       const fens = getFenArr(moves);
       if (this.verbose) console.log(fens);
       await this.evaluateMove().then((lines) =>
-        param.afterMoveCallback({ ok: true, lines }),
+        param.afterMoveCallback({ ok: true, moveNum: 0, sanMove: '', lines }),
       );
-      for (let fen of fens) {
-        console.log(fen);
-        let lines = await this.evaluateMove(fen);
-        param.afterMoveCallback({ ok: true, lines });
+      let lines = [];
+      for (let index = 0; index < fens.length; index++) {
+        let fen = fens[index];
+        try {
+          lines = await this.evaluateMove(fen);
+        } catch (e) {
+          console.log('it realy takes  a lot of time');
+          try {
+            console.log(`current movenum ${index + 1}`);
+            await this.restartEngine(fen);
+          } catch (e) {
+            console.error(e);
+            console.error(new Error('takes alot of time'));
+          }
+        }
+        param.afterMoveCallback({
+          ok: true,
+          sanMove: moves[index],
+          moveNum: index + 1,
+          lines,
+        });
       }
       this.stockfishWorker.terminate();
       resolve(true);
@@ -182,10 +223,15 @@ export class ChessEngine {
    * @param verbose : testing
    */
   constructor(multipv = 2, targetDepth: number = 15, verbose = false) {
-    this.workerUrl = new URL(
-      './stockfish/stockfish-worker.js',
-      import.meta.url,
-    );
+    var wasmSupported =
+      typeof WebAssembly === 'object' &&
+      WebAssembly.validate(
+        Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00),
+      );
+
+    this.workerUrl = wasmSupported
+      ? new URL('./stockfish/stockfish.js', import.meta.url)
+      : new URL('./stockfish/stockfish.wasm.js', import.meta.url);
     this.stockfishWorker = new Worker(this.workerUrl, { type: 'classic' });
     this.multipv = multipv;
     this.evaluateMove = this.evaluateMove.bind(this);

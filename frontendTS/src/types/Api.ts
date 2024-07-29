@@ -20,4 +20,5 @@ export type ChessComGame = {
   pgn: string;
   time_class: GameType;
   end_time: number;
+  url?: string;
 };

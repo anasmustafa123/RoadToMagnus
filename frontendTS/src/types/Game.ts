@@ -5,7 +5,7 @@ import { Vendor } from './Api';
 
 export const GameTypes = ['rapid', 'blitz', 'bullet', 'daily'];
 
-export type MoveType = 'n' | 'c' | 'p';
+export type MoveType = 'n' | 'c' | 'p' | string;
 
 export type GameType = 'rapid' | 'blitz' | 'bullet' | 'daily';
 
@@ -38,7 +38,7 @@ export interface Game {
   waccuracy?: number;
   baccuracy?: number;
   fen?: string;
-  gamesCount: GamesCount;
+  pgn: string;
 }
 
 export interface Evaluation {
