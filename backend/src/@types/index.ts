@@ -10,11 +10,21 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  chessDCusername?: string;
-  lichessusername?: string;
-  chessDotComLastUpdated?: string;
-  lichessComLastUpdated?: string;
+  chesscom: VendorContent;
+  lichess: VendorContent;
   matchPassword(enteredPassword: string): Promise<boolean>;
+}
+
+type VendorContent = {
+  username: string;
+  startDate?: number;
+  endDate?: number;
+};
+
+export interface IGame {
+  pgn: string;
+  gameId: number;
+  playerId: string;
 }
 
 export interface ErrorRes {
