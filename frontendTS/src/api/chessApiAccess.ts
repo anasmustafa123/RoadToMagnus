@@ -6,7 +6,6 @@ import { GetGameById } from '../../../shared/types/dist';
 async function getUserInfo(username: string) {
   const url = `https://api.chess.com/pub/player/${username}`;
   const res = await fetch(url);
-  console.log(res);
   return { ok: res.ok, data: await res.json() };
 }
 
@@ -64,7 +63,7 @@ const getGamesOfMonth = async (
   month: number,
 ) => {
   return new Promise(async (resolve) => {
-    console.log(`get game of month usernamae: ${username}`);
+    //console.log(`get game of month usernamae: ${username}`);
     fetchChessGamesonMonth(username, year, month).then((games) => {
       resolve(reduceGamesOfMonth('chess.com', username, games.games));
     });
@@ -87,6 +86,16 @@ const reduceGamesOfMonth = (
   });
   return monthGames.map((game) => {
     console.log(game);
+    let _gameId = 0;
+    if (game.url) {
+      console.log(game.url);
+      let res = game.url.split('/');
+      let url = '';
+      if (res.length > 0) {
+        url = res[res.length - 1].slice(0, -1);
+        _gameId = parseInt(url);
+      }
+    }
     let gameResult: GameResult =
       game.black.result.toLowerCase() === 'win['
         ? -1
@@ -107,9 +116,9 @@ const reduceGamesOfMonth = (
     const timeClass = GameTypes.find((v) => game.time_class.toLowerCase() == v)
       ? (game.time_class.toLowerCase() as GameType)
       : undefined;
-    console.log(game.time_class.toLowerCase() as GameType);
+    //console.log(game.time_class.toLowerCase() as GameType);
     timeClass ? (gamesCount[timeClass] = gamesCount[timeClass] + 1) : '';
-    console.log(game.time_class.toLowerCase() in GameTypes);
+    //console.log(game.time_class.toLowerCase() in GameTypes);
     let resgame: Game = {
       wuser: { username: game.white.username, rating: game.white.rating },
       buser: { username: game.black.username, rating: game.black.rating },
@@ -117,12 +126,12 @@ const reduceGamesOfMonth = (
       site: vendor,
       gameResult,
       playerColor: game.white.username == username ? 1 : -1,
-      gameId: 1,
+      gameId: _gameId,
       drawType: drawType ? drawType : '',
       isReviewed: false,
       date: getYearAndMonth(game.end_time).date,
       movesCount: getMovesNum(game.pgn),
-      gamesCount,
+      pgn: game.pgn
     };
     return resgame;
   });
