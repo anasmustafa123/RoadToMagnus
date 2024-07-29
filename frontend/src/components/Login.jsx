@@ -17,8 +17,8 @@ const Login = () => {
   } = useContext(UserContext);
   const [passwordInputType, setPasswordInputType] = useState("password");
   const [data, setData] = useState({
-    email: "anasanas@gma.com",
-    password: "anasanas@gma.com",
+    email: "1245l4l@dasf.com",
+    password: "anassanas",
   });
   const [errors, setErrors] = useState({
     email: "",

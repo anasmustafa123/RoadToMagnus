@@ -1,96 +1,117 @@
 import { useContext, useEffect, useState } from 'react';
 import Games from './routes/Games';
-import { RouterProvider, createBrowserRouter, defer } from 'react-router-dom';
-import { ReviewGameContextProvider } from './contexts/ReviewGameContext';
+import {
+  RouterProvider,
+  createBrowserRouter,
+  defer,
+  Routes,
+  Route,
+} from 'react-router-dom';
+import { ChessBoardContextProvider } from './contexts/GameBoardContext';
+import { ReviewGameContext } from './contexts/ReviewGameContext';
 import SignUp from './components/SignUp';
 import Login from './components/Login';
 import ProtectedRoute from './routes/ProtectedRoute';
 import './App.css';
 import Profile from './routes/Profile';
-import type { EngineLine, Game } from './types/Game';
+import type { EngineLine, Game, GamesCount, PlayerColor } from './types/Game';
 import RouteContainer from './routes/RouteContainer';
-import ReviewGame from './routes/ReviewGame';
 import { getAvalibleArchieves, getGamesOfMonth } from './api/chessApiAccess';
 import { UserContext } from './contexts/UserContext';
+import ReviewGame from './routes/ReviewGame';
+import {
+  addData,
+  deleteData,
+  getAllGames,
+  init_indexedDb,
+} from './api/indexedDb';
+import { GameContext } from './contexts/GamesContext';
+import { parsePgn } from './scripts/pgn';
+import ChessBoard_Eval from './components/ChessBoard_Eval';
 function App() {
   const [engineRes, setEngineRes] = useState<EngineLine[]>([]);
-  const { usernameChessDC } = useContext(UserContext);
+  const { usernameChessDC, isUser, setIsUser } = useContext(UserContext);
+  const { setAllGames } = useContext(GameContext);
   useEffect(() => {
-    if (engineRes) {
+    /* if (engineRes) {
       console.log({ engineRes });
-    }
+    } */
   }, [engineRes]);
 
-  const Routes = [
-    {
-      path: '/profile/:userId',
-      element: <ProtectedRoute Component={<Profile />} />,
-    },
-    { path: '/explore:userid', element: <></> },
-    {
-      path: '/games',
-      element: (
-        <ProtectedRoute
-          Component={
-            <Games
-              inlineStyles={{
-                gridColumnStart: '2',
-                marginLeft: 'auto',
-                marginRight: 'auto',
-                backgroundColor: 'var(--bg-color)',
-              }}
-            ></Games>
-          }
-        />
-      ),
-      loader: async () => {
-        let archieves = await getAvalibleArchieves('anasmostafa11');
-        let lastMonthGames = archieves.archives.length
-          ? archieves.archives[archieves.archives.length - 1]
-          : null;
-        console.log(lastMonthGames);
+  useEffect(() => {
+    setIsUser(true);
+    /* init_indexedDb().then(async () => {
+      console.debug('indexedDb initialized');
+      let values = await getAllGames();
+      let games: Game[] = [];
+      console.log(values);
+      let gamesCount: GamesCount = {
+        rapid: 0,
+        blitz: 0,
+        bullet: 0,
+        daily: 0,
+      };
+      values.value.forEach((game) => {
+        let gameparsed = parsePgn(game.pgn);
+        gamesCount[gameparsed.gameType] = gamesCount[gameparsed.gameType] + 1;
+        let movesCount = gameparsed.moves.length;
+        let playerColor: PlayerColor =
+          usernameChessDC == gameparsed.wuser.username ? 1 : -1;
+        let res: Game = {
+          ...gameparsed,
+          playerColor,
+          gameId: game.gameId,
+          site: 'chess.com',
+          movesCount,
+          pgn: game.pgn,
+          isReviewed: gameparsed.classifi ? true : false,
+        };
+        games.push(res);
+      });
+      setAllGames(games);
+    }); */
+  }, []);
 
-        if (lastMonthGames == null) return null;
-        let res = lastMonthGames.split('/');
-        console.log(res.length);
-        if (lastMonthGames && res.length > 2)
-          console.log(
-            usernameChessDC +
-              parseInt(res[res.length - 2]) +
-              parseInt(res[res.length - 1]),
-          );
-        console.log(getGamesOfMonth instanceof Promise);
-
-        return lastMonthGames && res.length > 2
-          ? defer({
-              gameData: getGamesOfMonth(
-                usernameChessDC,
-                parseInt(res[res.length - 2]),
-                5,
-              ),
-            })
-          : null;
-      },
-    },
-    {
-      path: '/review/:gameid',
-      element: <ProtectedRoute Component={<ReviewGame />} />,
-    },
-  ];
-  const Router = createBrowserRouter([
-    { path: '/', element: <ProtectedRoute Component={<Profile />} /> },
-    { path: '/login', element: <Login></Login> },
-    { path: '/register', element: <SignUp></SignUp> },
-    {
-      path: '/',
-      element: <RouteContainer />,
-      children: Routes,
-    },
-    { path: '*', element: <div>u got lost my friend</div> },
-  ]);
   return (
     <>
-      <RouterProvider router={Router}></RouterProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<SignUp />} />
+        <Route path="/" element={<ProtectedRoute />}>
+          <Route path="" element={<Profile />} />
+          <Route path="profile" element={<Profile />} />
+          {/* <Route
+            path="moves"
+            element={
+              <ChessBoardContextProvider>
+                <ChessBoard_Eval
+                  inlineStyles={{
+                    gridColumn: '2 / 3',
+                    margin: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                ></ChessBoard_Eval>
+              </ChessBoardContextProvider>
+            }
+          ></Route> */}
+          <Route
+            path="games"
+            element={
+              <Games
+                inlineStyles={{
+                  gridColumnStart: '2',
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+                  backgroundColor: 'var(--bg-color)',
+                }}
+              />
+            }
+          />
+          <Route path="review/:gameId" element={<ReviewGame />} />
+        </Route>
+        <Route path="*" element={<div>u lost ur way my friend</div>} />
+      </Routes>
     </>
   );
 }
