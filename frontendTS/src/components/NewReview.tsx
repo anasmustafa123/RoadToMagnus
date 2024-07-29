@@ -1,14 +1,21 @@
-import React, { useState, useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Loading from './Loading';
 import styles from '../styles/NewReview.module.css';
-import { GameResult } from '../types/Game';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
-export default function NewReview({ perc = 20 }) {
-  const { gameInfo } = useContext(ReviewGameContext);
+import { EngineLine } from '../types/Game';
+import { ChessEngine } from '../scripts/_Stockfish';
+
+export default function NewReview() {
+  const [engineRes, setEngineRes] = useState<EngineLine[]>([]);
+  useEffect(() => {
+    if (engineRes) {
+      console.log({ engineRes });
+    }
+  }, [engineRes]);
+  const { gameInfo, currentPerc, maxPerc } = useContext(ReviewGameContext);
   let largeScreen = false;
   const message =
     'calculating\t                                                                                                                                                                                                                                                                                                                                                                                                                                            variations...';
-  const maxValue = 100;
   const depth = 18;
   return (
     <>
@@ -26,13 +33,11 @@ export default function NewReview({ perc = 20 }) {
             {gameInfo.wuser.rating}
           </div>
           <div className={styles.gameResult}>
-            {
-              gameInfo.gameResult == 0
-                ? '1/2 - 1/2' 
-                : gameInfo.gameResult == 1
-                  ? '1 - 0'
-                  : '0 : 1'
-            }
+            {gameInfo.gameResult == 0
+              ? '1/2 - 1/2'
+              : gameInfo.gameResult == 1
+                ? '1 - 0'
+                : '0 : 1'}
           </div>
           <div
             style={
@@ -48,8 +53,8 @@ export default function NewReview({ perc = 20 }) {
         <div>
           <Loading
             message={message}
-            maxValue={maxValue}
-            perc={perc}
+            maxValue={maxPerc}
+            perc={currentPerc}
             inlineStyling={{
               width: '120px',
               alignSelf: 'center',

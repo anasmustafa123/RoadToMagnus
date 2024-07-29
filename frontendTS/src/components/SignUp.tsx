@@ -82,7 +82,7 @@ const SignUp = () => {
           email: data.email,
           password: data.password,
           lichess: data.lichess ? data.lichess : '',
-          'chess.com': data['chess.com'] ? data['chess.com'] : '',
+          "chess.com": data['chess.com'] ? data['chess.com'] : '',
         }).then((response) => {
           console.log({ response });
           navigate('/');
@@ -353,7 +353,7 @@ const SignUp = () => {
               type="text"
               placeholder="Enter chess.com username"
             />
-            <img src="/logos/chessdotcom.png" alt="chess.com logo" />
+            <img src="/logos/chess.com.png" alt="chess.com logo" />
             {!loading['chess.com'] ? (
               <button
                 type="button"

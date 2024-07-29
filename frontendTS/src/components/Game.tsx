@@ -3,10 +3,10 @@ import styles from '../styles/Game.module.css';
 import { UserContext } from '../contexts/UserContext';
 import type { Game } from '../types/Game';
 const Game: React.FC<{
-  id: number;
+  key: number;
   gameData: Game;
   onClick: (gameData: Game) => void;
-}> = ({ id, gameData, onClick }) => {
+}> = ({ gameData, onClick }) => {
   let largeScreen = true;
   const hoverColor = {
     rapid: 'green',
@@ -29,7 +29,6 @@ const Game: React.FC<{
         onClick={() => {
           onClick(gameData);
         }}
-        key={id}
         className={styles.game_container}
       >
         <img

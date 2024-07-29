@@ -2,7 +2,7 @@ import React from 'react';
 import styles from '../styles/evaluation.module.css';
 import type { Evaluation } from '../types/Game';
 const EvaluationBar: React.FC<{ evaluation: Evaluation }> = ({
-  evaluation,
+  evaluation = {type: 'cp', value: 7},
 }) => {
   const getScale = (evaluation: Evaluation) => {
     return evaluation.type == 'cp' ? 50.0 + (evaluation.value / 2) * 10 : 0;

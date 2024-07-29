@@ -1,55 +1,11 @@
-import React, { useState, useContext } from 'react';
+import { useContext } from 'react';
 import styles from '../styles/ReviewResult.module.css';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
-import { ClassificationScores, Classification } from '../types/Review';
-
+import { Classification, classificationInfo } from '../types/Review';
 export default function ReviewResult() {
-  const { gameInfo, getClassification, moves, classifications } =
-    useContext(ReviewGameContext);
+  const { gameInfo, movesClassifications } = useContext(ReviewGameContext);
 
-  const [movesClassifications, setMovesClassifications] =
-    useState<ClassificationScores>({
-      book: [0, 0],
-      brilliant: [0, 0],
-      great: [0, 0],
-      best: [0, 0],
-      excellent: [0, 0],
-      good: [0, 0],
-      inaccuracy: [0, 0],
-      mistake: [0, 0],
-      missed: [0, 0],
-      forced: [0, 0],
-      blunder: [0, 0],
-      botezgambit: [0, 0],
-      unknown: [0, 0],
-    });
-
-  const countClassifications = (classifications: Classification[]) => {
-    let temp: ClassificationScores = { ...movesClassifications };
-    classifications.forEach((classification: Classification, i) => {
-      !(i % 2)
-        ? temp[classification.name][0]++
-        : temp[classification.name][1]++;
-    });
-    console.log(temp);
-    setMovesClassifications(temp);
-  };
-
-  const classificationInfo: Classification[] = [
-    { name: 'book', color: '#72c3a6', sym: '!$' },
-    { name: 'brilliant', color: '#00989dba', sym: '$$' },
-    { name: 'great', color: '#185fb5d9', sym: '$' },
-    { name: 'best', color: '#509d00', sym: '=$$' },
-    { name: 'excellent', color: '#5caa0b', sym: '!!' },
-    { name: 'good', color: '#768c51', sym: '!' },
-    { name: 'forced', color: '#7c9f89', sym: '==' },
-    { name: 'inaccuracy', color: '#ff9800', sym: '?!' },
-    { name: 'mistake', color: '#e3786a', sym: '?' },
-    { name: 'blunder', color: '#ff0909', sym: '??' },
-    { name: 'missed', color: '#da3f2a', sym: '?$' },
-    { name: 'botezgambit', color: '#5c5c5c', sym: '????' },
-    { name: 'unknown', color: '#5c5c5c', sym: '????' },
-  ];
+ 
   return (
     <div className={styles.reviewResult}>
       <div className={styles.reviewHeader}>
@@ -115,31 +71,35 @@ export default function ReviewResult() {
         </div>
       </div>
       <div className={styles.ReviewContainer}>
-        {classificationInfo.map((classification, i) => (
-          <div
-            style={{
-              color: `${classification.color}`,
-            }}
-            className={styles.line}
-            key={i}
-          >
-            <div className={styles.wClassi}>
-              {movesClassifications[classification.name][0]}
-            </div>
-            <img
-              src={`/classification/${classification.name}.png`}
-              alt={`${classification.name} chessmove`}
-            />
+        {classificationInfo.map((classification, i) =>
+          classification.name != 'unknown' ? (
             <div
               style={{
-                color: classification.color,
+                color: `${classification.color}`,
               }}
-              className={styles.bClassi}
+              className={styles.line}
+              key={i}
             >
-              {movesClassifications[classification.name][1]}
+              <div className={styles.wClassi}>
+                {movesClassifications[classification.name][0]}
+              </div>
+              <img
+                src={`/classification/${classification.name}.png`}
+                alt={`${classification.name} chessmove`}
+              />
+              <div
+                style={{
+                  color: classification.color,
+                }}
+                className={styles.bClassi}
+              >
+                {movesClassifications[classification.name][1]}
+              </div>
             </div>
-          </div>
-        ))}
+          ) : (
+            <></>
+          ),
+        )}
       </div>
       <div>
         <div className={`${styles.line} ${styles.reviewStatics}`}>

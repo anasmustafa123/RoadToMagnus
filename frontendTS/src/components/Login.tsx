@@ -18,8 +18,8 @@ const Login = () => {
   } = useContext(UserContext);
   const [passwordInputType, setPasswordInputType] = useState('password');
   const [data, setData] = useState({
-    email: 'anasanas@gma.com',
-    password: 'anasanas@gma.com',
+    email: '1245l4l@dasf.com',
+    password: 'anassanas',
   });
   const [errors, setErrors] = useState({
     email: '',
@@ -30,7 +30,7 @@ const Login = () => {
     console.log(`is user changed ${isUser}`);
     if (isUser) {
       console.log('navigating');
-      navigate('/games', { replace: true });
+       navigate('/profile', { replace: true });
     }
   }, [isUser]);
 
@@ -59,7 +59,7 @@ const Login = () => {
           console.log('before');
           setIsUser(true);
           console.log('after');
-          console.log(res)
+          console.log(res);
           res.data['chess.com']
             ? setChessDCUsername(res.data['chess.com'])
             : '';
