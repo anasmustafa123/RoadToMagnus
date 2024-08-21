@@ -1,0 +1,15 @@
+.pagelinkContainer {
+  grid-column: span 4;
+  font-size: 1.3rem;
+  font-weight: 600;
+  padding: 1rem 0rem 1rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagelink,
+.pagelinkContainer > i {
+  color: cornflowerblue;
+  cursor: pointer;
+}

@@ -7,14 +7,18 @@ import { notify } from '../scripts/toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { validateEmail, validatePassword } from '../scripts/validate';
 import { OldUser } from '../types/User';
+import { addData, getDataByKey, init_indexedDb } from '../api/indexedDb';
 const Login = () => {
   const navigate = useNavigate();
   const {
+    userId,
+    setUserId,
     isUser,
     setIsUser,
     setChessDCUsername,
     setUsername,
     setUserLicehessname,
+    usernameLichess,
   } = useContext(UserContext);
   const [passwordInputType, setPasswordInputType] = useState('password');
   const [data, setData] = useState({
@@ -25,25 +29,58 @@ const Login = () => {
     email: '',
     password: '',
   });
+  useEffect(() => {
+    if (userId) {
+      init_indexedDb({ storeName: 'users', dbVersion: 2 })
+        .then((res) => {
+          if (res.ok) {
+            getDataByKey({ storename: 'users', data: { key: String(userId) } })
+              .then((data) => {
+                addData({
+                  storename: 'users',
+                  data: {
+                    key: String(userId),
+                    username: usernameLichess,
+                    vendor: 'lichess',
+                  },
+                }).then((res) => {
+                  res.ok
+                    ? console.info('store created')
+                    : console.error('store not created');
+                });
+              })
+              .catch((e) => {
+                console.error(`store not found: ${e}`);
+              });
+          }
+        })
+        .catch((e) => {
+          console.error('catched');
+        });
+    }
+  }, [userId]);
 
   useEffect(() => {
-    console.log(`is user changed ${isUser}`);
     if (isUser) {
-      console.log('navigating');
-       navigate('/profile', { replace: true });
+      navigate('/games', { replace: true });
     }
   }, [isUser]);
 
   const loginReq = async (obj: OldUser) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/users/auth`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(obj),
-      },
-    );
-    return res.json();
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/auth`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(obj),
+        },
+      );
+      return res.json();
+    } catch (e) {
+      throw new Error(`catched: error`);
+    }
   };
 
   const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,10 +93,9 @@ const Login = () => {
     if (errors.email == '' && errors.password == '') {
       loginReq(data).then((res) => {
         if (res.ok) {
-          console.log('before');
+          console.dir(res);
+          setUserId(res.data.userId);
           setIsUser(true);
-          console.log('after');
-          console.log(res);
           res.data['chess.com']
             ? setChessDCUsername(res.data['chess.com'])
             : '';

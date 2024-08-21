@@ -1,4 +1,10 @@
-import { Chess, ChessInstance, PieceColor, Square, Move as chessjsMove } from 'chess.js';
+import {
+  Chess,
+  ChessInstance,
+  PieceColor,
+  Square,
+  Move as chessjsMove,
+} from 'chess.js';
 import {
   AttackPiece,
   EngineLine,
@@ -14,10 +20,10 @@ import { UserInfo } from '../types/User';
 import { checkIfBook } from '../api/lichessApiAccess';
 
 export class Classify {
-  private game: ChessInstance;
-  private sanMoves: string[];
-  private evaluations: Evaluation[];
-  private engineResponses: EngineLine[][];
+  game: ChessInstance;
+  sanMoves: string[];
+  evaluations: Evaluation[];
+  engineResponses: EngineLine[][];
 
   private minwining = (rating: number, plColor: PlayerColor) => {
     const wineval =
@@ -98,20 +104,10 @@ export class Classify {
       let i = 0;
       let endofattackers = false;
       let msg = '';
-
-      if (verbose) {
-        console.log(`i: ${i}`);
-        console.log(`attackers options before ${attackersOptions}`);
-      }
       attackersOptions.push({ result, moves: [...sacMoves] });
-      if (verbose) console.log(`attackers options now ${attackersOptions}`);
       do {
         if (attackers && attackers.length > i) {
           let attackmove = attackers[i];
-          if (verbose)
-            console.log(
-              `${attackmove.piece}, ${this.getPieceValue(attackmove.piece)}`,
-            );
           var res = gameCopy.move({ from: attackmove.square, to: move.to });
 
           if (res) {
@@ -120,21 +116,9 @@ export class Classify {
                 `${res.color == 'b' ? 'w' : 'b'}${res.captured.toUpperCase()}` as Piece,
               );
               sacMoves.push(res.san);
-              let captured = `${
-                res.color == 'b' ? 'w' : 'b'
-              }${res.captured.toUpperCase()}`;
-              if (verbose)
-                console.log(
-                  `attackers;  move: ${attackmove.piece} ,  from ${attackmove.piece} to ${move.to} captured: ${captured} res: ${result}`,
-                );
             }
             // pop the first attacer
             attackers.splice(0, 1);
-            if (verbose) {
-              console.log(`attackers now ${attackers}`);
-              console.log(attackmove);
-              console.log(res);
-            }
           } else i++;
         } else {
           msg = 'end of attackers';
@@ -143,28 +127,17 @@ export class Classify {
         }
       } while (!res);
       if (endofattackers) {
-        if (verbose) console.log(msg);
         break;
       }
       // the defenders
       i = 0;
       let endofdefenders = false;
       msg = '';
-      if (verbose) console.log(`defenders options before ${defenderOptions}`);
       defenderOptions.push(result);
-      if (verbose) console.log(`defenders options now ${defenderOptions}`);
       do {
         if (defenders && defenders.length > i) {
           let defendmove = defenders[i];
-          if (verbose)
-            console.log(
-              `${defendmove.piece}, ${this.getPieceValue(defendmove.piece)}`,
-            );
           var res = gameCopy.move({ from: defendmove.square, to: move.to });
-          if (verbose)
-            console.log(`defenders;  move: ${defendmove} , res: ${res}`);
-          if (verbose) console.log(defendmove);
-          if (verbose) console.log(res);
           if (res) {
             if (res.flags == 'c' && res.captured) {
               result += this.getPieceValue(
@@ -172,8 +145,6 @@ export class Classify {
               );
               sacMoves.push(res.san);
             }
-            if (verbose) console.log(`attackers options now`);
-            if (verbose) console.log(attackersOptions);
             defenders.splice(0, 1);
           } else i++;
         } else {
@@ -183,16 +154,8 @@ export class Classify {
         }
       } while (!res);
       if (endofdefenders) {
-        if (verbose) console.log(msg);
         break;
       }
-    }
-    if (verbose) {
-      console.log({ result });
-      console.log(attackers);
-      console.log(attackersOptions);
-      console.log(defenders);
-      console.log(defenderOptions);
     }
     // sort the attacking pieces by the piece value
     attackersOptions.sort((a, b) => a.result - b.result);
@@ -229,19 +192,7 @@ export class Classify {
       );
       let isDrawing = !iswining && !islosing;
       let wasDrawing = !waswining && !waslosing;
-      console.log({
-        prevEngineResponse,
-        iswining,
-        islosing,
-        waswining,
-        waslosing,
-        plRating,
-        plColor,
-        wasLosing2Line,
-        wasWining2Line,
-        isDrawing,
-        wasDrawing,
-      });
+
       if (
         (waswining && iswining && !wasWining2Line) ||
         (waslosing &&
@@ -265,25 +216,12 @@ export class Classify {
   ): ClassName => {
     const cAccuracy = this.getAccuracy(cEvaluation, plRating, opponentRating);
 
-    console.log(cEvaluation);
-    console.log({
-      cEvaluation,
-      prevEvaluation,
-      plColor,
-      plRating,
-      opponentRating,
-    });
-    console.log({ cAccuracy });
     const prevAccuracy = this.getAccuracy(
       prevEvaluation,
       plRating,
       opponentRating,
     );
-    console.log(prevEvaluation);
-    console.log({ prevAccuracy });
     const accuracyDiff = (cAccuracy - prevAccuracy) * plColor;
-    console.log({ accuracyDiff });
-    console.log(cEvaluation, prevEvaluation, plColor, plRating, opponentRating);
     return this.getClassifiValue(accuracyDiff);
   };
 
@@ -291,7 +229,6 @@ export class Classify {
     square: Square,
     plColor: PlayerColor,
     game: ChessInstance,
-    verbose = false,
   ): AttackPiece[] => {
     console.log('-------------------------------------------------');
     let y = square[0].charCodeAt(0),
@@ -331,10 +268,6 @@ export class Classify {
               possiblePiece.type == 'q' ||
               (possiblePiece.type == 'k' && Math.abs(newx - x) == 1))
           ) {
-            if (verbose) {
-              console.log('added');
-              console.log(square);
-            }
             attackers.push(possibleAttacker);
             break;
           } else if (possibleAttacker) {
@@ -383,11 +316,6 @@ export class Classify {
                 : newx - x) ||
               (possiblePiece.type == 'k' && Math.abs(newx - x) == 1))
           ) {
-            if (verbose) console.log(possibleAttacker);
-            if (verbose) {
-              console.log('added');
-              console.log(`${String.fromCharCode(newy)}${newx}`);
-            }
             attackers.push(possibleAttacker);
             break;
           } else if (possibleAttacker) {
@@ -428,10 +356,6 @@ export class Classify {
             possiblePiece.type == 'n' &&
             possiblePiece.color == playerColor
           ) {
-            if (verbose) {
-              console.log('added');
-              console.log(`${String.fromCharCode(newy)}${newx}`);
-            }
             attackers.push(possibleAttacker);
           }
         }
@@ -441,7 +365,6 @@ export class Classify {
   };
 
   private getPieceValue = (piece: Piece) => {
-    // console.log(piece);
     switch (piece[1].toLowerCase()) {
       case 'p':
         return 1;
@@ -481,7 +404,6 @@ export class Classify {
     if (evaluation.type == 'cp') {
       let normalizedEval =
         1.0 / (1.0 + Math.exp(-0.4 * (evaluation.value / 200)));
-      console.log({ normalizedEval: normalizedEval.toFixed(3) });
       let accuracyExp =
         1.0 / (1.0 + Math.pow(10, (opponnetRating - plRating) / 400));
       return Number((normalizedEval * accuracyExp * 2).toFixed(3));
@@ -494,7 +416,6 @@ export class Classify {
     moveNum: number;
     gameInfo: Game;
   }) => {
-    console.log(`currentMoveNum: ${params.moveNum}`);
     this.engineResponses.push(params.engineResponse);
     this.evaluations.push(
       params.engineResponse[params.engineResponse.length - 1].evaluation,
@@ -507,153 +428,149 @@ export class Classify {
     if (this.sanMoves && params.gameInfo) {
       let plColor: PlayerColor, opponent: UserInfo, player: UserInfo;
       let move: string = this.sanMoves[params.moveNum - 1];
-      console.log(`before ${this.game.history()}`);
-      let lastMove:any;
+      console.debug({ history: this.game.history() });
+      console.debug({ sanmoves: this.sanMoves });
       if (
+        this.game.history().length != params.moveNum ||
         this.game.history()[this.game.history().length - 1] !=
-        this.sanMoves[params.moveNum - 1]
+          this.sanMoves[params.moveNum - 1]
       ) {
-        lastMove = this.game.move(move) as chessjsMove;
+        const lastMove = this.game.move(move) as chessjsMove;
+        console.debug({ lastMove });
+        console.debug({ history: this.game.history() });
+        console.debug({ sanmoves: this.sanMoves });
         if (!lastMove)
           throw new Error(
             `illigal move num: ${params.moveNum} move= ${this.sanMoves[params.moveNum - 1]}`,
           );
-      }
-      console.log(`after ${this.game.history()}`);
-
-      if (params.moveNum % 2) {
-        player = params.gameInfo.wuser;
-        opponent = params.gameInfo.buser;
-        plColor = 1;
-      } else {
-        player = params.gameInfo.buser;
-        opponent = params.gameInfo.wuser;
-        plColor = -1;
-      }
-      console.log('old /n new');
-      console.log(evaluation);
-      console.log(
-        params.engineResponse[params.engineResponse.length - 1].evaluation,
-      );
-      let maxClassification = 6;
-      let firstMiddleGame = 0;
-      let firsetEndGame = 0;
-      let iswining = this.isWining(
-        params.engineResponse[params.engineResponse.length - 1].evaluation,
-        player.rating,
-        plColor,
-      );
-
-      let waswining = this.isWining(evaluation, player.rating, plColor);
-      let waslosing = this.isLosing(evaluation, player.rating, plColor);
-      let islosing = this.isLosing(
-        params.engineResponse[params.engineResponse.length - 1].evaluation,
-        player.rating,
-        plColor,
-      );
-      let currentPieceChar = lastMove.piece;
-      let isQueen = currentPieceChar
-        ? currentPieceChar.toLowerCase() == 'q'
-        : false;
-      if (lastMove.flags == 'cp' || lastMove.flags == 'pc') {
-        alert(lastMove.flags);
-      }
-      let lastMoveAsMove: Move = {
-        from: lastMove.from,
-        to: lastMove.to,
-        promotion: lastMove.promotion,
-        san: lastMove.san,
-        captured:
-          plColor == 1
-            ? (`b${lastMove.captured?.toUpperCase()}` as Piece)
-            : (`w${lastMove.captured?.toUpperCase()}` as Piece),
-        type: lastMove.flags,
-        lan: `${lastMove.from}${lastMove.to}` as Lan,
-        piece:
-          plColor == 1
-            ? (`w${lastMove.piece.toUpperCase()}` as Piece)
-            : (`b${lastMove.piece.toUpperCase()}` as Piece),
-      };
-      console.log(lastMoveAsMove);
-      let isSacc: any = { result: false };
-      if (this.game) {
-        isSacc = this.isSac(lastMoveAsMove, new Chess(this.game.fen()));
-      }
-      // is best when its one of top lines returned by the engine
-      let isbest =
-        this.engineResponses[params.moveNum - 1].length > 1
-          ? this.engineResponses[params.moveNum - 1].find((engineLine) => {
-              console.log(`${engineLine.bestMove} equal ${lastMoveAsMove.lan}`);
-              return engineLine.bestMove == lastMoveAsMove.lan;
-            })
-            ? true
-            : false
-          : false;
-
-      // u set the first move of middle game after last opening move  (book move)
-      if (!firstMiddleGame) {
-        //check book sanMoves
-        let isBook = this.game
-          ? await checkIfBook(this.game.fen())
-          : { ok: false };
-        if (isBook.ok) {
-          console.log(isBook.opening);
-          return 'book';
+        if (params.moveNum % 2) {
+          player = params.gameInfo.wuser;
+          opponent = params.gameInfo.buser;
+          plColor = 1;
         } else {
-          firstMiddleGame = params.moveNum;
+          player = params.gameInfo.buser;
+          opponent = params.gameInfo.wuser;
+          plColor = -1;
         }
-      }
-      let normalClassification = this.getNormalClassification(
-        params.engineResponse[params.engineResponse.length - 1].evaluation,
-        evaluation,
-        plColor,
-        player.rating,
-        opponent.rating,
-      );
-
-      console.log({
-        waslosing,
-        islosing,
-        iswining,
-        waswining,
-        isQueen,
-        isSacc,
-        isbest,
-        normalClassification,
-      });
-      if (
-        this.isGreat(
-          this.engineResponses[params.moveNum - 1],
-          iswining,
-          islosing,
-          waswining,
-          waslosing,
+        let maxClassification = 6;
+        let firstMiddleGame = 0;
+        let firsetEndGame = 0;
+        let iswining = this.isWining(
+          params.engineResponse[params.engineResponse.length - 1].evaluation,
           player.rating,
           plColor,
-        )
-      ) {
-        return 'great';
+        );
+        console.debug({ evaluation });
+        let waswining = this.isWining(evaluation, player.rating, plColor);
+        let waslosing = this.isLosing(evaluation, player.rating, plColor);
+        let islosing = this.isLosing(
+          params.engineResponse[params.engineResponse.length - 1].evaluation,
+          player.rating,
+          plColor,
+        );
+        let currentPieceChar = lastMove.piece;
+        let isQueen = currentPieceChar
+          ? currentPieceChar.toLowerCase() == 'q'
+          : false;
+        if (lastMove.flags == 'cp' || lastMove.flags == 'pc') {
+          alert(lastMove.flags);
+        }
+        let lastMoveAsMove: Move = {
+          from: lastMove.from,
+          to: lastMove.to,
+          promotion: lastMove.promotion,
+          san: lastMove.san,
+          captured:
+            plColor == 1
+              ? (`b${lastMove.captured?.toUpperCase()}` as Piece)
+              : (`w${lastMove.captured?.toUpperCase()}` as Piece),
+          type: lastMove.flags,
+          lan: `${lastMove.from}${lastMove.to}` as Lan,
+          piece:
+            plColor == 1
+              ? (`w${lastMove.piece.toUpperCase()}` as Piece)
+              : (`b${lastMove.piece.toUpperCase()}` as Piece),
+        };
+        let isSacc: any = { result: false };
+        if (this.game) {
+          isSacc = this.isSac(lastMoveAsMove, new Chess(this.game.fen()));
+        }
+        // is best when its one of top lines returned by the engine
+        let isbest =
+          this.engineResponses[params.moveNum - 1].length > 1
+            ? this.engineResponses[params.moveNum - 1].find((engineLine) => {
+                return engineLine.bestMove == lastMoveAsMove.lan;
+              })
+              ? true
+              : false
+            : false;
+
+        // u set the first move of middle game after last opening move  (book move)
+        if (!firstMiddleGame) {
+          //check book sanMoves
+          let isBook = this.game
+            ? await checkIfBook(this.game.fen())
+            : { ok: false };
+          if (isBook.ok) {
+            return 'book';
+          } else {
+            firstMiddleGame = params.moveNum;
+          }
+        }
+        let normalClassification = this.getNormalClassification(
+          params.engineResponse[params.engineResponse.length - 1].evaluation,
+          evaluation,
+          plColor,
+          player.rating,
+          opponent.rating,
+        );
+        if (
+          this.isGreat(
+            this.engineResponses[params.moveNum - 1],
+            iswining,
+            islosing,
+            waswining,
+            waslosing,
+            player.rating,
+            plColor,
+          )
+        ) {
+          return 'great';
+        }
+        if (isSacc) {
+          if (
+            ((waswining && iswining) || (!waswining && !islosing)) &&
+            isbest
+          ) {
+            return 'brilliant';
+          }
+          if (islosing && isQueen) {
+            return 'botezgambit';
+          }
+          return normalClassification;
+        } else if (isbest) {
+          return 'best';
+        } else if (
+          (normalClassification == 'mistake' ||
+            normalClassification == 'blunder') &&
+          iswining
+        ) {
+          return 'missed';
+        } else return normalClassification;
       }
-      if (isSacc) {
-        if (((waswining && iswining) || (!waswining && !islosing)) && isbest) {
-          return 'brilliant';
-        }
-        if (islosing && isQueen) {
-          return 'botezgambit';
-        }
-        return normalClassification;
-      } else if (isbest) {
-        return 'best';
-      } else if (
-        (normalClassification == 'mistake' ||
-          normalClassification == 'blunder') &&
-        iswining
-      ) {
-        return 'missed';
-      } else return normalClassification;
     }
     return 'unknown';
   };
+
+  _init(params: {
+    game?: ChessInstance;
+    evaluations?: Evaluation[];
+    engineResponses?: EngineLine[][];
+  }) {
+    this.game = params.game ? params.game : new Chess();
+    this.evaluations = params.evaluations ? params.evaluations : [];
+    this.engineResponses = params.engineResponses ? params.engineResponses : [];
+  }
 
   constructor(params: {
     fen?: string;

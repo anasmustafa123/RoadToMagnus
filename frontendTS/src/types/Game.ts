@@ -24,7 +24,7 @@ export interface Move
 }
 
 export interface Game {
-  gameId: number;
+  gameId: string;
   wuser: UserInfo;
   buser: UserInfo;
   playerColor: PlayerColor;

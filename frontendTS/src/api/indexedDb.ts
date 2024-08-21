@@ -1,19 +1,22 @@
 import { Vendor } from '../types/Api';
 
 const dbName = import.meta.env.VITE_TITLE as string;
-const dbVersion = 1;
-const storeName = 'Games';
 
 let db: IDBDatabase | null = null;
 
-const init_indexedDb = (): Promise<{ ok: boolean; database: IDBDatabase }> => {
+const init_indexedDb = ({
+  storeName,
+  dbVersion,
+}: {
+  storeName: string;
+  dbVersion: number;
+}): Promise<{ ok: boolean; database: IDBDatabase }> => {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(dbName, dbVersion);
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-      console.log('upgradeneeded');
       const db = (event.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains(storeName)) {
+      if (storeName != '' && !db.objectStoreNames.contains(storeName)) {
         db.createObjectStore(storeName);
       }
     };
@@ -29,9 +32,57 @@ const init_indexedDb = (): Promise<{ ok: boolean; database: IDBDatabase }> => {
   });
 };
 
+const isUser = (): Promise<{ ok: boolean; data: any }> => {
+  return new Promise((resolve, reject) => {
+    if (!db) {
+      reject('Database is not open');
+      return;
+    }
+    const transaction = db.transaction('users', 'readwrite');
+    const store = transaction.objectStore('users');
+    const request = store.getAll();
+
+    request.onsuccess = (e: any) => {
+      resolve({ ok: true, data: e.srcElement.result[0] });
+    };
+
+    request.onerror = (e) => {
+      reject(`catched ${e}`);
+    };
+  });
+};
+
+const logout = async () => {
+  return new Promise(async (resolve, reject) => {
+    const user = (await isUser()) as any;
+    if (user != undefined && user.data && user.data.id) {
+      if (!db) init_indexedDb({ storeName: '', dbVersion: 2 });
+      const deleteReq = db
+        ?.transaction(['users'], 'readwrite')
+        .objectStore('users')
+        .delete(user.data.id);
+      if (deleteReq) {
+        deleteReq.onsuccess = () => {
+          resolve({ ok: true });
+        };
+        deleteReq.onerror = () => {
+          reject({ ok: false });
+        };
+      }
+    } else resolve({ ok: true });
+  });
+};
+
 const addData = (param: {
   storename: string;
-  data: { pgn?: string; key: number; month?: number; year?: number };
+  data: {
+    pgn?: string;
+    key: string;
+    lichessdate?: number;
+    chessdate?: number;
+    vendor: Vendor;
+    username: string;
+  };
 }): Promise<{ ok: boolean }> => {
   return new Promise((resolve, reject) => {
     if (!db) {
@@ -42,8 +93,23 @@ const addData = (param: {
     const store = transaction.objectStore(param.storename);
     let request: IDBRequest<IDBValidKey>;
     request = param.data.pgn
-      ? store.add({ pgn: param.data.pgn }, param.data.key)
-      : store.add({ month: param.data.month, year: param.data.year });
+      ? store.add(
+          {
+            pgn: param.data.pgn,
+            id: param.data.key,
+            username: param.data.username,
+          },
+          param.data.key,
+        )
+      : store.add(
+          {
+            chessdate: param.data.chessdate,
+            lichessdate: param.data.lichessdate,
+            id: param.data.key,
+            username: param.data.username,
+          },
+          param.data.key,
+        );
     // @ts-ignore
     if (request) {
       request.onsuccess = () => {
@@ -59,31 +125,33 @@ const addData = (param: {
 
 const getDataByKey = (param: {
   storename: string;
-  data: { key: number };
+  data: { key: string };
 }): Promise<any> => {
   return new Promise((resolve, reject) => {
     if (!db) {
       reject('Database is not open');
       return;
     }
+    try {
+      const transaction = db.transaction(param.storename, 'readwrite');
+      const store = transaction.objectStore(param.storename);
+      const request = store.get(param.data.key);
+      request.onsuccess = (e: any) => {
+        resolve(e.srcElement.result );
+      };
 
-    const transaction = db.transaction(param.storename, 'readonly');
-    const store = transaction.objectStore(param.storename);
-    const request = store.get(param.data.key);
-
-    request.onsuccess = () => {
-      resolve({ ok: true, request });
-    };
-
-    request.onerror = () => {
-      reject({ ok: false, request });
-    };
+      request.onerror = (e) => {
+        reject({ request: e });
+      };
+    } catch (e) {
+      reject(`no store with the name: ${param.storename}- ${e}`);
+    }
   });
 };
 
 const updateData = (param: {
   storename: string;
-  data: { pgn?: string; month?: string; year?: string; key: number };
+  data: { pgn?: string; key: string; lichessdate?: string; chessdate?: string };
 }): Promise<any> => {
   return new Promise((resolve, reject) => {
     if (!db) {
@@ -94,17 +162,21 @@ const updateData = (param: {
     const transaction = db.transaction(param.storename, 'readwrite');
     const store = transaction.objectStore(param.storename);
     const request = param.data.pgn
-      ? store.put({ pgn: param.data.pgn }, param.data.key)
+      ? store.put({ pgn: param.data.pgn, id: param.data.key }, param.data.key)
       : store.put(
-          { month: param.data.month, year: param.data.year },
+          {
+            chessdate: param.data.chessdate,
+            lichessdate: param.data.lichessdate,
+            id: param.data.key,
+          },
           param.data.key,
         );
 
-    request.onsuccess = () => {
-      resolve({ ok: true, request });
+    request.onsuccess = (e: any) => {
+      resolve({ ok: true, data: e.srcElement.result });
     };
 
-    request.onerror = () => {
+    request.onerror = (e: any) => {
       reject({ ok: false, request });
     };
   });
@@ -112,7 +184,7 @@ const updateData = (param: {
 
 const deleteData = (param: {
   storename: string;
-  data: { key: number } | { key: Vendor };
+  data: { key: string } | { key: Vendor };
 }): Promise<any> => {
   return new Promise((resolve, reject) => {
     if (!db) {
@@ -133,9 +205,10 @@ const deleteData = (param: {
     };
   });
 };
+
 const getAllGames = (): Promise<{
   ok: boolean;
-  value: { gameId: number; pgn: string }[];
+  value: { gameId: string; pgn: { pgn: string } }[];
 }> => {
   let storeName = 'Games';
   return new Promise((resolve, reject) => {
@@ -150,11 +223,9 @@ const getAllGames = (): Promise<{
       try {
         const cursor = (event.target as IDBRequest).result;
         if (cursor) {
-          console.log(cursor);
-          games.push({ pgn: cursor.value, gameId: cursor.key });
+          games.push({ pgn: cursor.value, gameId: String(cursor.key) });
           cursor.continue();
         } else {
-          console.log('finished');
           resolve({ ok: true, value: games });
         }
       } catch (e) {
@@ -171,4 +242,6 @@ export {
   getAllGames,
   updateData,
   deleteData,
+  isUser,
+  logout,
 };

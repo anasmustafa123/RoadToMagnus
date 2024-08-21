@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  ReactNode,
-  ReactElement,
-} from 'react';
+import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { UserContextType } from '../types/UserContextType';
 import { MenuBarTheme } from '../types/Ui';
 
@@ -29,6 +23,8 @@ const defaultValue: UserContextType = {
   setShowRightSidebar: () => {},
   menuBarTheme: 'v',
   setMenuBarTheme: () => {},
+  largeScreen: true,
+  setLargeScreenWidth: () => {},
 };
 const UserContext = createContext<UserContextType>(defaultValue);
 
@@ -36,7 +32,7 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [username, setUsername] = useState<string>('');
-  const [userId, setUserId] = useState<number>(55);
+  const [userId, setUserId] = useState<number>(0);
   const [usernameChessDC, setChessDCUsername] = useState<string>('');
   const [usernameLichess, setUserLicehessname] = useState<string>('');
   const [chessDCAvatarLink, setChessDCAvatarLink] = useState<string>('');
@@ -45,18 +41,27 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   const [chessboardwidth, setChessboardWidth] = useState<number>(750);
   const [menuBarTheme, setMenuBarTheme] = useState<MenuBarTheme>('v');
   const [showRigthSidebar, setShowRightSidebar] = useState<boolean>(true);
+  const [largeScreen, setLargeScreenWidth] = useState(false);
+
   useEffect(() => {
     const handleResize = () => {
-      console.log(menuBarTheme);
-      if (window.innerWidth > 1350) setChessboardWidth(750);
-      else if (window.innerWidth <= 1350 && window.innerWidth > 1100) {
-        if (menuBarTheme == 'v') setChessboardWidth(650);
-        setShowRightSidebar(false);
-      } else if (window.innerWidth <= 1100 && window.innerWidth > 900)
-        if (menuBarTheme == 'v') {
-          setMenuBarTheme('mv')
-          setChessboardWidth(550);
-        }
+      //console.log(menuBarTheme);
+      if (window.innerWidth > 1350) {
+        setChessboardWidth(750);
+        if (!largeScreen) setLargeScreenWidth(true);
+        //if (menuBarTheme != 'v') setMenuBarTheme('v');
+      } else if (window.innerWidth <= 1350 && window.innerWidth > 1100) {
+        console.log('vertical');
+        //if (menuBarTheme == 'v') setChessboardWidth(650);
+        // if (menuBarTheme != 'v') setMenuBarTheme('v');
+        if (!largeScreen) setLargeScreenWidth(true);
+      } else if (window.innerWidth <= 900) {
+        console.log('horizontal');
+
+        if (largeScreen) setLargeScreenWidth(false);
+        //  if (menuBarTheme != 'h') setMenuBarTheme('h');
+        setChessboardWidth(window.innerWidth - 10);
+      }
     };
 
     // Add event listener
@@ -100,6 +105,8 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
         setShowRightSidebar,
         menuBarTheme,
         setMenuBarTheme,
+        largeScreen,
+        setLargeScreenWidth,
       }}
     >
       {children}

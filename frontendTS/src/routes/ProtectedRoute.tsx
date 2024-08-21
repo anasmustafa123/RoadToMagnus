@@ -5,54 +5,71 @@ import Sidebar from '../components/MenuBar';
 
 const ProtectedRoute = () => {
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const { isUser, menuBarTheme } = useContext(UserContext);
+  const { isUser, menuBarTheme, showRigthSidebar } = useContext(UserContext);
 
-  !isUser ? console.error('cant access route if not logged in') : '';
+  !isUser ? console.warn('cant access route if not logged in') : '';
 
   useEffect(() => {
     sidebarRef.current
       ? (sidebarRef.current.className = `gridContainer ${
           menuBarTheme == 'v'
-            ? ' verticalMenuBar'
+            ? showRigthSidebar
+              ? 'layout_1_v'
+              : 'layout_2_v'
             : menuBarTheme == 'h'
-              ? ' horizontalMenubar'
+              ? showRigthSidebar
+                ? 'layout_1_h'
+                : 'layout_2_h'
               : menuBarTheme == 'mv'
-                ? ' minimizedverticalMenuBar'
+                ? showRigthSidebar
+                  ? 'layout_1_mv'
+                  : 'layout_2_mv'
                 : ''
         }`)
       : '';
   }, [menuBarTheme]);
+  console.log({showRigthSidebar})
   return isUser ? (
     <div
       ref={sidebarRef}
       className={`gridContainer ${
         menuBarTheme == 'v'
-          ? ' verticalMenuBar'
+          ? showRigthSidebar
+            ? 'layout_1_v'
+            : 'layout_2_v'
           : menuBarTheme == 'h'
-            ? ' horizontalMenubar'
+            ? showRigthSidebar
+              ? 'layout_1_h'
+              : 'layout_2_h'
             : menuBarTheme == 'mv'
-              ? ' minimizedverticalMenuBar'
+              ? showRigthSidebar
+                ? 'layout_1_mv'
+                : 'layout_2_mv'
               : ''
       }`}
     >
       <Sidebar
-        inlineStyles={{
-          gridColumn:
-            menuBarTheme == 'v' || menuBarTheme == 'mv'
-              ? '1/2'
+        classNames={
+          menuBarTheme == 'v'
+            ? ['sidebar']
+            : menuBarTheme == 'mv'
+              ? ['sidebar', 'min']
               : menuBarTheme == 'h'
-                ? '1/3'
-                : 0,
-        }}
+                ? ['header']
+                : ['']
+        }
       />
       <Outlet
         context={{
-          gridColumn:
-            menuBarTheme == 'v' || menuBarTheme == 'mv'
-              ? '2/3'
-              : menuBarTheme == 'h'
-                ? '1/2'
-                : 0,
+          outletStyles: {
+            gridColumn:
+              menuBarTheme == 'v' || menuBarTheme == 'mv'
+                ? '2/3'
+                : menuBarTheme == 'h'
+                  ? '1/2'
+                  : 0,
+            gridRow: menuBarTheme == 'h' ? '2/3' : '',
+          },
         }}
       />
     </div>

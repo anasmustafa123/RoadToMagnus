@@ -38,16 +38,12 @@
   margin-right: auto;
 }
 .reviewHeader {
-  border: 0px solid var(--text-color);
-  border-bottom-width: 1px !important;
   color: var(--text-color);
   font-size: 22px;
   font-weight: 700;
 }
 .ReviewContainer {
   margin-top: 1rem;
-  border: 0px solid var(--text-color);
-  border-bottom-width: 1px !important;
   color: var(--text-color);
   font-size: 22px;
   font-weight: 700;
@@ -59,11 +55,11 @@
   border: 2px solid;
   border-radius: 0.7rem;
   padding: 5px 15px 5px 15px;
-  border-color: 'var(--block-border)';
-  width: '92px';
-  font-size: '22px';
-  font-weight: '700';
-  text-align: 'center';
+  border-color: var(--block-border);
+  width: 92px;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
 }
 .wblock {
   border-radius: 0.7rem;
@@ -73,7 +69,7 @@
   color: var(--bg-color);
 }
 .reviewStatics {
-  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 .reviewStatics img {
   display: block;
@@ -97,4 +93,33 @@
 div.wcontainer > img,
 div.bcontainer > img {
   margin: auto;
+}
+.reviewResult_content > div {
+  border: 0px solid var(--text-color);
+  border-bottom-width: 1px !important;
+}
+
+.gameStatistics {
+  margin-top: 1.5rem;
+}
+@media screen and (max-width: 650px) {
+  .reviewHeader {
+    justify-content: center;
+  }
+  .userInfo {
+    margin: 0 !important;
+  }
+  .reviewResult {
+    padding: 15px 5% 15px 5%;
+  }
+}
+.state_is_shrinked {
+  max-height: 90vh;
+  overflow-y: hidden;
+}
+@media screen and (max-width: 400px) {
+  .imgContainer > img {
+    width: 80px;
+    height: 80px;
+  }
 }

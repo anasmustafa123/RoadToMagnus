@@ -13,11 +13,18 @@ import {
   CustomSquareStyles,
   PromotionPieceOption,
 } from 'react-chessboard/dist/chessboard/types';
+import { _pointInLine } from 'chart.js/helpers';
 const ChessBoard: React.FC<{
-  moves: Move[];
-  classifications: ClassName[];
-  movesIndex: number;
-}> = ({ moves, classifications, movesIndex }) => {
+  moves?: Move[];
+  classifications?: ClassName[];
+  movesIndex?: number;
+  inlineStyles?:React.CSSProperties ;
+}> = ({
+  moves = [],
+  classifications = [],
+  movesIndex = 0,
+  inlineStyles = undefined,
+}) => {
   const [customArrows, setCustomArrows] = useState<Arrow[]>([]);
   const [currentClassif, setCurrentClassifi] = useState<ClassName>();
   const [currentMove, setCurrentMove] = useState({ to: '' });
@@ -27,18 +34,15 @@ const ChessBoard: React.FC<{
     showClassification,
     selectedPieceTheme,
     selectedBoardTheme,
-    avalibleBoardThemes,
-    avaliblePieceThemes,
     rightClickedSquares,
     setRightClickedSquares,
     moveSquares,
     optionSquares,
     setOptionSquares,
     classificationInfo,
-    getClassification,
     getClassificationByName,
   } = useContext(GameboardContext);
-  const { chessboardwidth, setChessboardWidth } = useContext(UserContext);
+  const { chessboardwidth } = useContext(UserContext);
   const [moveFrom, setMoveFrom] = useState<Square>();
   const [moveTo, setMoveTo] = useState<Square>();
   const [showPromotionDialog, setShowPromotionDialog] =
@@ -290,7 +294,7 @@ const ChessBoard: React.FC<{
   }, [currentClassif, currentMove]);
 
   return (
-    <div className="boardWrapper">
+    <div style={inlineStyles}>
       <Chessboard
         id="StyledBoard"
         animationDuration={200}

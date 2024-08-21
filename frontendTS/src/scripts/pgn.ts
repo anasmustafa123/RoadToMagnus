@@ -52,10 +52,10 @@ const parsePgn = (pgn: string) => {
   let clks = [],
     evaluations: Evaluation[] = [],
     classifi: Classification[] = [],
-    moves = [];
+    moves = [],
+    gameId = '';
 
   const [header, body] = String(pgn).split(/\n\s*\n/);
-
   header.split('\n').forEach((line) => {
     if (line.startsWith('[White ')) {
       wname = line.slice(8, -2);
@@ -82,6 +82,15 @@ const parsePgn = (pgn: string) => {
             : res >= 1
               ? 'blitz'
               : 'bullet';
+    } else if (line.startsWith('[Link')) {
+      // chess.com pgn
+      let url = line.slice(line.indexOf('"') + 1, -2);
+      let urlarr = url.split('/');
+      gameId = urlarr[urlarr.length - 1];
+    } else if (line.startsWith('[Site') && !line.includes('chess.com')) {
+      let url = line.slice(line.indexOf('"') + 1, -2);
+      let urlarr = url.split('/');
+      gameId = urlarr[urlarr.length - 1];
     }
   });
   const parts = body.split(/\s+/);
@@ -131,11 +140,15 @@ const parsePgn = (pgn: string) => {
     buser: { username: bname, rating: brating }, // @ts-ignore
     gameResult: result,
     moves,
+    movesCount: moves.length,
     clks,
     evaluations,
     classifi,
     date,
     gameType,
+    gameId,
+    isReviewed: classifi.length ? true: false,
+    pgn,
   };
 };
 

@@ -33,3 +33,17 @@ export interface ErrorRes {
   kind: string;
   stack: any;
 }
+export type classification = {
+  book: number;
+  brilliant: number;
+  great: number;
+  best: number;
+  excellent: number;
+  good: number;
+  forced: number;
+  inaccuracy: number;
+  mistake: number;
+  blunder: number;
+  missed: number;
+  botezgambit: number;
+};

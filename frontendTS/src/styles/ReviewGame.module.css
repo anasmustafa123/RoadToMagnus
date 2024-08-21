@@ -1,0 +1,24 @@
+.showReview {
+  width: 100%;
+}
+.showReview > button {
+  display: block;
+  margin: 15px auto 15px auto;
+  padding: 10px;
+  width: 50%;
+  background-color: forestgreen;
+  border: none;
+  border-radius: 6px;
+  color: var(--bg-color);
+  font-weight: 600;
+}
+
+.expand_review > i {
+  font-size: 1.5rem;
+  margin: auto;
+  text-align: center;
+  width: 100%;
+  padding: 5px 0 5px 0;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+}

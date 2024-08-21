@@ -13,7 +13,6 @@ export interface ReviewGameContext {
   setsanMoves: React.Dispatch<React.SetStateAction<string[]>>;
   gameInfo: Game;
   setGameInfo: React.Dispatch<React.SetStateAction<Game>>;
-  getClassification: (engineResponse: EngineLine[]) => Promise<ClassName>;
   maxPerc: number;
   setMaxtPerc: React.Dispatch<React.SetStateAction<number>>;
   currentPerc: number;

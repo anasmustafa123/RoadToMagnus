@@ -9,7 +9,7 @@ import { useOutletContext } from 'react-router-dom';
 export default function ChessBoard_Eval(props: {
   inlineStyles: React.CSSProperties;
 }) {
-  const { gridColumn} = useOutletContext<React.CSSProperties>();
+  const { gridColumn } = useOutletContext<React.CSSProperties>();
   const {
     makeAMove,
     safeGameMutate,
@@ -23,7 +23,10 @@ export default function ChessBoard_Eval(props: {
   const [movesIndex, setMovesIndex] = useState(0);
 
   return (
-    <div style={{...props.inlineStyles, gridColumn}} className={styles.chessboard_eval}>
+    <div
+      style={{ ...props.inlineStyles, gridColumn }}
+      className={styles.chessboard_eval}
+    >
       <div
         style={{
           display: 'flex',
@@ -34,6 +37,15 @@ export default function ChessBoard_Eval(props: {
       >
         <EvaluationBar evaluation={evaluations[movesIndex]}></EvaluationBar>
         <ChessBoard
+          inlineStyles={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            maxWidth: 'fit-content',
+            height: '100%',
+            gridColumn: '3 / 8',
+          }}
           moves={moves}
           movesIndex={movesIndex}
           classifications={classificationNames}

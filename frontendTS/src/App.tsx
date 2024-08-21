@@ -1,75 +1,85 @@
 import { useContext, useEffect, useState } from 'react';
 import Games from './routes/Games';
-import {
-  RouterProvider,
-  createBrowserRouter,
-  defer,
-  Routes,
-  Route,
-} from 'react-router-dom';
-import { ChessBoardContextProvider } from './contexts/GameBoardContext';
-import { ReviewGameContext } from './contexts/ReviewGameContext';
+import { Routes, Route } from 'react-router-dom';
 import SignUp from './components/SignUp';
 import Login from './components/Login';
 import ProtectedRoute from './routes/ProtectedRoute';
 import './App.css';
 import Profile from './routes/Profile';
-import type { EngineLine, Game, GamesCount, PlayerColor } from './types/Game';
-import RouteContainer from './routes/RouteContainer';
-import { getAvalibleArchieves, getGamesOfMonth } from './api/chessApiAccess';
+import type { EngineLine } from './types/Game';
 import { UserContext } from './contexts/UserContext';
 import ReviewGame from './routes/ReviewGame';
-import {
-  addData,
-  deleteData,
-  getAllGames,
-  init_indexedDb,
-} from './api/indexedDb';
+import { init_indexedDb, isUser as getUserfromDb } from './api/indexedDb';
 import { GameContext } from './contexts/GamesContext';
-import { parsePgn } from './scripts/pgn';
-import ChessBoard_Eval from './components/ChessBoard_Eval';
+import Stats from './routes/Stats';
+import {
+  fetchChessGamesonMonth,
+  getAllPlayerGames,
+} from './api/chessApiAccess';
+import { getMissingData } from './scripts/LoadGames';
 function App() {
-  const [engineRes, setEngineRes] = useState<EngineLine[]>([]);
-  const { usernameChessDC, isUser, setIsUser } = useContext(UserContext);
-  const { setAllGames } = useContext(GameContext);
+  const [engineRes] = useState<EngineLine[]>([]);
+  const { setIsUser, userId, setUserId, usernameLichess } =
+    useContext(UserContext);
+
+  const { setLichessGames } = useContext(GameContext);
   useEffect(() => {
-    /* if (engineRes) {
-      console.log({ engineRes });
-    } */
+    if (engineRes) {
+    }
   }, [engineRes]);
 
   useEffect(() => {
-    setIsUser(true);
-    /* init_indexedDb().then(async () => {
-      console.debug('indexedDb initialized');
-      let values = await getAllGames();
-      let games: Game[] = [];
-      console.log(values);
-      let gamesCount: GamesCount = {
-        rapid: 0,
-        blitz: 0,
-        bullet: 0,
-        daily: 0,
-      };
-      values.value.forEach((game) => {
-        let gameparsed = parsePgn(game.pgn);
-        gamesCount[gameparsed.gameType] = gamesCount[gameparsed.gameType] + 1;
-        let movesCount = gameparsed.moves.length;
-        let playerColor: PlayerColor =
-          usernameChessDC == gameparsed.wuser.username ? 1 : -1;
-        let res: Game = {
-          ...gameparsed,
-          playerColor,
-          gameId: game.gameId,
-          site: 'chess.com',
-          movesCount,
-          pgn: game.pgn,
-          isReviewed: gameparsed.classifi ? true : false,
-        };
-        games.push(res);
-      });
-      setAllGames(games);
+    /*  getAllPlayerGames({
+      username: 'anasmostafa11',
+      syear: 2021,
+      eyear: 2022,
+      smonth: 11,
+      emonth: 12,
+      afterEachMonthCallback: (games) => {
+        console.debug("month")
+        console.debug(games)
+      },
+    }).then((games) => {
+      console.dir(games);
     }); */
+    getMissingData({
+      storekey: String(userId),
+      vendor: 'chess.com',
+      username: 'anasmostafa11',
+      afterGameCallback: () => {},
+      afterGamesCallback: () => {},
+    });
+
+    init_indexedDb({ storeName: 'users', dbVersion: 2 }).then((res) => {
+      if (res.ok) {
+        getUserfromDb()
+          .then((value: any) => {
+            if (value.data) {
+              setUserId(value.data.id);
+              setIsUser(true);
+            }
+            //loading game from indexedDb
+            `getAllGames().then((res) => {
+              if (res.ok)
+                setLichessGames(
+                  res.value.map((simplegame) => {
+                    console.log(simplegame.pgn.pgn);
+                    const parsedGame = parsePgn(simplegame.pgn.pgn);
+                    return {
+                      ...parsedGame,
+                      site: 'lichess',
+                      playerColor:
+                        usernameLichess == parsedGame.wuser.username ? 1 : -1,
+                    };
+                  }),
+                );
+            });`;
+          })
+          .catch((e) => {
+            console.error(`catched : ${e}`);
+          });
+      }
+    });
   }, []);
 
   return (
@@ -80,21 +90,6 @@ function App() {
         <Route path="/" element={<ProtectedRoute />}>
           <Route path="" element={<Profile />} />
           <Route path="profile" element={<Profile />} />
-          {/* <Route
-            path="moves"
-            element={
-              <ChessBoardContextProvider>
-                <ChessBoard_Eval
-                  inlineStyles={{
-                    gridColumn: '2 / 3',
-                    margin: 'auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                ></ChessBoard_Eval>
-              </ChessBoardContextProvider>
-            }
-          ></Route> */}
           <Route
             path="games"
             element={
@@ -108,7 +103,9 @@ function App() {
               />
             }
           />
+          <Route path="stats" element={<Stats />} />
           <Route path="review/:gameId" element={<ReviewGame />} />
+          <Route path="explorer">explore</Route>
         </Route>
         <Route path="*" element={<div>u lost ur way my friend</div>} />
       </Routes>

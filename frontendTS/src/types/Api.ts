@@ -1,10 +1,11 @@
-import { GameType } from "./Game";
+import { GameType } from './Game';
 
 export interface ShortGame {
   pgn: string;
   isReviewd: boolean;
   site: string;
 }
+export const Vendors = ['chess.com', 'lichess'];
 
 export type Vendor = 'chess.com' | 'lichess';
 

@@ -3,13 +3,11 @@ import {
   AttackPiece,
   EngineLine,
   Evaluation,
-  Game,
   Move,
   PlayerColor,
 } from '../types/Game';
 import { Piece } from 'react-chessboard/dist/chessboard/types';
 import {
-  Classification,
   ClassificationScores,
   ClassName,
   emptyClassificationScores,
@@ -176,22 +174,8 @@ const getNormalClassification = (
   opponentRating: number,
 ): ClassName => {
   const cAccuracy = getAccuracy(cEvaluation, plRating, opponentRating);
-
-  console.log(cEvaluation);
-  console.log({
-    cEvaluation,
-    prevEvaluation,
-    plColor,
-    plRating,
-    opponentRating,
-  });
-  console.log({ cAccuracy });
   const prevAccuracy = getAccuracy(prevEvaluation, plRating, opponentRating);
-  console.log(prevEvaluation);
-  console.log({ prevAccuracy });
   const accuracyDiff = (cAccuracy - prevAccuracy) * plColor;
-  console.log({ accuracyDiff });
-  console.log(cEvaluation, prevEvaluation, plColor, plRating, opponentRating);
   return getClassifiValue(accuracyDiff);
 };
 
@@ -216,7 +200,6 @@ const getAccuracy = (
   if (evaluation.type == 'cp') {
     let normalizedEval =
       1.0 / (1.0 + Math.exp(-0.4 * (evaluation.value / 200)));
-    console.log({ normalizedEval: normalizedEval.toFixed(3) });
     let accuracyExp =
       1.0 / (1.0 + Math.pow(10, (opponnetRating - plRating) / 400));
     return Number((normalizedEval * accuracyExp * 2).toFixed(3));
@@ -430,7 +413,6 @@ const getClassificationScore = (classificationNames: ClassName[]) => {
       ? temp[classificationNames[i]][0]++
       : temp[classificationNames[i]][1]++;
   }
-  console.log(temp);
   return temp;
 };
 
@@ -456,19 +438,6 @@ const isGreat = (
     );
     let isDrawing = !iswining && !islosing;
     let wasDrawing = !waswining && !waslosing;
-    console.log({
-      prevEngineResponse,
-      iswining,
-      islosing,
-      waswining,
-      waslosing,
-      plRating,
-      plColor,
-      wasLosing2Line,
-      wasWining2Line,
-      isDrawing,
-      wasDrawing,
-    });
     if (
       (waswining && iswining && !wasWining2Line) ||
       (waslosing &&

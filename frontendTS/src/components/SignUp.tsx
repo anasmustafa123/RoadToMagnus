@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import styles from '../styles/SignUp.module.css';
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import { notify } from '../scripts/toast.ts';
 import { validateEmail, validatePassword } from '../scripts/validate.ts';
 import { Link, useNavigate } from 'react-router-dom';
@@ -84,7 +84,6 @@ const SignUp = () => {
           lichess: data.lichess ? data.lichess : '',
           "chess.com": data['chess.com'] ? data['chess.com'] : '',
         }).then((response) => {
-          console.log({ response });
           navigate('/');
           response.ok
             ? notify('user credintials added successfully', 'success')
@@ -156,7 +155,6 @@ const SignUp = () => {
               onChange={(e) => {
                 const newpass = changeHandler(e);
                 let res = validatePassword(newpass);
-                console.log({ res });
                 !res.ok
                   ? setErrors((old) => {
                       old.password = res.message;
@@ -280,7 +278,6 @@ const SignUp = () => {
                     notify('empty lichess username', 'error');
                   } else {
                     lichessVerify(data.lichess).then((res) => {
-                      console.log({ res });
                       if (res.ok) {
                         setUserLicehessname(res.data.username);
                         notify('lichess verified', 'success');
@@ -369,12 +366,9 @@ const SignUp = () => {
                     chessVerify(
                       data['chess.com'] ? data['chess.com'] : '',
                     ).then((res) => {
-                      console.log(res);
                       if (res.ok) {
-                        console.log(typeof setChessDCAvatarLink);
                         setChessDCAvatarLink(res.data.avatar);
                         setChessDCUsername(res.data.username);
-                        console.log({ playeravatar: res.data.avatar });
                         notify('chess.com verified', 'success');
                         setErrors((old) => {
                           const copy = { ...old };

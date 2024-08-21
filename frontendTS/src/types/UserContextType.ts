@@ -1,4 +1,4 @@
-import { MenuBarTheme } from "./Ui";
+import { MenuBarTheme } from './Ui';
 
 export interface UserContextType {
   setChessDCAvatarLink: React.Dispatch<React.SetStateAction<string>>;
@@ -21,4 +21,6 @@ export interface UserContextType {
   setShowRightSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   menuBarTheme: MenuBarTheme;
   setMenuBarTheme: React.Dispatch<React.SetStateAction<MenuBarTheme>>;
+  largeScreen: boolean;
+  setLargeScreenWidth: React.Dispatch<React.SetStateAction<boolean>>;
 }

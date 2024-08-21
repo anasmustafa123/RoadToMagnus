@@ -51,7 +51,20 @@ export const classificationInfo: Classification[] = [
   { name: 'botezgambit', color: '#5c5c5c', sym: '????' },
   { name: 'unknown', color: '#5c5c5c', sym: '????' },
 ];
-
+export const classnames = [
+  'book',
+  'brilliant',
+  'great',
+  'best',
+  'excellent',
+  'good',
+  'forced',
+  'inaccuracy',
+  'mistake',
+  'blunder',
+  'missed',
+  'botezgambit',
+];
 export const emptyClassificationScores: ClassificationScores = {
   book: [0, 0],
   brilliant: [0, 0],

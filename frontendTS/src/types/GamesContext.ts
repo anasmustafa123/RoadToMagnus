@@ -1,9 +1,10 @@
 import { Game } from './Game';
 
 export interface GamesContext {
-  setAllGames: React.Dispatch<React.SetStateAction<Game[]>>;
   setEngineDepth: React.Dispatch<React.SetStateAction<number>>;
-  allGames: Game[];
+  chessdcomGames: Game[];
+  setChessdcomGames: React.Dispatch<React.SetStateAction<Game[]>>;
+  lichessGames: Game[];
+  setLichessGames: React.Dispatch<React.SetStateAction<Game[]>>;
   engineDepth: number;
-  updateAllGames: (newGames: Game[]) => void;
 }
