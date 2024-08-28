@@ -1,28 +1,18 @@
 import React, { CSSProperties, memo, useContext, useState } from 'react';
 import Game from '../components/Game';
 import styles from '../styles/Games.module.css';
-import { UserContext } from '../contexts/UserContext';
 import { GameContext } from '../contexts/GamesContext';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
-import {
-  addData,
-  getAllGames as getAllGamesFromINDB,
-  getDataByKey,
-  updateData,
-} from '../api/indexedDb';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { ChessEngine } from '../scripts/_Stockfish';
 import { EngineLine, Game as GameType } from '../types/Game';
 import { getMoves, parsePgn } from '../scripts/pgn';
 import { Classify } from '../scripts/_Classify';
-import { fetchPlayerGames } from '../api/lichessApiAccess';
 import { getMissingData } from '../scripts/LoadGames';
 const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
   ({ inlineStyles }) => {
     const { outletStyles } = useOutletContext<any>();
     const navigate = useNavigate();
-    const { usernameChessDC, usernameLichess, userId } =
-      useContext(UserContext);
     const [animation, setanimation] = useState('');
     const {
       setGameInfo,
@@ -34,7 +24,8 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
       setReviewStatus,
       setMoves,
     } = useContext(ReviewGameContext);
-    const { lichessGames, setLichessGames } = useContext(GameContext);
+    const { lichessGames, setLichessGames, chessdcomGames, setChessdcomGames } =
+      useContext(GameContext);
     const date = new Date();
     const [month] = useState(date.getMonth());
     const callbackfunction =
@@ -158,112 +149,90 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
                   setanimation('');
                 }, 2000);
 
-                getDataByKey({
-                  storename: 'users',
-                  data: { key: String(userId) },
-                }).then((res) => {
-                  getAllGamesFromINDB().then((res) => {
-                    if (res.ok)
-                      if (res.value.length > 0) {
-                        setLichessGames(
-                          res.value.map((simplegame) => {
-                            const parsedGame = parsePgn(simplegame.pgn.pgn);
-                            return {
-                              ...parsedGame,
-                              site: 'lichess',
-                              playerColor:
-                                usernameLichess == parsedGame.wuser.username
-                                  ? 1
-                                  : -1,
-                            };
-                          }),
-                        );
-                      } else {
-                        console.error('no games found');
-                        getMissingData({
-                          storekey: String(userId),
-                          vendor: 'lichess',
-                          afterGameCallback: (games) => {
-                            setLichessGames([...lichessGames, ...games]);
-                          },
-                          afterGamesCallback: (fullgames) => {
-                            updateData({
-                              storename: 'users',
-                              data: {
-                                key: String(userId),
-                                lichessdate:
-                                  fullgames[fullgames.length - 1].date,
-                              },
-                            });
-                            fullgames.forEach((game: GameType) => {
-                              addData({
-                                storename: 'Games',
-                                data: {
-                                  key: game.gameId,
-                                  pgn: game.pgn,
-                                  vendor: 'lichess',
-                                  username: usernameLichess,
-                                },
-                              });
-                            });
-                          },
-                          username: usernameLichess,
-                        }).catch((e) => {
-                          console.error(`error catched: ${e}`);
-                        });
-                      }
-                  });
-                });
-                false &&
-                  fetchPlayerGames('gg', (games) => {
-                    setLichessGames([...lichessGames, ...games]);
-                  })
-                    .then((fullgames: any) => {
-                      updateData({
-                        storename: 'users',
-                        data: {
-                          key: String(userId),
-                          lichessdate: fullgames[fullgames.length - 1].date,
-                        },
-                      });
-                      fullgames.forEach((game: GameType) => {
-                        addData({
-                          storename: 'Games',
-                          data: {
-                            key: game.gameId,
-                            pgn: game.pgn,
-                            vendor: 'lichess',
-                            username: usernameLichess,
-                          },
-                        });
-                      });
-                    })
-                    .catch((e) => {
-                      console.error(`error catched: ${e}`);
-                    });
-                /* fetchChessGamesonMonth(usernameChessDC, 2022, month).then(
-                (res) => {
-                  let end = Date.now();
-                  setmonth((old) => old - 1);
-                  console.log(`time: ${(end - st) / 1000}sec`);
-                  console.log(res);
-                  console.log({
-                    reduced: reducechessDC(
-                      'chess.com',
-                      usernameChessDC,
-                      res.games,
-                    ),
-                  });
-                  updateAllGames(
-                    reducechessDC('chess.com', usernameChessDC, res.games),
+                /* const ligames = useLiveQuery(() => game_db.games.toArray());
+                 if (ligames && ligames.length > 0) {
+                  setLichessGames(
+                    ligames.map((simplegame) => {
+                      const parsedGame = parsePgn(simplegame.pgn);
+                      return {
+                        ...parsedGame,
+                        site: 'lichess',
+                        playerColor:
+                          usernameLichess == parsedGame.wuser.username ? 1 : -1,
+                      };
+                    }),
                   );
-                },
-              ); */
+                }  */
+                getMissingData({
+                  username: 'anasmostafa11',
+                  vendor: 'chess.com',
+                  afterGameCallback: (games) => {
+                    setChessdcomGames((old) => [...old, ...games]);
+                  },
+                  afterGamesCallback: () => {},
+                }).then((res) => {
+                  console.log(res);
+                  if (res.ok) {
+                    //setChessdcomGames(res.games);
+                  }
+                });
+                /* setLichessGames(
+                                res.value.map((simplegame) => {
+                                  const parsedGame = parsePgn(simplegame.pgn);
+                                  return {
+                                    ...parsedGame,
+                                    site: 'lichess',
+                                    playerColor:
+                                      usernameLichess ==
+                                      parsedGame.wuser.username
+                                        ? 1
+                                        : -1,
+                                  };
+                                }),
+                              ); */
+
+                //    console.error('no games found');
+                /*  getMissingData({
+                                vendor: 'lichess',
+                                afterGameCallback: (games) => {
+                                  setLichessGames([...lichessGames, ...games]);
+                                },
+                                afterGamesCallback: (fullgames) => {
+                                  updateData({
+                                    storename: 'users',
+                                    data: {
+                                      key: String(userId),
+                                      lichessdate:
+                                        fullgames[fullgames.length - 1].date,
+                                    },
+                                  });
+                                  fullgames.forEach(async (game: GameType) => {
+                                    try {
+                                      const _key = await game_db.games.add({
+                                        key: game.gameId,
+                                        pgn: game.pgn,
+                                        vendor: 'lichess',
+                                        username: usernameLichess,
+                                      });
+                                      console.info({
+                                        message: 'game added',
+                                        idL: _key,
+                                      });
+                                    } catch (error) {
+                                      console.error({
+                                        message: 'game not added',
+                                        id: null,
+                                      });
+                                    }
+                                  });
+                                },
+                                username: usernameLichess,
+                              }) */
               }}
               className={`${animation} bx bx-repost`}
             ></i>
           </div>
-          <React.Suspense
+          {/* <React.Suspense
             fallback={
               <div className={`${styles.animatedTextCont}`}>
                 <div className={styles.animatedTextRight}>
@@ -274,60 +243,60 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
                 </div>
               </div>
             }
-          >
-            {lichessGames.map((value, i) => (
-              <Game
-                gamelink={`https://lichess.org/${value.gameId}`}
-                onClick={async (gameData) => {
-                  setGameInfo(gameData);
-                  setMaxtPerc(gameData.movesCount);
-                  setGameInfo(gameData);
-                  navigate(`/review/:${gameData.gameId}`);
-                  let parsedGameData = parsePgn(gameData.pgn);
-                  let moves = getMoves(gameData.pgn);
-                  setMoves(moves);
-                  setsanMoves(parsedGameData.moves);
-                  setClassificationNames(
-                    parsedGameData.classifi.map((c) => c.name),
-                  );
-                  setEvaluations(parsedGameData.evaluations);
-                  let ClassificationHelper = new Classify({
-                    sanMoves: parsedGameData.moves,
-                    evaluations: parsedGameData.evaluations,
-                  });
+          > */}
+          {chessdcomGames.map((value, i) => (
+            <Game
+              gamelink={`https://www.chess.com/game/live/${value.gameId}`}
+              onClick={async (gameData) => {
+                setGameInfo(gameData);
+                setMaxtPerc(gameData.movesCount);
+                setGameInfo(gameData);
+                navigate(`/review/:${gameData.gameId}`);
+                let parsedGameData = parsePgn(gameData.pgn);
+                let moves = getMoves(gameData.pgn);
+                setMoves(moves);
+                setsanMoves(parsedGameData.moves);
+                setClassificationNames(
+                  parsedGameData.classifi.map((c) => c.name),
+                );
+                setEvaluations(parsedGameData.evaluations);
+                let ClassificationHelper = new Classify({
+                  sanMoves: parsedGameData.moves,
+                  evaluations: parsedGameData.evaluations,
+                });
 
-                  let stockfish = new ChessEngine(2, 18);
-                  stockfish._init().then(() => {
-                    try {
-                      stockfish
-                        .evaluatePosition({
-                          pgn: gameData.pgn,
-                          afterMoveCallback: callbackfunction(
-                            ClassificationHelper,
-                            gameData,
-                            parsedGameData,
-                          ),
-                        })
-                        .catch((e) => {
-                          continueEvaluatingPosition({
-                            ClassificationHelper: ClassificationHelper,
-                            e,
-                            parsedGameData,
-                            stockfish,
-                            gameData,
-                          });
+                let stockfish = new ChessEngine(2, 18);
+                stockfish._init().then(() => {
+                  try {
+                    stockfish
+                      .evaluatePosition({
+                        pgn: gameData.pgn,
+                        afterMoveCallback: callbackfunction(
+                          ClassificationHelper,
+                          gameData,
+                          parsedGameData,
+                        ),
+                      })
+                      .catch((e) => {
+                        continueEvaluatingPosition({
+                          ClassificationHelper: ClassificationHelper,
+                          e,
+                          parsedGameData,
+                          stockfish,
+                          gameData,
                         });
-                    } catch (e: any) {
-                      console.error(`error: ${e.message}`);
-                    }
-                  });
-                  // navigate(`/review/:${gameData.gameId}`);
-                }}
-                key={i}
-                gameData={value}
-              ></Game>
-            ))}
-          </React.Suspense>
+                      });
+                  } catch (e: any) {
+                    console.error(`error: ${e.message}`);
+                  }
+                });
+                // navigate(`/review/:${gameData.gameId}`);
+              }}
+              key={i}
+              gameData={value}
+            ></Game>
+          ))}
+          {/* </React.Suspense> */}
         </div>
       </>
     );

@@ -7,7 +7,7 @@ import { notify } from '../scripts/toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { validateEmail, validatePassword } from '../scripts/validate';
 import { OldUser } from '../types/User';
-import { addData, getDataByKey, init_indexedDb } from '../api/indexedDb';
+import { db } from '../api/Indexed';
 const Login = () => {
   const navigate = useNavigate();
   const {
@@ -30,33 +30,22 @@ const Login = () => {
     password: '',
   });
   useEffect(() => {
+    // adding new user
     if (userId) {
-      init_indexedDb({ storeName: 'users', dbVersion: 2 })
-        .then((res) => {
-          if (res.ok) {
-            getDataByKey({ storename: 'users', data: { key: String(userId) } })
-              .then((data) => {
-                addData({
-                  storename: 'users',
-                  data: {
-                    key: String(userId),
-                    username: usernameLichess,
-                    vendor: 'lichess',
-                  },
-                }).then((res) => {
-                  res.ok
-                    ? console.info('store created')
-                    : console.error('store not created');
-                });
-              })
-              .catch((e) => {
-                console.error(`store not found: ${e}`);
-              });
-          }
-        })
-        .catch((e) => {
-          console.error('catched');
-        });
+      async function adduser() {
+        try {
+          const _key = await db.users.add({
+            key: String(userId),
+            username: usernameLichess,
+            lichessdate: null,
+            chessdate: null,
+          });
+          console.info({ message: 'user added', idL: _key });
+        } catch (error) {
+          console.error({ message: 'user not added', id: null });
+        }
+      }
+      adduser();
     }
   }, [userId]);
 

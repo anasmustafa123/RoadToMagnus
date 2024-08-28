@@ -7,22 +7,14 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import './App.css';
 import Profile from './routes/Profile';
 import type { EngineLine } from './types/Game';
-import { UserContext } from './contexts/UserContext';
 import ReviewGame from './routes/ReviewGame';
-import { init_indexedDb, isUser as getUserfromDb } from './api/indexedDb';
-import { GameContext } from './contexts/GamesContext';
 import Stats from './routes/Stats';
-import {
-  fetchChessGamesonMonth,
-  getAllPlayerGames,
-} from './api/chessApiAccess';
-import { getMissingData } from './scripts/LoadGames';
+import { db } from './api/Indexed';
+import { UserContext } from './contexts/UserContext';
 function App() {
-  const [engineRes] = useState<EngineLine[]>([]);
-  const { setIsUser, userId, setUserId, usernameLichess } =
+  const { setIsUser, setChessDCUsername, setUserLicehessname, setUserId } =
     useContext(UserContext);
-
-  const { setLichessGames } = useContext(GameContext);
+  const [engineRes] = useState<EngineLine[]>([]);
   useEffect(() => {
     if (engineRes) {
     }
@@ -42,44 +34,22 @@ function App() {
     }).then((games) => {
       console.dir(games);
     }); */
-    getMissingData({
+    /* getMissingData({
       storekey: String(userId),
       vendor: 'chess.com',
       username: 'anasmostafa11',
       afterGameCallback: () => {},
       afterGamesCallback: () => {},
-    });
-
-    init_indexedDb({ storeName: 'users', dbVersion: 2 }).then((res) => {
-      if (res.ok) {
-        getUserfromDb()
-          .then((value: any) => {
-            if (value.data) {
-              setUserId(value.data.id);
-              setIsUser(true);
-            }
-            //loading game from indexedDb
-            `getAllGames().then((res) => {
-              if (res.ok)
-                setLichessGames(
-                  res.value.map((simplegame) => {
-                    console.log(simplegame.pgn.pgn);
-                    const parsedGame = parsePgn(simplegame.pgn.pgn);
-                    return {
-                      ...parsedGame,
-                      site: 'lichess',
-                      playerColor:
-                        usernameLichess == parsedGame.wuser.username ? 1 : -1,
-                    };
-                  }),
-                );
-            });`;
-          })
-          .catch((e) => {
-            console.error(`catched : ${e}`);
-          });
+    }); */
+    async function f() {
+      let users = await db.users.toArray();
+      let user = users[0];
+      if (user) {
+        setIsUser(true);
+        //setUserId(user.key);
       }
-    });
+    }
+    f();
   }, []);
 
   return (

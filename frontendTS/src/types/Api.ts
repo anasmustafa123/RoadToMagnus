@@ -23,3 +23,7 @@ export type ChessComGame = {
   end_time: number;
   url?: string;
 };
+
+export interface IDBDatabase_ {
+
+}

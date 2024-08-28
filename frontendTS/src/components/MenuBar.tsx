@@ -2,7 +2,6 @@ import React, { useContext, useState } from 'react';
 import styles from '../styles/Menubar.module.css';
 import { UserContext } from '../contexts/UserContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { logout } from '../api/indexedDb';
 export default function Sidebar(props: {
   inlineStyles?: React.CSSProperties;
   classNames: string[];
@@ -110,7 +109,7 @@ export default function Sidebar(props: {
                   credentials: 'include',
                 })
                   .then(async () => {
-                    let res = await logout();
+                    //let res = await logout();
                   })
                   .catch((e) => {
                     navigate('/login');

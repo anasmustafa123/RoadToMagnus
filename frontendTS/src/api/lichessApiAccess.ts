@@ -16,9 +16,13 @@ async function fetchLichesssGames(username: string) {
 
 const getUserInfo = async (username: string) => {
   const url = `https://lichess.org/api/user/${username}`;
-  const res = await fetch(url);
-  console.log(res);
-  return { ok: res.ok, data: await res.json() };
+  try {
+    const res = await fetch(url);
+    console.error(res);
+    return { ok: true, data: await res.json() };
+  } catch (e) {
+    return { ok: false, data: null };
+  }
 };
 
 async function fetchOpeningData(fen: string) {
@@ -50,21 +54,38 @@ const checkIfBook = async (
  * @param username lichess player username
  * @param updateGames callback function to update the games called after each game is fetched
  */
-const fetchPlayerGames = async (
-  username: string,
-  updateGames: (games: Game[]) => void,
-) => {
-  return new Promise(async (resolve, reject) => {
-    const response = await fetch(
-      `https://lichess.org/api/games/user/${username}?rated=true&perfType=blitz,rapid,bullet&evals=false`,
-    );
+const fetchPlayerGames = async ({
+  username,
+  updateGames,
+  sinceDate,
+  toDate,
+}: {
+  username: string;
+  updateGames: (games: Game[]) => void;
+  sinceDate?: string;
+  toDate?: string;
+}): Promise<{ ok: boolean; games: Game[]; message?: string }> => {
+  return new Promise(async (resolve) => {
+    const url =
+      sinceDate && toDate
+        ? `https://lichess.org/api/games/user/${username}?since=${sinceDate}&until=${toDate}`
+        : toDate
+          ? `https://lichess.org/api/games/user/${username}&until=${toDate}`
+          : sinceDate
+            ? `https://lichess.org/api/games/user/${username}?since=${sinceDate}`
+            : `https://lichess.org/api/games/user/${username}?rated=true&perfType=blitz,rapid,bullet&evals=false`;
+    const response = await fetch(url);
     if (!response.ok) {
-      reject(`HTTP error! status: ${response.status}`);
+      resolve({
+        message: `HTTP error! status: ${response.status}`,
+        ok: false,
+        games: [],
+      });
       return;
     }
     const readablestream = response.body;
     if (readablestream === null) {
-      reject('No games found');
+      resolve({ message: 'No games found', ok: false, games: [] });
       return;
     }
     const reader = readablestream.getReader();
@@ -72,7 +93,7 @@ const fetchPlayerGames = async (
     reader.read().then(function handlechunks({ done, value }) {
       if (done) {
         console.log('fetched all games');
-        resolve(result);
+        resolve({ games: result, ok: true });
         return;
       }
       try {
@@ -87,7 +108,8 @@ const fetchPlayerGames = async (
         updateGames(result);
         reader.read().then(handlechunks);
       } catch (e) {
-        reject(e);
+        resolve({ message: `${e}`, ok: false, games: result });
+        return;
       }
     });
   });
