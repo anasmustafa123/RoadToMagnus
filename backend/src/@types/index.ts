@@ -10,11 +10,21 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  chessDCusername?: string;
-  lichessusername?: string;
-  chessDotComLastUpdated?: string;
-  lichessComLastUpdated?: string;
+  chesscom: VendorContent;
+  lichess: VendorContent;
   matchPassword(enteredPassword: string): Promise<boolean>;
+}
+
+type VendorContent = {
+  username: string;
+  startDate?: number;
+  endDate?: number;
+};
+
+export interface IGame {
+  pgn: string;
+  gameId: number;
+  playerId: string;
 }
 
 export interface ErrorRes {
@@ -23,3 +33,17 @@ export interface ErrorRes {
   kind: string;
   stack: any;
 }
+export type classification = {
+  book: number;
+  brilliant: number;
+  great: number;
+  best: number;
+  excellent: number;
+  good: number;
+  forced: number;
+  inaccuracy: number;
+  mistake: number;
+  blunder: number;
+  missed: number;
+  botezgambit: number;
+};

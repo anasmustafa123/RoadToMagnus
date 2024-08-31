@@ -1,15 +1,23 @@
 import mongoose, { Model, Document } from "mongoose";
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from "bcrypt";
 import { IUser } from "../@types";
+
+const VendorContent = new mongoose.Schema({
+  username: { type: String },
+  startDate: { type: Number, requirerd: false },
+  endDate: { type: Number, required: false },
+});
 
 const userSchema = new mongoose.Schema<IUser>({
   name: { type: String },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  chessDCusername: { type: String },
+  chesscom: { type: VendorContent },
+  lichess: { type: VendorContent },
+  /* chessDCusername: { type: String },
   lichessusername: { type: String },
   chessDotComLastUpdated: { type: String },
-  lichessComLastUpdated: { type: String },
+  lichessComLastUpdated: { type: String }, */
 });
 
 userSchema.pre("save", async function (next) {

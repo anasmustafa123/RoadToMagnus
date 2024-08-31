@@ -12,6 +12,8 @@
   --loss-color: rgb(242, 26, 26);
   --draw-color: grey;
   --light-black: #45423f;
+  --size-large1: 1200px;
+  --signature-color: rgb(129, 253, 6);
 }
 #root.light {
   --text-color: #2f2e2b;
@@ -20,7 +22,7 @@
 }
 #root.dark {
   --text-color: #f5f5f5;
-  --bg-color: #2f2e2b;
+  --bg-color: #45423f;
   --comment-color: rgb(166, 166, 166);
 }
 body {
@@ -45,3 +47,11 @@ a:hover {
   color: var(--main-color-hover);
 }
 
+#root{
+  height: 100%;
+}
+
+:root{
+  padding: 0px !important;
+  margin: 0px !important;
+}

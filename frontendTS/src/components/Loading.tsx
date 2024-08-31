@@ -24,7 +24,7 @@ const Loading: React.FC<{
         >
           {/* Put any TSX content in here that you'd like. It'll be vertically and horizonally centered. */}
           <i
-            style={{ fontSize: '50px' }}
+            style={{ fontSize: '50px', color: 'var(--text-color)' }}
             className="bx bx-search-alt bx-spin"
           ></i>
           {/* <div style={{ fontSize: 15, marginTop: 5, textAlign: "center" }}>

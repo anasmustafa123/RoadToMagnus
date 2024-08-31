@@ -32,8 +32,9 @@ export interface GameBoardContextType {
 }
 
 export interface BoardTheme {
-  dark: string;
-  light: string;
+  colors: { dark: string; light: string };
+  name: string;
+  url: string;
 }
 
 export type PieceTheme = 'pieces_1' | 'pieces_2';

@@ -4,23 +4,52 @@ import '../styles/chessboard.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { GameboardContext } from '../contexts/GameBoardContext';
 import { ShortMove, Square } from 'chess.js';
-import type { ClassName, Classification } from '../types/Review';
+import type { ClassName } from '../types/Review';
 import type { Move } from '../types/Game';
 import type { Piece } from 'react-chessboard/dist/chessboard/types';
+import { UserContext } from '../contexts/UserContext';
 import {
   Arrow,
   CustomSquareStyles,
   PromotionPieceOption,
 } from 'react-chessboard/dist/chessboard/types';
+import { _pointInLine } from 'chart.js/helpers';
 const ChessBoard: React.FC<{
-  moves: Move[];
-  classifications: Classification[];
-  movesIndex: number;
-}> = ({ moves, classifications, movesIndex }) => {
+  moves?: Move[];
+  classifications?: ClassName[];
+  movesIndex?: number;
+  inlineStyles?:React.CSSProperties ;
+}> = ({
+  moves = [],
+  classifications = [],
+  movesIndex = 0,
+  inlineStyles = undefined,
+}) => {
   const [customArrows, setCustomArrows] = useState<Arrow[]>([]);
   const [currentClassif, setCurrentClassifi] = useState<ClassName>();
   const [currentMove, setCurrentMove] = useState({ to: '' });
+  const {
+    game,
+    makeAMove,
+    showClassification,
+    selectedPieceTheme,
+    selectedBoardTheme,
+    rightClickedSquares,
+    setRightClickedSquares,
+    moveSquares,
+    optionSquares,
+    setOptionSquares,
+    classificationInfo,
+    getClassificationByName,
+  } = useContext(GameboardContext);
+  const { chessboardwidth } = useContext(UserContext);
+  const [moveFrom, setMoveFrom] = useState<Square>();
+  const [moveTo, setMoveTo] = useState<Square>();
+  const [showPromotionDialog, setShowPromotionDialog] =
+    useState<boolean>(false);
+
   useEffect(() => {
+    makeAMove;
     if (movesIndex) {
       const moves = game ? game.history({ verbose: true }) : [];
       if (movesIndex > moves.length) {
@@ -30,7 +59,7 @@ const ChessBoard: React.FC<{
       }
       if (moves.length == movesIndex) {
         let themove = moves[movesIndex - 1];
-        let className = getClassification(classifications[movesIndex - 1].sym);
+        let className = classifications[movesIndex - 1];
         setCurrentMove(themove);
         console.log({ themove, className });
         setCurrentClassifi(className);
@@ -50,67 +79,6 @@ const ChessBoard: React.FC<{
       setCurrentClassifi('unknown');
     }
   }, [movesIndex]);
-  const {
-    game,
-    makeAMove,
-    showClassification,
-    selectedPieceTheme,
-    selectedBoardTheme,
-    avalibleBoardThemes,
-    avaliblePieceThemes,
-    rightClickedSquares,
-    setRightClickedSquares,
-    moveSquares,
-    optionSquares,
-    setOptionSquares,
-    classificationInfo,
-    getClassification,
-    getClassificationByName,
-  } = useContext(GameboardContext);
-  const [moveFrom, setMoveFrom] = useState<Square>();
-  const [moveTo, setMoveTo] = useState<Square>();
-  const [showPromotionDialog, setShowPromotionDialog] =
-    useState<boolean>(false);
-  const [chessboardwidth, setChessboardWidth] = useState<number>(1000);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 1970) {
-        setChessboardWidth(1000);
-      } else if (window.innerWidth > 1300) {
-        setChessboardWidth(800);
-      } else if (window.innerWidth > 760) {
-        setChessboardWidth(window.innerWidth - 200);
-      } else if (window.innerWidth > 600) {
-        setChessboardWidth(500);
-      } else if (window.innerWidth > 430) {
-        setChessboardWidth(400);
-      } else {
-        setChessboardWidth(300);
-      }
-    };
-
-    // Add event listener
-    window.addEventListener('resize', handleResize);
-
-    // Call handler right away so state gets updated with initial window size
-    if (window.innerWidth > 1970) {
-      setChessboardWidth(1000);
-    } else if (window.innerWidth > 1300) {
-      setChessboardWidth(800);
-    } else if (window.innerWidth > 760) {
-      setChessboardWidth(700);
-    } else if (window.innerWidth > 600) {
-      setChessboardWidth(500);
-    } else if (window.innerWidth > 430) {
-      setChessboardWidth(400);
-    } else {
-      setChessboardWidth(300);
-    }
-
-    // Remove event listener on cleanup
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // style possible moves
   function getMoveOptions(square: Square) {
@@ -250,12 +218,13 @@ const ChessBoard: React.FC<{
   }
 
   function onDrop(sourceSquare: Square, targetSquare: Square) {
+    console.log(game.board());
     const move = makeAMove({
       from: sourceSquare,
       to: targetSquare,
       promotion: 'q', // always promote to a queen for example simplicity
-    });
-
+    } as ShortMove);
+    console.log(move);
     // illegal move
     if (move === null) return false;
     return true;
@@ -325,7 +294,7 @@ const ChessBoard: React.FC<{
   }, [currentClassif, currentMove]);
 
   return (
-    <div className="boardWrapper">
+    <div style={inlineStyles}>
       <Chessboard
         id="StyledBoard"
         animationDuration={200}
@@ -338,6 +307,8 @@ const ChessBoard: React.FC<{
         onSquareRightClick={onSquareRightClick}
         onPromotionPieceSelect={onPromotionPieceSelect}
         customBoardStyle={{
+          backgroundSize: 'cover',
+          backgroundImage: `url("${selectedBoardTheme.url}")`,
           borderRadius: '4px',
           boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
         }}
@@ -349,10 +320,10 @@ const ChessBoard: React.FC<{
         promotionToSquare={moveTo}
         showPromotionDialog={showPromotionDialog}
         customDarkSquareStyle={{
-          backgroundColor: selectedBoardTheme.dark,
+          backgroundColor: selectedBoardTheme.colors.dark,
         }}
         customLightSquareStyle={{
-          backgroundColor: selectedBoardTheme.light,
+          backgroundColor: selectedBoardTheme.colors.light,
         }}
         customPieces={customPieces}
         customArrows={customArrows}

@@ -7,43 +7,69 @@ import { notify } from '../scripts/toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { validateEmail, validatePassword } from '../scripts/validate';
 import { OldUser } from '../types/User';
+import { db } from '../api/Indexed';
 const Login = () => {
   const navigate = useNavigate();
   const {
+    userId,
+    setUserId,
     isUser,
     setIsUser,
     setChessDCUsername,
     setUsername,
     setUserLicehessname,
+    usernameLichess,
   } = useContext(UserContext);
   const [passwordInputType, setPasswordInputType] = useState('password');
   const [data, setData] = useState({
-    email: 'anasanas@gma.com',
-    password: 'anasanas@gma.com',
+    email: '1245l4l@dasf.com',
+    password: 'anassanas',
   });
   const [errors, setErrors] = useState({
     email: '',
     password: '',
   });
+  useEffect(() => {
+    // adding new user
+    if (userId) {
+      async function adduser() {
+        try {
+          const _key = await db.users.add({
+            key: String(userId),
+            username: usernameLichess,
+            lichessdate: null,
+            chessdate: null,
+          });
+          console.info({ message: 'user added', idL: _key });
+        } catch (error) {
+          console.error({ message: 'user not added', id: null });
+        }
+      }
+      adduser();
+    }
+  }, [userId]);
 
   useEffect(() => {
-    console.log(`is user changed ${isUser}`);
     if (isUser) {
-      console.log('navigating');
       navigate('/games', { replace: true });
     }
   }, [isUser]);
 
   const loginReq = async (obj: OldUser) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/api/users/auth`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(obj),
-      },
-    );
-    return res.json();
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/auth`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(obj),
+        },
+      );
+      return res.json();
+    } catch (e) {
+      throw new Error(`catched: error`);
+    }
   };
 
   const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,10 +82,9 @@ const Login = () => {
     if (errors.email == '' && errors.password == '') {
       loginReq(data).then((res) => {
         if (res.ok) {
-          console.log('before');
+          console.dir(res);
+          setUserId(res.data.userId);
           setIsUser(true);
-          console.log('after');
-          console.log(res)
           res.data['chess.com']
             ? setChessDCUsername(res.data['chess.com'])
             : '';

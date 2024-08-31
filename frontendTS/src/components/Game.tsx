@@ -3,9 +3,11 @@ import styles from '../styles/Game.module.css';
 import { UserContext } from '../contexts/UserContext';
 import type { Game } from '../types/Game';
 const Game: React.FC<{
-  id: number;
+  key: number;
   gameData: Game;
-}> = ({ id, gameData }) => {
+  gamelink?: string;
+  onClick: (gameData: Game) => void;
+}> = ({ gameData, onClick, gamelink }) => {
   let largeScreen = true;
   const hoverColor = {
     rapid: 'green',
@@ -24,7 +26,8 @@ const Game: React.FC<{
         : -1;
   return (
     <>
-      <div key={id} className={styles.game_container}>
+      <div className={styles.game_container}>
+        <a href={gamelink}  className={styles.linkcontainer}></a>
         <img
           className={styles.logo}
           src={`/logos/${gameData.site}.png`}
@@ -155,6 +158,9 @@ const Game: React.FC<{
           </div>
         ) : (
           <i
+            onClick={() => {
+              onClick(gameData);
+            }}
             style={{
               '--hover-color': `${gameData.gameType ? hoverColor[gameData.gameType] : 'red'}`,
               margin: 'auto',

@@ -27,7 +27,11 @@ const initalContextValues: GameBoardContextType = {
   safeGameMutate: () => {},
   avaliblePieceThemes: [],
   avalibleBoardThemes: [],
-  selectedBoardTheme: { light: '', dark: '' },
+  selectedBoardTheme: {
+    name: 'darkwood',
+    url: '/board_themes/darkwood.png',
+    colors: { dark: '', light: '' },
+  },
   selectedPieceTheme: 'pieces_1',
   showClassification: false,
   game: Chess(),
@@ -77,14 +81,17 @@ const ChessBoardContextProvider: React.FC<{ children: ReactNode }> = ({
   }
 
   const [selectedBoardTheme, setSelectedBoardTheme] = useState<BoardTheme>({
-    dark: '',
-    light: '',
+    name: 'darkwood',
+    url: '/board_themes/darkwood.png',
+    colors: { dark: '', light: '' },
   });
-  const [avalibleBoardThemes, setAvalibleBoardThemes] = useState<BoardTheme[]>([
-    { dark: '#779952', light: '#edeed1' },
-  ]);
+
+  const [avalibleBoardThemes, setAvalibleBoardThemes] = useState<BoardTheme[]>(
+    [],
+  );
 
   function makeAMove(san: string | ShortMove): any {
+    console.log('make a move');
     const gameCopy = { ...game };
     const result = gameCopy.move(san);
     console.log({ result });

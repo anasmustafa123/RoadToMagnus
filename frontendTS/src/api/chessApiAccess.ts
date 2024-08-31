@@ -1,5 +1,3 @@
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { getMovesNum } from '../scripts/pgn';
 import { ChessComGame, Vendor } from '../types/Api';
 import type { Game, GameResult, GamesCount, GameType } from '../types/Game';
@@ -8,9 +6,64 @@ import { GetGameById } from '../../../shared/types/dist';
 async function getUserInfo(username: string) {
   const url = `https://api.chess.com/pub/player/${username}`;
   const res = await fetch(url);
-  console.log(res);
   return { ok: res.ok, data: await res.json() };
 }
+
+const getmissingarchieves = ({
+  newyear,
+  newmonth,
+  cyear,
+  cmonth,
+}: {
+  newyear: number;
+  newmonth: number;
+  cyear: number;
+  cmonth: number;
+}) => {
+  let res = [];
+  const currentYear = cyear;
+  while (newyear >= cyear) {
+    let smonth = currentYear == cyear ? cmonth : 1;
+    let emonth = cyear == newyear ? newmonth : 12;
+    for (let i = smonth; i <= emonth; i++) {
+      res.push({ month: i, year: cyear });
+    }
+    cyear++;
+  }
+  return res;
+};
+
+/**
+ *
+ * @param username
+ * @returns the last month and year of the last game played by user in chess.com
+ */
+const get_chessDcom_last_date = (
+  username: string,
+): Promise<
+  | { ok: true; month: number; year: number }
+  | { ok: false; month: null; year: null }
+> => {
+  return new Promise((resolve, reject) => {
+    getAvalibleArchieves(username)
+      .then((archieves) => {
+        let [lastyear, lastmonth] = archieves.archives[
+          archieves.archives.length - 1
+        ]
+          .split('/')
+          .slice(-2);
+        console.debug(lastmonth, lastyear);
+        let month = parseInt(lastmonth);
+        let year = parseInt(lastyear);
+        resolve({ ok: true, month: month, year: year });
+        return;
+      })
+      .catch((err) => {
+        resolve({ ok: false, month: null, year: null });
+        return;
+      });
+  });
+};
 
 /* async function getPlayerProfileInfo(username) {
   let info = await getUserInfo(username);
@@ -22,6 +75,57 @@ async function getUserInfo(username: string) {
     url: info["url"],
   };
 } */
+const getAvalibleArchieves = async (username: string) => {
+  const url = `https://api.chess.com/pub/player/${username}/games/archives`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Error fetching games: ${response.status}`);
+    }
+    const data = await response.json();
+    console.debug(data);
+    return data;
+  } catch (error) {
+    console.error('enter correct chess.com username');
+    return null; // Or handle the error differently
+  }
+};
+
+const getAllGames = async (
+  username: string,
+  afterEachMonthCallback: (games: Game[]) => void,
+) => {
+  try {
+    const res = await getAvalibleArchieves(username);
+    if (!res.archives) {
+      return { ok: false, message: 'no archieves', games: [] };
+    }
+    let full_games = [] as Game[];
+    for (let url of res.archives as string[]) {
+      console.log({ url });
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          console.error({
+            ok: false,
+            message: `Error fetching games: ${response.status}`,
+          });
+          continue;
+        }
+        const data = await response.json();
+        let month_games = reduceGamesOfMonth('chess.com', username, data.games);
+        afterEachMonthCallback(month_games);
+        full_games = full_games.concat(month_games);
+      } catch (error) {
+        console.error('enter correct chess.com username');
+        continue;
+      }
+    }
+    return { ok: true, message: '', games: full_games };
+  } catch (e) {
+    return { ok: false, games: [], message: `Error fetching games: ${e}` };
+  }
+};
 
 async function fetchChessGamesonMonth(
   username: string,
@@ -34,16 +138,26 @@ async function fetchChessGamesonMonth(
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      toast.error('Error Enter correct chess.com username..');
       throw new Error(`Error fetching games: ${response.status}`);
     }
     const data = await response.json();
     return data;
   } catch (error) {
-    toast.error('Error Enter correct chess.com username...');
     return null; // Or handle the error differently
   }
 }
+
+const getGamesOfMonth = async (
+  username: string,
+  year: number,
+  month: number,
+) => {
+  return new Promise<Game[]>(async (resolve) => {
+    fetchChessGamesonMonth(username, year, month).then((games) => {
+      resolve(reduceGamesOfMonth('chess.com', username, games.games));
+    });
+  });
+};
 
 const reduceGamesOfMonth = (
   vendor: Vendor,
@@ -56,7 +170,20 @@ const reduceGamesOfMonth = (
     bullet: 0,
     daily: 0,
   };
+  monthGames = monthGames.filter((game, i) => {
+    return game.pgn;
+  });
   return monthGames.map((game) => {
+    let _gameId = '';
+    if (game.url) {
+      let res = game.url.split('/');
+      if (res.length > 0) {
+        let url = res[res.length - 1];
+        console.error(game.url)
+        console.log(res)
+        _gameId = url;
+      }
+    }
     let gameResult: GameResult =
       game.black.result.toLowerCase() === 'win'
         ? -1
@@ -77,9 +204,7 @@ const reduceGamesOfMonth = (
     const timeClass = GameTypes.find((v) => game.time_class.toLowerCase() == v)
       ? (game.time_class.toLowerCase() as GameType)
       : undefined;
-    console.log(game.time_class.toLowerCase() as GameType);
     timeClass ? (gamesCount[timeClass] = gamesCount[timeClass] + 1) : '';
-    console.log(game.time_class.toLowerCase() in GameTypes);
     let resgame: Game = {
       wuser: { username: game.white.username, rating: game.white.rating },
       buser: { username: game.black.username, rating: game.black.rating },
@@ -87,62 +212,60 @@ const reduceGamesOfMonth = (
       site: vendor,
       gameResult,
       playerColor: game.white.username == username ? 1 : -1,
-      gameId: 1,
+      gameId: _gameId,
       drawType: drawType ? drawType : '',
       isReviewed: false,
       date: getYearAndMonth(game.end_time).date,
       movesCount: getMovesNum(game.pgn),
-      gamesCount,
+      pgn: game.pgn,
     };
     return resgame;
   });
 };
 
-/* async function getAllPlayerGames(
+async function fetch_games_onperiod({
   username,
   smonth,
   syear,
   emonth,
   eyear,
-  callback1,
-  callback2
-) {
-  let allGames = [];
-  let allMoves = [];
-  for (let startYear = syear; startYear <= eyear; startYear++) {
-    // if current year last month is the current month
-    let endMonth = startYear == eyear ? emonth : 12;
-    for (let startMonth = smonth; startMonth <= endMonth; startMonth++) {
-      let currentMonthGames = await fetchChessGamesonMonth(
-        username,
-        startYear,
-        startMonth
-      );
-      let minCurrentMonthGames = minimizeData(
-        username,
-        currentMonthGames["games"]
-      );
-      allGames = allGames.concat(minCurrentMonthGames);
-      allMoves = allMoves.concat(
-        minCurrentMonthGames.map((value) => {
-          return String(value.pgn)
-            .split(/\n\s*\n/)
-            .filter((value) => {
-              return value[0] == "1";
-            })
-            .map((value) => {
-              return value.split(/\s+/).filter((str) => /^[a-zA-Z]/.test(str));
-            });
-        })
-      );
-      callback1();
-      callback2(currentMonthGames["games"].length);
+  afterEachMonthCallback,
+}: {
+  username: string;
+  smonth: number | null;
+  syear: number | null;
+  emonth: number | null;
+  eyear: number | null;
+  afterEachMonthCallback: (games: Game[]) => any;
+}): Promise<{ ok: boolean; allGames: Game[] }> {
+  console.log(afterEachMonthCallback);
+  let allGames: Game[] = [];
+  if (eyear == null || emonth == null || smonth == null || syear == null) {
+    let res = await getAllGames(username, afterEachMonthCallback);
+    if (res.ok) {
+      return { ok: true, allGames: res.games };
+    } else {
+      return { ok: false, allGames: [] };
     }
-    // only the first year might not start from january
-    smonth = 1;
+  } else {
+    for (let startYear = syear; startYear <= eyear; startYear++) {
+      // if current year last month is the current month
+      let endMonth = startYear == eyear ? emonth : 12;
+      const size = endMonth - smonth + 1;
+      for (let startMonth of Array(size)
+        .fill(0)
+        .map((v, i) => (smonth as number) + i)) {
+        let games = await getGamesOfMonth(username, startYear, startMonth);
+        console.log(afterEachMonthCallback);
+        afterEachMonthCallback(games);
+        allGames = allGames.concat(games);
+      }
+      // only the first year might not start from january
+      smonth = 1;
+    }
+    return { ok: true, allGames };
   }
-  return { allGames, allMoves };
-} */
+}
 
 const getYearAndMonth = (
   joinDate: number,
@@ -156,9 +279,10 @@ const getYearAndMonth = (
   return { year: year, month: month, date: `${month}-${year}` };
 };
 
-
 const getGameById: GetGameById = async (gameId) => {
-  return await fetch(`${import.meta.env.VITE_BACKEND_URL}/chess.com/game/${gameId}`);
+  return await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/chess.com/game/${gameId}`,
+  );
 };
 
 export {
@@ -167,4 +291,9 @@ export {
   fetchChessGamesonMonth,
   getYearAndMonth,
   reduceGamesOfMonth,
+  getAvalibleArchieves,
+  getGamesOfMonth,
+  fetch_games_onperiod,
+  get_chessDcom_last_date,
+  getmissingarchieves,
 };

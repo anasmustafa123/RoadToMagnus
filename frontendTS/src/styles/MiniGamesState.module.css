@@ -1,0 +1,42 @@
+.singleGameContainer {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: inherit;
+  margin-top: 1px;
+  border-bottom: 1px solid var(--text-color);
+}
+
+.singleGameContainer:last-child {
+  border-bottom: none;
+}
+
+.singleGameContainer img {
+  width: 50px;
+  height: auto;
+}
+
+.singleGameContainer > div > img {
+  width: 30px;
+  height: auto;
+}
+.verticalflex {
+  display: flex;
+  flex-direction: column;
+  width: 90px;
+  gap: 10px;
+}
+
+.valuesContainer > div {
+  margin-top: 50%;
+  margin-bottom: 50%;
+}
+.miniGamesContainer {
+  grid-column: 5/6;
+  height: fit-content;
+  max-width: 100%;
+  margin: auto;
+  padding: 0px 20px 0px 20px;
+}

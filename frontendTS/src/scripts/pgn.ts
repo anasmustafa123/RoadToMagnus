@@ -1,5 +1,12 @@
-import { GameResult } from '../types/Game';
+import { Evaluation, GameResult, GameType, Lan, Move } from '../types/Game';
 import { UserInfo } from '../types/User';
+import {
+  Classification,
+  classificationInfo,
+  ClassSymbol,
+} from '../types/Review';
+import { Chess, PieceType } from 'chess.js';
+import { Piece } from 'react-chessboard/dist/chessboard/types';
 const constructPgn = (
   wplayer: UserInfo,
   bplayer: UserInfo,
@@ -35,14 +42,20 @@ const constructPgn = (
 };
 
 const parsePgn = (pgn: string) => {
-  let wname, wrating, bname, brating, result;
+  let wname: string = '',
+    wrating: number = 0,
+    bname: string = '',
+    brating: number = 0,
+    result: GameResult,
+    date: `${string}-${string}` = '-',
+    gameType: GameType;
   let clks = [],
-    evaluations = [],
-    classifi = [],
-    moves = [];
+    evaluations: Evaluation[] = [],
+    classifi: Classification[] = [],
+    moves = [],
+    gameId = '';
 
   const [header, body] = String(pgn).split(/\n\s*\n/);
-
   header.split('\n').forEach((line) => {
     if (line.startsWith('[White ')) {
       wname = line.slice(8, -2);
@@ -55,10 +68,32 @@ const parsePgn = (pgn: string) => {
     } else if (line.startsWith('[Result ')) {
       const resultStr = line.slice(line.indexOf('"') + 1, -2).split('-')[0];
       result = resultStr.length > 1 ? 0 : !parseInt(resultStr) ? -1 : 1;
+    } else if (line.startsWith('[UTCDate ')) {
+      const res = new Date(line.slice(line.indexOf('"') + 1, -2));
+      date = `${res.getMonth() + 1}-${res.getFullYear()}`;
+    } else if (line.startsWith('[TimeControl')) {
+      let res =
+        parseInt(line.slice(line.indexOf('"') + 1, -2).split('-')[0]) / 60;
+      gameType =
+        res > 30
+          ? 'daily'
+          : res >= 10
+            ? 'rapid'
+            : res >= 1
+              ? 'blitz'
+              : 'bullet';
+    } else if (line.startsWith('[Link')) {
+      // chess.com pgn
+      let url = line.slice(line.indexOf('"') + 1, -2);
+      let urlarr = url.split('/');
+      gameId = urlarr[urlarr.length - 1];
+    } else if (line.startsWith('[Site') && !line.includes('chess.com')) {
+      let url = line.slice(line.indexOf('"') + 1, -2);
+      let urlarr = url.split('/');
+      gameId = urlarr[urlarr.length - 1];
     }
   });
   const parts = body.split(/\s+/);
-  console.log(parts);
 
   for (let i = 1; i < parts.length; i++) {
     if (!parts[i]) continue;
@@ -75,24 +110,45 @@ const parsePgn = (pgn: string) => {
       moves.push(parts[i]);
     } else if (parts[i] == '%eval') {
       if (parts[i].endsWith(']}')) {
-        evaluations.push(parts[i].slice(0, -2));
+        let evalarr = parts[i].slice(0, -2).split('-');
+        evaluations.push({
+          type: evalarr[0] as 'mate' | 'cp',
+          value: parseFloat(evalarr[1]),
+        });
       } else {
-        evaluations.push(parts[i + 1]);
+        let evalarr = parts[i + 1];
+        evaluations.push({
+          type: evalarr[0] as 'mate' | 'cp',
+          value: parseFloat(evalarr[1]),
+        });
       }
     } else if (parts[i] == '%classi') {
-      classifi.push(parts[i].slice(0, -2));
+      let sym = parts[i].slice(0, -2) as ClassSymbol;
+      let classification = classificationInfo.find((v) => {
+        v.sym == sym;
+      });
+      if (classification) {
+        classifi.push(classification);
+      }
     }
+  } // @ts-ignore
+  if (!wname || !bname || !wrating || !brating || !date || !gameType) {
+    throw new Error();
   }
   return {
-    wname,
-    wrating,
-    bname,
-    brating,
-    result,
+    wuser: { username: wname, rating: wrating },
+    buser: { username: bname, rating: brating }, // @ts-ignore
+    gameResult: result,
     moves,
+    movesCount: moves.length,
     clks,
     evaluations,
     classifi,
+    date,
+    gameType,
+    gameId,
+    isReviewed: classifi.length ? true: false,
+    pgn,
   };
 };
 
@@ -154,4 +210,24 @@ const getMovesNum = (pgn: string) => {
   return body.split(/\s+/).filter((value) => parseInt(value[0])).length;
 };
 
-export { constructPgn, parsePgn, getMovesNum };
+const getMoves = (pgn: string) => {
+  const game = new Chess();
+  game.load_pgn(pgn);
+  let moves = game.history({ verbose: true });
+  return moves.map((move): Move => {
+    return {
+      from: move.from,
+      to: move.to,
+      san: move.san,
+      lan: `${move.from}${move.to}` as Lan,
+      type: move.flags as PieceType,
+      promotion: move.promotion,
+      captured: (move.captured
+        ? `${move.color}${move.captured.toUpperCase()}`
+        : undefined) as Piece | undefined,
+      piece: `${move.color}${move.piece.toUpperCase()}` as Piece,
+    };
+  });
+};
+
+export { constructPgn, parsePgn, getMovesNum, getMoves };

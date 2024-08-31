@@ -1,10 +1,11 @@
-import { GameType } from "./Game";
+import { GameType } from './Game';
 
 export interface ShortGame {
   pgn: string;
   isReviewd: boolean;
   site: string;
 }
+export const Vendors = ['chess.com', 'lichess'];
 
 export type Vendor = 'chess.com' | 'lichess';
 
@@ -20,4 +21,9 @@ export type ChessComGame = {
   pgn: string;
   time_class: GameType;
   end_time: number;
+  url?: string;
 };
+
+export interface IDBDatabase_ {
+
+}

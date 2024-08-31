@@ -19,8 +19,52 @@
 .header > i:hover {
   cursor: pointer;
 }
-.gamesContainer{
+.gamesContainer {
   min-width: 600px;
+  max-width: 700px;
+  overflow: hidden;
   margin-top: 1.5rem;
   border-radius: 15px;
+}
+
+.animatedTextCont {
+  margin-top: auto;
+  margin-bottom: auto;
+  width: 80%;
+  overflow: hidden;
+  text-align: center;
+}
+
+.animatedTextRight,
+.animatedTextLeft {
+  padding: 10px;
+  font-size: 1.5rem;
+  font-weight: 500;
+  animation-timing-function: ease-in-out;
+  animation: toTheRightToTheRight 3s infinite;
+  animation-timing-function: linear;
+}
+.animatedTextRight{
+  margin-top: 3rem;
+}
+.animatedTextLeft {
+  animation-direction: alternate;
+}
+
+@keyframes toTheRightToTheRight {
+  0% {
+    transform: translateX(-100%);
+  }
+  25% {
+    transform: translateX(-50%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  75% {
+    transform: translateX(50%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }

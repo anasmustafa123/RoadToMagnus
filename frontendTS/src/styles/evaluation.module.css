@@ -1,6 +1,8 @@
 .evaluationbar_container {
   /* height: 100%; */
   width: 1.5rem;  
+  background-color: rgb(243, 230, 230);
+  overflow: hidden;
 }
 #whitebar {
   background-color: white;
@@ -19,4 +21,5 @@
 .evaluationText {
   text-align: center;
   font-size: 1.2rem;
+  margin-bottom: 1rem;
 }

@@ -1,76 +1,84 @@
-import React, { useContext, useEffect, useState } from 'react';
-import Games from './pages/Games';
-import {
-  RouterProvider,
-  createBrowserRouter,
-  Navigate,
-} from 'react-router-dom';
-import { ReviewGameContextProvider } from './contexts/ReviewGameContext';
+import { useContext, useEffect, useState } from 'react';
+import Games from './routes/Games';
+import { Routes, Route } from 'react-router-dom';
 import SignUp from './components/SignUp';
 import Login from './components/Login';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './routes/ProtectedRoute';
 import './App.css';
-import NewReview from './components/NewReview';
-import Profile from './pages/Profile';
+import Profile from './routes/Profile';
+import type { EngineLine } from './types/Game';
+import ReviewGame from './routes/ReviewGame';
+import Stats from './routes/Stats';
+import { db } from './api/Indexed';
 import { UserContext } from './contexts/UserContext';
-import { EngineLine } from './types/Game';
 function App() {
-  const [engineRes, setEngineRes] = useState<EngineLine[]>([]);
-  const { userId, isUser } = useContext(UserContext);
-
+  const { setIsUser, setChessDCUsername, setUserLicehessname, setUserId } =
+    useContext(UserContext);
+  const [engineRes] = useState<EngineLine[]>([]);
   useEffect(() => {
     if (engineRes) {
-      console.log({ engineRes });
     }
   }, [engineRes]);
 
-  const ProtectedRoutes = [
-    {
-      path: '/',
-      element: isUser ? (
-        <Navigate to={`/login`} replace={true}></Navigate>
-      ) : (
-        <Navigate to="/games" replace={true}></Navigate>
-      ),
-    },
-    {
-      path: '/games',
-      element: (
-        <Games
-          inlineStyles={{
-            gridColumnStart: '2',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            backgroundColor: 'var(--bg-color)',
-          }}
-        ></Games>
-      ),
-    },
-    { path: '/profile/:userId', element: <Profile /> },
-  ];
+  useEffect(() => {
+    /*  getAllPlayerGames({
+      username: 'anasmostafa11',
+      syear: 2021,
+      eyear: 2022,
+      smonth: 11,
+      emonth: 12,
+      afterEachMonthCallback: (games) => {
+        console.debug("month")
+        console.debug(games)
+      },
+    }).then((games) => {
+      console.dir(games);
+    }); */
+    /* getMissingData({
+      storekey: String(userId),
+      vendor: 'chess.com',
+      username: 'anasmostafa11',
+      afterGameCallback: () => {},
+      afterGamesCallback: () => {},
+    }); */
+    async function f() {
+      let users = await db.users.toArray();
+      let user = users[0];
+      if (user) {
+        setIsUser(true);
+        //setUserId(user.key);
+      }
+    }
+    f();
+  }, []);
 
-  const Router = createBrowserRouter([
-    {
-      path: '/',
-      element: <ProtectedRoute />,
-      children: ProtectedRoutes,
-    },
-    { path: '/login', element: <Login></Login> },
-    { path: '/register', element: <SignUp></SignUp> },
-    {
-      path: '/review:gameid',
-      element: (
-        <ReviewGameContextProvider>
-          <NewReview></NewReview>
-        </ReviewGameContextProvider>
-      ),
-    },
-    { path: '/explore:userid', element: <></> },
-    { path: '*', element: <div>u got lost my friend</div> },
-  ]);
   return (
     <>
-      <RouterProvider router={Router}></RouterProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<SignUp />} />
+        <Route path="/" element={<ProtectedRoute />}>
+          <Route path="" element={<Profile />} />
+          <Route path="profile" element={<Profile />} />
+          <Route
+            path="games"
+            element={
+              <Games
+                inlineStyles={{
+                  gridColumnStart: '2',
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+                  backgroundColor: 'var(--bg-color)',
+                }}
+              />
+            }
+          />
+          <Route path="stats" element={<Stats />} />
+          <Route path="review/:gameId" element={<ReviewGame />} />
+          <Route path="explorer">explore</Route>
+        </Route>
+        <Route path="*" element={<div>u lost ur way my friend</div>} />
+      </Routes>
     </>
   );
 }

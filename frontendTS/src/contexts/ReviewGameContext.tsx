@@ -1,158 +1,112 @@
-import React, { useState, createContext } from 'react';
-import { Chess, Square } from 'chess.js';
+import React, { useState, createContext, useEffect, useRef } from 'react';
+import { Chess, ChessInstance } from 'chess.js';
 import type { ReviewGameContext } from '../types/ReviewGameContext';
-import {
+import type {
   EngineLine,
   Evaluation,
   Move,
   PlayerColor,
   Game as GameType,
+  Lan,
 } from '../types/Game';
-import { Classification, ClassName } from '../types/Review';
 import {
-  getNormalClassification,
-  isLosing,
-  isSac,
-  isWining,
+  ClassificationScores,
+  ClassName,
+  emptyClassificationScores,
+} from '../types/Review';
+import {
+  getClassificationScore,
 } from '../scripts/evaluate';
-import { UserInfo } from '../types/User';
 
-const initialContext = {
-  reviewStatus: false,
-  setReviewStatus: () => {},
-  classifications: [],
-  setClassifications: () => {},
-  evaluations: [],
-  setEvaluations: () => {},
-  moves: [] as unknown as Move[],
-  setMoves: () => {},
-  setwUser: () => {},
-  setbUser: () => {},
-  setGameResult: () => {},
-  setPlayerColor: () => {},
-  getClassification: () => 'unknown' as ClassName,
-  gameInfo: {} as GameType,
-  setGameInfo: () => {},
-};
-
-const ReviewGameContext = createContext<ReviewGameContext>(initialContext);
+// @ts-ignore
+const ReviewGameContext = createContext<ReviewGameContext>();
 
 const ReviewGameContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [reviewStatus, setReviewStatus] = useState<boolean>(false);
-  const [classifications, setClassifications] = useState<Classification[]>([]);
+  let gameRef = useRef<ChessInstance>();
+  const [reviewStatus, setReviewStatus] = useState<boolean>(true);
+  const [classificationNames, setClassificationNames] = useState<ClassName[]>(
+    [],
+  );
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+  const [sanMoves, setsanMoves] = useState<string[]>([]);
   const [moves, setMoves] = useState<Move[]>([]);
-  const [gameInfo, setGameInfo] = useState<GameType>({} as GameType);
-
-  /* 
-userInfo{bUsername, bAccuracy, bRating, bAvatar}
-evaluation: {type, value}
-engineLine: {evaluation, bestMove}
-*/
-
-  const getClassification = (
-    engineResponse: EngineLine[],
-    evaluation: Evaluation,
-    fen: string,
-  ): ClassName => {
-    console.log(`lines got from stockfish: ${engineResponse.length} lines`);
-    const game = new Chess(fen);
-    if (moves && gameInfo) {
-      const moveNum = moves.length;
-      let plColor: PlayerColor, opponent: UserInfo, player: UserInfo;
-      let move: Move = moves[moveNum - 1];
-
-      if (moveNum % 2) {
-        player = gameInfo.wuser;
-        opponent = gameInfo.buser;
-        plColor = 1;
-      } else {
-        player = gameInfo.buser;
-        opponent = gameInfo.wuser;
-        plColor = -1;
-      }
-      let maxClassification = 6;
-      let firstMiddleGame = 0;
-      let firsetEndGame = 0;
-      let iswining = isWining(
-        engineResponse[0].evaluation,
-        player.rating,
-        plColor,
-      );
-
-      let waswining = isWining(evaluation, player.rating, plColor);
-      let waslosing = isLosing(evaluation, player.rating, plColor);
-      let islosing = isLosing(
-        engineResponse[0].evaluation,
-        player.rating,
-        plColor,
-      );
-      let currentPieceChar = game.get(move.to as Square);
-      let isQueen = currentPieceChar
-        ? currentPieceChar.type.toLowerCase() == 'q'
-        : false;
-      let isSacc = isSac(move, game);
-      // is best when its one of top lines returned by the engine
-      let isbest = engineResponse.find(
-        (engineLine) => engineLine.bestMove == move.lan,
-      )
-        ? true
-        : false;
-
-      // u set the first move of middle game after last opening move  (book move)
-      if (!firstMiddleGame) {
-        //check book moves
-        console.log('might be book move');
-      }
-      let normalClassification = getNormalClassification(
-        engineResponse[0].evaluation,
-        evaluation,
-        plColor,
-        player.rating,
-        opponent.rating,
-      );
-
-      console.log({
-        waslosing,
-        islosing,
-        iswining,
-        waswining,
-        isQueen,
-        isSacc,
-        isbest,
-        normalClassification,
-      });
-      if (isSacc) {
-        if (((waswining && iswining) || (!waswining && !islosing)) && isbest) {
-          return 'brilliant';
-        }
-        if (islosing && isQueen) {
-          return 'botezgambit';
-        }
-        return normalClassification;
-      } else if (isbest) {
-        return 'best';
-      } else return normalClassification;
+  const [gameInfo, setGameInfo] = useState<GameType>({
+    buser: {
+      rating: 0,
+      username: 'black_joe',
+      'chess.com': 'black_joe_chess.com',
+      lichess: 'black_joe_lichess',
+      avatar: "/black_brain.png"
+    },
+    wuser: {
+      rating: 0,
+      username: 'white_joe',
+      'chess.com': 'white_joe_chess.com',
+      lichess: 'white_joe_lichess',
+      avatar: "/white_brain.png"
+    },
+    gameId: '0000',
+    site: 'chess.com',
+    movesCount: 10,
+    playerColor: 1,
+    gameResult: 1,
+    isReviewed: false,
+    pgn: '',
+    gameType: 'rapid',
+    date: '2021-10',
+  });
+  const [currentMoveNum, setCurrentMoveNum] = useState<number>(-1);
+  const [currentEngineLines, setCurrentEngineLines] = useState<EngineLine[]>(
+    [],
+  );
+  const [engineResponses, setEngineResponses] = useState<EngineLine[][]>([]);
+  const [currentPerc, setCurrentPerc] = useState<number>(0);
+  const [maxPerc, setMaxtPerc] = useState<number>(100);
+  const [movesClassifications, setMovesClassifications] =
+    useState<ClassificationScores>(emptyClassificationScores);
+  useEffect(() => {
+    if (currentPerc && currentPerc == maxPerc) {
+  
+      setReviewStatus(true);
     }
-    return 'unknown';
-  };
+  }, [currentPerc]);
+
+  useEffect(() => {
+    if (reviewStatus) {
+      let score = getClassificationScore(classificationNames);
+      setMovesClassifications(score);
+    }
+  }, [reviewStatus]);
 
   return (
     <ReviewGameContext.Provider
       value={{
         reviewStatus,
         setReviewStatus,
-        moves,
-        classifications,
+        sanMoves,
         evaluations,
-        setClassifications,
+        classificationNames,
+        setClassificationNames,
         setEvaluations,
-        setMoves,
-        getClassification,
+        setsanMoves,
         gameInfo,
         setGameInfo,
+        maxPerc,
+        setMaxtPerc,
+        currentPerc,
+        setCurrentPerc,
+        currentMoveNum,
+        setCurrentMoveNum,
+        currentEngineLines,
+        setCurrentEngineLines,
+        movesClassifications,
+        setMovesClassifications,
+        engineResponses,
+        setEngineResponses,
+        moves,
+        setMoves,
       }}
     >
       {children}

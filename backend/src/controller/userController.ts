@@ -14,8 +14,8 @@ const authUser = asyncHandler(async (req, res) => {
         userId: user._id,
         name: user.name,
         email: user.email,
-        "chess.com": user.chessDCusername,
-        lichess: user.lichessusername,
+        "chess.com": user.chesscom ? user.chesscom.username : "",
+        lichess: user.lichess ? user.lichess.username : "",
       },
     });
   } else {
@@ -44,8 +44,8 @@ const registerUser = asyncHandler(async (req, res) => {
     name: (lichess ? lichess : "") + "-" + (chessdotcom ? chessdotcom : ""),
     email,
     password,
-    "chess.com": chessdotcom,
-    lichess: lichess,
+    chesscom: { username: chessdotcom },
+    lichess: { username: lichess },
   });
 
   if (user) {
@@ -56,8 +56,8 @@ const registerUser = asyncHandler(async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        chessDCusername: user.chessDCusername,
-        lichessusername: user.lichessusername,
+        chessDCusername: user.chesscom ? user.chesscom.username : "",
+        lichessusername: user.lichess ? user.lichess.username : "",
       },
     });
   } else {

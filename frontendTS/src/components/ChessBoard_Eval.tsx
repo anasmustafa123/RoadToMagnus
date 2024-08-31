@@ -5,26 +5,50 @@ import { GameboardContext } from '../contexts/GameBoardContext';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
 import styles from '../styles/ChessBoard_Eval.module.css';
 import { ChessInstance } from 'chess.js';
-export default function ChessBoard_Eval() {
+import { useOutletContext } from 'react-router-dom';
+export default function ChessBoard_Eval(props: {
+  inlineStyles: React.CSSProperties;
+}) {
+  const { gridColumn } = useOutletContext<React.CSSProperties>();
   const {
-    makeAMove,   
+    makeAMove,
     safeGameMutate,
     setMoveSquares,
     setOptionSquares,
     setRightClickedSquares,
   } = useContext(GameboardContext);
-  const { classifications, evaluations, moves } = useContext(ReviewGameContext);
+  const { classificationNames, evaluations, moves } =
+    useContext(ReviewGameContext);
 
   const [movesIndex, setMovesIndex] = useState(0);
 
   return (
-    <div className={styles.chessboard_eval}>
-      <div style={{ display: 'flex' }}>
+    <div
+      style={{ ...props.inlineStyles, gridColumn }}
+      className={styles.chessboard_eval}
+    >
+      <div
+        style={{
+          display: 'flex',
+          gap: '2rem',
+          margin: 'auto',
+          width: 'fit-content',
+        }}
+      >
         <EvaluationBar evaluation={evaluations[movesIndex]}></EvaluationBar>
         <ChessBoard
+          inlineStyles={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            maxWidth: 'fit-content',
+            height: '100%',
+            gridColumn: '3 / 8',
+          }}
           moves={moves}
           movesIndex={movesIndex}
-          classifications={classifications}
+          classifications={classificationNames}
         ></ChessBoard>
       </div>
       <div
@@ -33,14 +57,15 @@ export default function ChessBoard_Eval() {
       >
         <button
           onClick={() => {
+            console.log('left');
             movesIndex ? setMovesIndex((old) => old - 1) : '';
             safeGameMutate((update) => {
               update.undo();
               return update;
             });
-            setMoveSquares({});
-            setOptionSquares({});
-            setRightClickedSquares({});
+            //setMoveSquares({});
+            //setOptionSquares({});
+            //setRightClickedSquares({});
           }}
         >
           <i className="bx bxs-left-arrow"></i>
@@ -61,11 +86,10 @@ export default function ChessBoard_Eval() {
         </button>
         <button
           onClick={() => {
+            console.log('right');
             const currentIndex = movesIndex;
             if (moves.length > currentIndex) {
-              const res = makeAMove
-                ? makeAMove(moves[currentIndex].san)
-                : undefined;
+              const res = makeAMove(moves[currentIndex].san);
               if (res) setMovesIndex((old) => old + 1);
             }
           }}

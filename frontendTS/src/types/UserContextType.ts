@@ -1,3 +1,5 @@
+import { MenuBarTheme } from './Ui';
+
 export interface UserContextType {
   setChessDCAvatarLink: React.Dispatch<React.SetStateAction<string>>;
   setUserLicehessname: React.Dispatch<React.SetStateAction<string>>;
@@ -13,4 +15,12 @@ export interface UserContextType {
   usernameLichess: string;
   uiTheme: 'light' | 'dark';
   userId: number;
+  chessboardwidth: number;
+  setChessboardWidth: React.Dispatch<React.SetStateAction<number>>;
+  showRigthSidebar: boolean;
+  setShowRightSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  menuBarTheme: MenuBarTheme;
+  setMenuBarTheme: React.Dispatch<React.SetStateAction<MenuBarTheme>>;
+  largeScreen: boolean;
+  setLargeScreenWidth: React.Dispatch<React.SetStateAction<boolean>>;
 }
