@@ -164,10 +164,10 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
                   );
                 }  */
                 getMissingData({
-                  username: 'anasmostafa11',
-                  vendor: 'chess.com',
+                  username: 'gg',
+                  vendor: 'lichess',
                   afterGameCallback: (games) => {
-                    setChessdcomGames((old) => [...old, ...games]);
+                    setLichessGames((old) => [...old, ...games]);
                   },
                   afterGamesCallback: () => {},
                 }).then((res) => {
@@ -244,7 +244,7 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
               </div>
             }
           > */}
-          {chessdcomGames.map((value, i) => (
+          {lichessGames.map((value, i) => (
             <Game
               gamelink={`https://www.chess.com/game/live/${value.gameId}`}
               onClick={async (gameData) => {
@@ -276,6 +276,9 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
                           gameData,
                           parsedGameData,
                         ),
+                      })
+                      .then((e) => {
+                        console.log('finished');
                       })
                       .catch((e) => {
                         continueEvaluatingPosition({

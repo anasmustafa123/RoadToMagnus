@@ -12,7 +12,7 @@ const ReviewGame = () => {
   const { reviewStatus } = useContext(ReviewGameContext);
   const [expand_review_state, setExpand_review_state] = useState(false);
   const [showEval_chessmoves, setShowChessmoves] = useState(false);
-  return !reviewStatus ? (
+  return reviewStatus ? (
     showEval_chessmoves ? (
       <ChessBoardContextProvider>
         <ChessBoard_Eval

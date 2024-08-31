@@ -11,10 +11,10 @@ const constructPgn = (
   wplayer: UserInfo,
   bplayer: UserInfo,
   result: GameResult,
-  moves: [string],
-  clks: [string],
-  evaluations: [string],
-  classifi: [string],
+  moves: Move[],
+  clks: string[],
+  evaluations: Evaluation[],
+  classifi: string[],
 ) => {
   let res = '';
   res += wplayer.username ? getHeader('White', wplayer.username) : '';
@@ -28,6 +28,8 @@ const constructPgn = (
       )
     : '';
   res += '\n';
+  console.log({1: moves.length, 2: clks.length, 3: evaluations.length, 4: classifi.length});
+  console.log(evaluations)
   if (moves.length === clks?.length) {
     if (clks.length === evaluations?.length) {
       res += pgnMerge3(moves, clks, evaluations, classifi);
@@ -147,7 +149,7 @@ const parsePgn = (pgn: string) => {
     date,
     gameType,
     gameId,
-    isReviewed: classifi.length ? true: false,
+    isReviewed: classifi.length ? true : false,
     pgn,
   };
 };
@@ -161,7 +163,7 @@ function startsWithAlpha(str: string) {
     (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)
   );
 }
-const pgnMerge1 = (moves: [string]) => {
+const pgnMerge1 = (moves: Move[]) => {
   return moves
     .map((move, i) =>
       !(i % 2)
@@ -171,7 +173,7 @@ const pgnMerge1 = (moves: [string]) => {
     .join('');
 };
 
-const pgnMerge2 = (moves: [string], clks: [string]) => {
+const pgnMerge2 = (moves: Move[], clks: string[]) => {
   return moves
     .map((move, i) =>
       !(i % 2)
@@ -182,19 +184,19 @@ const pgnMerge2 = (moves: [string], clks: [string]) => {
 };
 
 const pgnMerge3 = (
-  moves: [string],
-  clks: [string],
-  evaluations: [string],
-  classifi: [string],
+  moves: Move[],
+  clks: string[],
+  evaluations: Evaluation[],
+  classifi: string[],
 ) => {
   return moves
     .map((move, i) =>
       !(i % 2)
-        ? `${i / 2 + 1}. ${move} {[%clk ${clks[i]} %eval ${
-            evaluations[i]
+        ? `${i / 2 + 1}. ${move.san} {[%clk ${clks[i]} %eval ${
+            evaluations[i].value
           } %classif ${classifi[i]}]} `
-        : `${Math.floor(i / 2) + 1}... ${move} {[%clk ${clks[i]} %eval ${
-            evaluations[i]
+        : `${Math.floor(i / 2) + 1}... ${move.san} {[%clk ${clks[i]} %eval ${
+            evaluations[i].value
           } %classif ${classifi[i]}]} `,
     )
     .join('');
