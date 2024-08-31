@@ -10,13 +10,14 @@ import type {
   Lan,
 } from '../types/Game';
 import {
+  classificationInfo,
   ClassificationScores,
   ClassName,
   emptyClassificationScores,
 } from '../types/Review';
-import {
-  getClassificationScore,
-} from '../scripts/evaluate';
+import { getClassificationScore } from '../scripts/evaluate';
+import { db } from '../api/Indexed';
+import { constructPgn } from '../scripts/pgn';
 
 // @ts-ignore
 const ReviewGameContext = createContext<ReviewGameContext>();
@@ -25,7 +26,7 @@ const ReviewGameContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   let gameRef = useRef<ChessInstance>();
-  const [reviewStatus, setReviewStatus] = useState<boolean>(true);
+  const [reviewStatus, setReviewStatus] = useState<boolean>(false);
   const [classificationNames, setClassificationNames] = useState<ClassName[]>(
     [],
   );
@@ -38,14 +39,14 @@ const ReviewGameContextProvider: React.FC<{ children: React.ReactNode }> = ({
       username: 'black_joe',
       'chess.com': 'black_joe_chess.com',
       lichess: 'black_joe_lichess',
-      avatar: "/black_brain.png"
+      avatar: '/black_brain.png',
     },
     wuser: {
       rating: 0,
       username: 'white_joe',
       'chess.com': 'white_joe_chess.com',
       lichess: 'white_joe_lichess',
-      avatar: "/white_brain.png"
+      avatar: '/white_brain.png',
     },
     gameId: '0000',
     site: 'chess.com',
@@ -68,7 +69,6 @@ const ReviewGameContextProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<ClassificationScores>(emptyClassificationScores);
   useEffect(() => {
     if (currentPerc && currentPerc == maxPerc) {
-  
       setReviewStatus(true);
     }
   }, [currentPerc]);
@@ -77,6 +77,24 @@ const ReviewGameContextProvider: React.FC<{ children: React.ReactNode }> = ({
     if (reviewStatus) {
       let score = getClassificationScore(classificationNames);
       setMovesClassifications(score);
+      let newpgn = constructPgn(
+        gameInfo.wuser,
+        gameInfo.buser,
+        gameInfo.gameResult,
+        moves,
+        new Array(moves.length).fill(''),
+        evaluations,
+        classificationInfo.map((classification) => {
+          return classification.sym;
+        }),
+      );
+      let newObject = Object.assign({}, gameInfo, {
+        isReviewed: true,
+        pgn: newpgn,
+      });
+      console.log(gameInfo);
+      console.log(newObject);
+     // db.games.update(gameInfo.gameId, gameInfo);
     }
   }, [reviewStatus]);
 

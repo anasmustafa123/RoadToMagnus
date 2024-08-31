@@ -93,7 +93,6 @@ export class ChessEngine {
                     '0',
                 ),
               };
-
               // Invert evaluation if black to play since scores are from black perspective
               // and we want them always from the perspective of white
               if (fen && fen.includes(' b ')) {
@@ -238,6 +237,7 @@ export class ChessEngine {
             moveNum: index + 1,
             lines: lines,
           });
+          if (index == moves.length - 1) resolve(true);
           index++;
         } catch (e) {
           this.stockfishWorker.terminate();
