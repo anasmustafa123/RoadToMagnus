@@ -3,7 +3,7 @@ import styles from '../styles/Game.module.css';
 import { UserContext } from '../contexts/UserContext';
 import type { Game } from '../types/Game';
 const Game: React.FC<{
-  key: number;
+  key: string;
   gameData: Game;
   gamelink?: string;
   onClick: (gameData: Game) => void;

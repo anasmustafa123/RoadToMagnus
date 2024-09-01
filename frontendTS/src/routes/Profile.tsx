@@ -50,8 +50,11 @@ const Profile = () => {
             title="Stats"
             hovercolor="green"
           />
-          {classifications.map((classi, i) => (
-            <div key={i} className={styles.classificationBlock}>
+          {classifications.map((classi) => (
+            <div
+              key={`${classi.chess}-${classi.lichess}:${classi.name}`}
+              className={styles.classificationBlock}
+            >
               <img
                 src={`/classification/${classi.name}.png`}
                 alt={`${classi} move image`}
