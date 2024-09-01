@@ -244,7 +244,7 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
               </div>
             }
           > */}
-          {lichessGames.map((value, i) => (
+          {lichessGames.map((value) => (
             <Game
               gamelink={`https://www.chess.com/game/live/${value.gameId}`}
               onClick={async (gameData) => {
@@ -295,7 +295,7 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
                 });
                 // navigate(`/review/:${gameData.gameId}`);
               }}
-              key={i}
+              key={value.gameId}
               gameData={value}
             ></Game>
           ))}

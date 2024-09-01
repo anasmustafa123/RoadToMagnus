@@ -18,7 +18,7 @@ export default function LinesReview() {
         !(i % 2) ? (
           <div
             style={{ backgroundColor: `${bgColors[(i / 2 + 1) % 2]}` }}
-            key={i}
+            key={`${move.san}-${move.lan}-${move.to}`}
             className={styles.movesContainer}
           >
             <span className={styles.move_index}>{i / 2 + 1}.</span>

@@ -90,7 +90,7 @@ const ReviewResult: React.FC<{ expand_review_state: boolean }> = ({
                   color: `${classification.color}`,
                 }}
                 className={styles.line}
-                key={i}
+                key={`${classification.name}-${Math.round(Math.random() * 1000)}-${classification.color}`}
               >
                 <div className={styles.wClassi}>
                   {movesClassifications[classification.name][0]}
