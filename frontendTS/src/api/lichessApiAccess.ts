@@ -105,7 +105,7 @@ const fetchPlayerGames = async ({
           playerColor: parsedPgn.wuser.username == username ? 1 : -1,
         };
         result.push(game);
-        updateGames(result);
+        updateGames([game]);
         reader.read().then(handlechunks);
       } catch (e) {
         resolve({ message: `${e}`, ok: false, games: result });

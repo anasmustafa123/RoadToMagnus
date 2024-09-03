@@ -1,6 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 import Games from './routes/Games';
-import { Routes, Route } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  createBrowserRouter,
+  RouterProvider,
+  defer,
+} from 'react-router-dom';
 import SignUp from './components/SignUp';
 import Login from './components/Login';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -11,74 +17,151 @@ import ReviewGame from './routes/ReviewGame';
 import Stats from './routes/Stats';
 import { db } from './api/Indexed';
 import { UserContext } from './contexts/UserContext';
+import { checkIfBook } from './api/lichessApiAccess';
+import { getMissingData } from './scripts/LoadGames';
+import { GameContext } from './contexts/GamesContext';
 function App() {
-  const { setIsUser, setChessDCUsername, setUserLicehessname, setUserId } =
-    useContext(UserContext);
+  const {
+    isUser,
+    setIsUser,
+    setChessDCUsername,
+    setUserLicehessname,
+    setUserId,
+  } = useContext(UserContext);
+  const { lichessGames, setLichessGames, chessdcomGames, setChessdcomGames } =
+    useContext(GameContext);
   const [engineRes] = useState<EngineLine[]>([]);
   useEffect(() => {
     if (engineRes) {
     }
   }, [engineRes]);
 
-  useEffect(() => {
-    /*  getAllPlayerGames({
-      username: 'anasmostafa11',
-      syear: 2021,
-      eyear: 2022,
-      smonth: 11,
-      emonth: 12,
-      afterEachMonthCallback: (games) => {
-        console.debug("month")
-        console.debug(games)
-      },
-    }).then((games) => {
-      console.dir(games);
-    }); */
-    /* getMissingData({
-      storekey: String(userId),
-      vendor: 'chess.com',
-      username: 'anasmostafa11',
-      afterGameCallback: () => {},
-      afterGamesCallback: () => {},
-    }); */
+  /*   useEffect(() => {
     async function f() {
       let users = await db.users.toArray();
       let user = users[0];
       if (user) {
-        setIsUser(true);
+        //setIsUser(true);
         //setUserId(user.key);
       }
     }
     f();
-  }, []);
+  }, []); */
+
+  const checkUser = (): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+      if (isUser) resolve(true);
+      else {
+        db.users
+          .toArray()
+          .then((users) => {
+            let user = users[0];
+            if (user) {
+              setIsUser(true);
+              setUserId(user.key);
+              resolve(true);
+            } else {
+              reject(false);
+            }
+          })
+          .catch(() => {
+            reject(false);
+          });
+      }
+    });
+  };
+  const checkNotUser = () => {
+    return new Promise(async (resolve, reject) => {
+      const isuser = await checkUser();
+      if (!isuser) {
+        resolve(true);
+      } else {
+        reject(false);
+      }
+    });
+  };
+  const lichessGamesLoading = () => {
+    return new Promise((resolve, reject) => {
+      getMissingData({
+        username: 'gg',
+        vendor: 'lichess',
+        afterGameCallback: (games) => {
+          console.log(games);
+          setLichessGames((old) => [...old, ...games]);
+        },
+        afterGamesCallback: () => {},
+      }).then((res) => {
+        console.log(res);
+        if (res.ok) {
+          console.log('finished');
+          resolve(true);
+          //setChessdcomGames(res.games);
+        } else reject(false);
+      });
+    });
+  };
+  const router = createBrowserRouter([
+    {
+      path: '/login',
+      element: <Login />,
+      loader: () => {
+        console.log('loader');
+        return defer({
+          loader_data: checkNotUser(),
+        });
+      },
+    },
+    {
+      path: '/register',
+      element: <SignUp />,
+      loader: () => {
+        return defer({ loader_data: checkNotUser() });
+      },
+    },
+    {
+      path: '/',
+      element: <ProtectedRoute />,
+      children: [
+        { path: 'profile', element: <Profile /> },
+        {
+          path: 'games',
+          element: (
+            <Games
+              inlineStyles={{
+                gridColumnStart: '2',
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                backgroundColor: 'var(--bg-color)',
+              }}
+            />
+          ),
+        },
+        {
+          path: 'stats',
+          element: <Stats />,
+        },
+        {
+          path: 'review/:gameId',
+          element: <ReviewGame />,
+        },
+        {
+          path: 'explorer',
+          element: 'explore',
+        },
+      ],
+      loader: () => {
+        return defer({ loader_data: checkUser() });
+      },
+    },
+    {
+      path: '*',
+      element: <div>u lost ur way my friend</div>,
+    },
+  ]);
 
   return (
     <>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<SignUp />} />
-        <Route path="/" element={<ProtectedRoute />}>
-          <Route path="" element={<Profile />} />
-          <Route path="profile" element={<Profile />} />
-          <Route
-            path="games"
-            element={
-              <Games
-                inlineStyles={{
-                  gridColumnStart: '2',
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                  backgroundColor: 'var(--bg-color)',
-                }}
-              />
-            }
-          />
-          <Route path="stats" element={<Stats />} />
-          <Route path="review/:gameId" element={<ReviewGame />} />
-          <Route path="explorer">explore</Route>
-        </Route>
-        <Route path="*" element={<div>u lost ur way my friend</div>} />
-      </Routes>
+      <RouterProvider router={router} />
     </>
   );
 }
