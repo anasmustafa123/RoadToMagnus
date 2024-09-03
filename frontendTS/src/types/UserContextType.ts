@@ -7,14 +7,14 @@ export interface UserContextType {
   setChessDCUsername: React.Dispatch<React.SetStateAction<string>>;
   setIsUser: React.Dispatch<React.SetStateAction<boolean>>;
   setUiTheme: React.Dispatch<React.SetStateAction<'light' | 'dark'>>;
-  setUserId: React.Dispatch<React.SetStateAction<number>>;
+  setUserId: React.Dispatch<React.SetStateAction<string>>;
   chessDCAvatarLink: string;
   username: string;
   isUser: boolean;
   usernameChessDC: string;
   usernameLichess: string;
   uiTheme: 'light' | 'dark';
-  userId: number;
+  userId: string;
   chessboardwidth: number;
   setChessboardWidth: React.Dispatch<React.SetStateAction<number>>;
   showRigthSidebar: boolean;

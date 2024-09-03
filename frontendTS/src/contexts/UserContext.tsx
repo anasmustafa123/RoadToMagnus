@@ -16,7 +16,7 @@ const defaultValue: UserContextType = {
   usernameChessDC: '',
   usernameLichess: '',
   uiTheme: 'light',
-  userId: 0,
+  userId: "",
   chessboardwidth: 750,
   setChessboardWidth: () => {},
   showRigthSidebar: true,
@@ -32,7 +32,7 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [username, setUsername] = useState<string>('');
-  const [userId, setUserId] = useState<number>(0);
+  const [userId, setUserId] = useState<string>("");
   const [usernameChessDC, setChessDCUsername] = useState<string>('');
   const [usernameLichess, setUserLicehessname] = useState<string>('');
   const [chessDCAvatarLink, setChessDCAvatarLink] = useState<string>('');
