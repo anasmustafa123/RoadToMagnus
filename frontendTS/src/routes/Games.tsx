@@ -9,6 +9,7 @@ import { EngineLine, Game as GameType } from '../types/Game';
 import { getMoves, parsePgn } from '../scripts/pgn';
 import { Classify } from '../scripts/_Classify';
 import { getMissingData } from '../scripts/LoadGames';
+import { db } from '../api/Indexed';
 const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
   ({ inlineStyles }) => {
     const { outletStyles } = useOutletContext<any>();
@@ -141,13 +142,16 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
           vendor: 'lichess',
           afterGameCallback: (games) => {
             console.log(games);
-            setLichessGames((old) => [...old, ...games]);
+            setLichessGames((old) => {
+              return old.add_games(games);
+            });
           },
           afterGamesCallback: () => {},
         }).then((res) => {
           console.log(res);
           if (res.ok) {
             console.log('finished');
+            db.games.toArray().then((games) => {});
             resolve(true);
           } else reject(false);
         });
@@ -158,7 +162,7 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
           vendor: 'chess.com',
           afterGameCallback: (games) => {
             console.log(games);
-            setChessdcomGames((old) => [...old, ...games]);
+            setChessdcomGames((old) => old.add_games(games));
           },
           afterGamesCallback: () => {},
         }).then((res) => {

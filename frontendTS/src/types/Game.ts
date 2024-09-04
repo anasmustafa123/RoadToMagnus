@@ -3,6 +3,19 @@ import { Piece } from 'react-chessboard/dist/chessboard/types';
 import { UserInfo } from './User';
 import { Vendor } from './Api';
 
+export class Unique_Game_Array extends Array<Game> {
+  add_game(this: Unique_Game_Array, game: Game) {
+    this.find((v) => v.gameId === game.gameId);
+    return this;
+  }
+  add_games(this: Unique_Game_Array, games: Game[]) {
+    games.forEach((game) => {
+      this.add_game(game);
+    });
+    return this;
+  }
+}
+
 export const GameTypes = ['rapid', 'blitz', 'bullet', 'daily'];
 
 export type MoveType = 'n' | 'c' | 'p' | string;

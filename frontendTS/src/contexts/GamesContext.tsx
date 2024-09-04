@@ -1,12 +1,12 @@
 import React, { createContext, ReactNode, useState } from 'react';
 import type { GamesContext } from '../types/GamesContext';
-import { Game } from '../types/Game';
+import { Game, Unique_Game_Array } from '../types/Game';
 const initialContext: GamesContext = {
   setEngineDepth: () => {},
   engineDepth: 0,
-  chessdcomGames: [],
+  chessdcomGames: new Unique_Game_Array(),
   setChessdcomGames: () => {},
-  lichessGames: [],
+  lichessGames: new Unique_Game_Array(),
   setLichessGames: () => {},
 };
 const GameContext = createContext<GamesContext>(initialContext);
@@ -15,8 +15,12 @@ const GameContextProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [engineDepth, setEngineDepth] = useState<number>(18);
-  const [chessdcomGames, setChessdcomGames] = useState<Game[]>([]);
-  const [lichessGames, setLichessGames] = useState<Game[]>([]);
+  const [chessdcomGames, setChessdcomGames] = useState<Unique_Game_Array>(
+    new Unique_Game_Array(),
+  );
+  const [lichessGames, setLichessGames] = useState<Unique_Game_Array>(
+    new Unique_Game_Array(),
+  );
 
   return (
     <GameContext.Provider
