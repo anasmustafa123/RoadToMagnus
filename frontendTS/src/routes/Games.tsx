@@ -9,11 +9,13 @@ import { EngineLine, Game as GameType } from '../types/Game';
 import { getMoves, parsePgn } from '../scripts/pgn';
 import { Classify } from '../scripts/_Classify';
 import { getMissingData } from '../scripts/LoadGames';
+import { db } from '../api/Indexed';
 const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
   ({ inlineStyles }) => {
     const { outletStyles } = useOutletContext<any>();
     const navigate = useNavigate();
     const [animation, setanimation] = useState('');
+    const [max_displayed_games, setMax_displayed_games] = useState(10);
     const {
       setGameInfo,
       setCurrentPerc,
@@ -195,12 +197,16 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
           </div>
           {[...chessdcomGames, ...lichessGames]
             .sort((a, b) => {
-              return a.gameId.localeCompare(b.gameId);
+              return new Date(a.date).getTime() - new Date(b.date).getTime();
             })
-            .slice(0, 20)
+            .slice(0, max_displayed_games)
             .map((value, i) => (
               <Game
-                gamelink={`https://www.chess.com/game/live/${value.gameId}`}
+                gamelink={
+                  value.site == 'chess.com'
+                    ? `https://www.chess.com/game/live/${value.gameId}`
+                    : `https://lichess.org/${value.gameId}`
+                }
                 onClick={async (gameData) => {
                   setGameInfo(gameData);
                   setMaxtPerc(gameData.movesCount);
@@ -256,7 +262,14 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
                 gameData={value}
               ></Game>
             ))}
-          {/* </React.Suspense> */}
+          <button
+            onClick={() => {
+              setMax_displayed_games((old) => old + 10);
+            }}
+            className={styles.load_more}
+          >
+            <i className="bx bxs-chevrons-down"></i>
+          </button>
         </div>
       </>
     );

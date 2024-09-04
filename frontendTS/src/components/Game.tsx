@@ -27,7 +27,7 @@ const Game: React.FC<{
   return (
     <>
       <div className={styles.game_container}>
-        <a href={gamelink}  className={styles.linkcontainer}></a>
+        <a target="_blank" href={gamelink} className={styles.linkcontainer}></a>
         <img
           className={styles.logo}
           src={`/logos/${gameData.site}.png`}
