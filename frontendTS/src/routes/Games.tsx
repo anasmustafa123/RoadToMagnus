@@ -9,7 +9,6 @@ import { EngineLine, Game as GameType } from '../types/Game';
 import { getMoves, parsePgn } from '../scripts/pgn';
 import { Classify } from '../scripts/_Classify';
 import { getMissingData } from '../scripts/LoadGames';
-import { db } from '../api/Indexed';
 const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
   ({ inlineStyles }) => {
     const { outletStyles } = useOutletContext<any>();
