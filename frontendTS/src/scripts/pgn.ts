@@ -28,8 +28,13 @@ const constructPgn = (
       )
     : '';
   res += '\n';
-  console.log({1: moves.length, 2: clks.length, 3: evaluations.length, 4: classifi.length});
-  console.log(evaluations)
+  console.log({
+    1: moves.length,
+    2: clks.length,
+    3: evaluations.length,
+    4: classifi.length,
+  });
+  console.log(evaluations);
   if (moves.length === clks?.length) {
     if (clks.length === evaluations?.length) {
       res += pgnMerge3(moves, clks, evaluations, classifi);
@@ -72,7 +77,7 @@ const parsePgn = (pgn: string) => {
       result = resultStr.length > 1 ? 0 : !parseInt(resultStr) ? -1 : 1;
     } else if (line.startsWith('[UTCDate ')) {
       const res = new Date(line.slice(line.indexOf('"') + 1, -2));
-      date = `${res.getMonth() + 1}-${res.getFullYear()}`;
+      date = `${res.getFullYear()}-${res.getMonth() + 1}`;
     } else if (line.startsWith('[TimeControl')) {
       let res =
         parseInt(line.slice(line.indexOf('"') + 1, -2).split('-')[0]) / 60;
