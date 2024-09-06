@@ -65,16 +65,6 @@ const get_chessDcom_last_date = (
   });
 };
 
-/* async function getPlayerProfileInfo(username) {
-  let info = await getUserInfo(username);
-  let joinYearMonth = getYearAndMonth(info["joined"]);
-  return {
-    joinMonth: joinYearMonth.month,
-    joinYear: joinYearMonth.year,
-    username: username,
-    url: info["url"],
-  };
-} */
 const getAvalibleArchieves = async (username: string) => {
   const url = `https://api.chess.com/pub/player/${username}/games/archives`;
   try {
@@ -276,7 +266,7 @@ const getYearAndMonth = (
   const year = date.getFullYear();
   // Months are zero-indexed (0 = January, 1 = February, ..., 11 = December)
   const month = date.getMonth() + 1; // Adding 1 to get 1-based month
-  return { year: year, month: month, date: `${month}-${year}` };
+  return { year: year, month: month, date: `${year}-${month}` };
 };
 
 const getGameById: GetGameById = async (gameId) => {
@@ -288,11 +278,7 @@ const getGameById: GetGameById = async (gameId) => {
 export {
   getGameById,
   getUserInfo,
-  fetchChessGamesonMonth,
-  getYearAndMonth,
-  reduceGamesOfMonth,
   getAvalibleArchieves,
-  getGamesOfMonth,
   fetch_games_onperiod,
   get_chessDcom_last_date,
   getmissingarchieves,
