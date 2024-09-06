@@ -5,7 +5,7 @@ import { GameContext } from '../contexts/GamesContext';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { ChessEngine } from '../scripts/_Stockfish';
-import { EngineLine, Game as GameType } from '../types/Game';
+import { EngineLine, Game as GameType, Unique_Game_Array } from '../types/Game';
 import { getMoves, parsePgn } from '../scripts/pgn';
 import { Classify } from '../scripts/_Classify';
 import { getMissingData } from '../scripts/LoadGames';
@@ -143,7 +143,8 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
           afterGameCallback: (games) => {
             console.log(games);
             setLichessGames((old) => {
-              return old.add_games(games);
+              const newarr = new Unique_Game_Array(...old);
+              return newarr.add_games(games);
             });
           },
           afterGamesCallback: () => {},
@@ -162,7 +163,10 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
           vendor: 'chess.com',
           afterGameCallback: (games) => {
             console.log(games);
-            setChessdcomGames((old) => old.add_games(games));
+            setChessdcomGames((old) => {
+              const newarr = new Unique_Game_Array(...old);
+              return newarr.add_games(games);
+            });
           },
           afterGamesCallback: () => {},
         }).then((res) => {
@@ -197,9 +201,9 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
               className={`${animation} bx bx-repost`}
             ></i>
           </div>
-          {[...chessdcomGames, ...lichessGames]
+          {chessdcomGames
             .sort((a, b) => {
-              return a.gameId.localeCompare(b.gameId);
+              return new Date(b.date).getTime() - new Date(a.date).getTime();
             })
             .slice(0, 20)
             .map((value, i) => (

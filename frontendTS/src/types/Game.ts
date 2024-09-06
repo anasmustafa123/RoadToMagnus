@@ -5,7 +5,8 @@ import { Vendor } from './Api';
 
 export class Unique_Game_Array extends Array<Game> {
   add_game(this: Unique_Game_Array, game: Game) {
-    this.find((v) => v.gameId === game.gameId);
+    const dupgame = this.find((v) => v.gameId === game.gameId);
+    if (!dupgame) this.push(game);
     return this;
   }
   add_games(this: Unique_Game_Array, games: Game[]) {
