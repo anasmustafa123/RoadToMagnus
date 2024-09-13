@@ -1,4 +1,11 @@
-import { Evaluation, GameResult, GameType, Lan, Move } from '../types/Game';
+import {
+  Evaluation,
+  Game,
+  GameResult,
+  GameType,
+  Lan,
+  Move,
+} from '../types/Game';
 import { UserInfo } from '../types/User';
 import {
   Classification,
@@ -7,6 +14,7 @@ import {
 } from '../types/Review';
 import { Chess, PieceType } from 'chess.js';
 import { Piece } from 'react-chessboard/dist/chessboard/types';
+import { Vendor } from '../types/Api';
 const constructPgn = (
   wplayer: UserInfo,
   bplayer: UserInfo,
@@ -237,4 +245,35 @@ const getMoves = (pgn: string) => {
   });
 };
 
-export { constructPgn, parsePgn, getMovesNum, getMoves };
+const convertPgnToGame = (
+  pgn: string,
+  username: string,
+  vendor: Vendor,
+): Game => {
+  const parsedGame = parsePgn(pgn);
+  return {
+    ...parsedGame,
+    playerColor: username == parsedGame.wuser.username ? 1 : -1,
+    site: vendor,
+    pgn,
+  };
+};
+
+const convertPgnsToGames = (
+  pgns: string[],
+  username: string,
+  vendor: Vendor,
+): Game[] => {
+  return pgns.map((pgn) => {
+    return convertPgnToGame(pgn, username, vendor);
+  });
+};
+
+export {
+  constructPgn,
+  parsePgn,
+  getMovesNum,
+  getMoves,
+  convertPgnsToGames,
+  convertPgnToGame,
+};

@@ -6,12 +6,14 @@ import { ReviewGameContext } from '../contexts/ReviewGameContext';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { ChessEngine } from '../scripts/_Stockfish';
 import { EngineLine, Game as GameType, Unique_Game_Array } from '../types/Game';
-import { getMoves, parsePgn } from '../scripts/pgn';
+import { convertPgnsToGames, getMoves, parsePgn } from '../scripts/pgn';
 import { Classify } from '../scripts/_Classify';
 import { getMissingData } from '../scripts/LoadGames';
-import { db } from '../api/Indexed';
+import { db, IDB_Game } from '../api/Indexed';
+import { UserContext } from '../contexts/UserContext';
 const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
   ({ inlineStyles }) => {
+    const { user } = useContext(UserContext);
     const { outletStyles } = useOutletContext<any>();
     const navigate = useNavigate();
     const [animation, setanimation] = useState('');
@@ -25,10 +27,8 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
       setReviewStatus,
       setMoves,
     } = useContext(ReviewGameContext);
-    const { lichessGames, setLichessGames, chessdcomGames, setChessdcomGames } =
+    const { setLichessGames, chessdcomGames, setChessdcomGames } =
       useContext(GameContext);
-    const date = new Date();
-    const [month] = useState(date.getMonth());
     const callbackfunction =
       (
         ClassificationHelper: Classify,
@@ -82,10 +82,6 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
       parsedGameData: any;
       gameData: any;
     }) => {
-      console.error(`error`);
-      console.dir(params.e);
-      console.dir(params.stockfish);
-      console.dir(params.ClassificationHelper);
       const newclassify = new Classify({
         sanMoves: params.parsedGameData.moves,
         evaluations: params.parsedGameData.evaluations,
@@ -95,9 +91,7 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
         engineResponses: params.ClassificationHelper.engineResponses,
         evaluations: params.ClassificationHelper.evaluations,
       });
-      console.dir(newclassify);
       let stockfish2 = new ChessEngine(2, 18);
-      console.error('restarting');
       stockfish2._init().then(() => {
         try {
           stockfish2
@@ -112,8 +106,6 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
               moves: params.e.moves,
             })
             .catch((e) => {
-              console.error(`again restarting`);
-              console.debug(`restarting  at index ${e.index}`);
               continueEvaluatingPosition({
                 stockfish: params.stockfish,
                 e,
@@ -135,46 +127,112 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
         }
       });
     };
+    /*   db.users.toArray().then((users) => {
+      const newuser = users[0];
+      if (newuser) {
+        setUser(newuser);
+        db.games.toArray().then((games) => {
+          setChessdcomGames(
+            new Unique_Game_Array(convertPgnsToGames(games.map((v) => v.pgn), newuser.)),
+          )
+        });
+      }
+    }); */
     const getGames = () => {
       const lichessLoading = new Promise((resolve, reject) => {
         getMissingData({
           username: 'gg',
           vendor: 'lichess',
           afterGameCallback: (games) => {
-            console.log(games);
             setLichessGames((old) => {
               const newarr = new Unique_Game_Array(...old);
               return newarr.add_games(games);
             });
           },
           afterGamesCallback: () => {},
-        }).then((res) => {
-          console.log(res);
+        }).then(async (res) => {
           if (res.ok) {
-            console.log('finished');
-            db.games.toArray().then((games) => {});
+            console.log({res})
+            if (user) {
+              let lastDate = new Date(res.missingGames[0].date).getTime();
+              const gamesToAdd = res.missingGames.map((game) => {
+                const newDate = new Date(game.date).getTime();
+                if (newDate > lastDate) {
+                  lastDate = newDate;
+                }
+                const username = user.username.split('-')[1].trim();
+                return {
+                  username,
+                  vendor: game.site,
+                  pgn: game.pgn,
+                  key: game.gameId,
+                };
+              });
+              try {
+                await Promise.all([
+                  db.users.update(user.key, {
+                    lichessdate: lastDate,
+                  }),
+                  db.games.bulkAdd(gamesToAdd),
+                ]);
+                console.log('Games added successfully');
+              } catch (error) {
+                console.error('Error adding games:', error);
+              }
+              resolve(true);
+            }
             resolve(true);
           } else reject(false);
         });
       });
+
       const chessdcomLoading = new Promise((resolve, reject) => {
         getMissingData({
           username: 'anasmostafa11',
           vendor: 'chess.com',
           afterGameCallback: (games) => {
-            console.log(games);
             setChessdcomGames((old) => {
               const newarr = new Unique_Game_Array(...old);
               return newarr.add_games(games);
             });
           },
           afterGamesCallback: () => {},
-        }).then((res) => {
-          console.log(res);
+        }).then(async (res) => {
+          console.log({res})
           if (res.ok) {
-            console.log('finished');
-            resolve(true);
-            //setChessdcomGames(res.games);
+            if (user) {
+              let lastDate = new Date(res.missingGames[0].date).getTime();
+              const gamesToAdd = res.missingGames.map((game) => {
+                const newDate = new Date(game.date).getTime();
+                if (newDate > lastDate) {
+                  lastDate = newDate;
+                }
+                const username =
+                  game.site === 'chess.com'
+                    ? user.username.split('-')[0].trim()
+                    : game.site === 'lichess'
+                      ? user.username.split('-')[1].trim()
+                      : '';
+                return {
+                  username,
+                  vendor: game.site,
+                  pgn: game.pgn,
+                  key: game.gameId,
+                };
+              });
+              try {
+                await Promise.all([
+                  db.users.update(user.key, {
+                    chessdate: lastDate,
+                  }),
+                  db.games.bulkAdd(gamesToAdd),
+                ]);
+                console.log('Games added successfully');
+              } catch (error) {
+                console.error('Error adding games:', error);
+              }
+              resolve(true);
+            }
           } else reject(false);
         });
       });

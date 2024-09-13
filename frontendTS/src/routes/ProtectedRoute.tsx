@@ -40,7 +40,7 @@ const ProtectedRoute = () => {
         </>
       }
     >
-      <Await resolve={loader_data} errorElement={<Navigate to="/login" />}>
+      <Await resolve={loader_data}  errorElement={<Navigate to="/login" />}>
         <div
           ref={sidebarRef}
           className={`gridContainer ${
