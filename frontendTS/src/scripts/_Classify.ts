@@ -428,17 +428,12 @@ export class Classify {
     if (this.sanMoves && params.gameInfo) {
       let plColor: PlayerColor, opponent: UserInfo, player: UserInfo;
       let move: string = this.sanMoves[params.moveNum - 1];
-      console.debug({ history: this.game.history() });
-      console.debug({ sanmoves: this.sanMoves });
       if (
         this.game.history().length != params.moveNum ||
         this.game.history()[this.game.history().length - 1] !=
           this.sanMoves[params.moveNum - 1]
       ) {
         const lastMove = this.game.move(move) as chessjsMove;
-        console.debug({ lastMove });
-        console.debug({ history: this.game.history() });
-        console.debug({ sanmoves: this.sanMoves });
         if (!lastMove)
           throw new Error(
             `illigal move num: ${params.moveNum} move= ${this.sanMoves[params.moveNum - 1]}`,
@@ -498,9 +493,30 @@ export class Classify {
         // is best when its one of top lines returned by the engine
         let isbest =
           this.engineResponses[params.moveNum - 1].length > 1
-            ? this.engineResponses[params.moveNum - 1].find((engineLine) => {
-                return engineLine.bestMove == lastMoveAsMove.lan;
-              })
+            ? this.engineResponses[params.moveNum - 1].find(
+                (engineLine, index) => {
+                  const topBestMove =
+                    this.engineResponses[params.moveNum - 1][
+                      this.engineResponses.length - 1
+                    ];
+                  if (
+                    (engineLine.bestMove == lastMoveAsMove.lan &&
+                      // if it's the last (best) line then automatically it's the bestmove
+                      index ===
+                        this.engineResponses[params.moveNum - 1].length - 1) || // else it has to be the same type as best line
+                    (engineLine.evaluation.type ==
+                      topBestMove.evaluation.type &&
+                      (engineLine.evaluation.type == 'mate' ||
+                        // For centipawn evaluations, check if it's within 2 centipawns of the top move
+                        Math.abs(
+                          engineLine.evaluation.value -
+                            topBestMove.evaluation.value,
+                        ) < 2))
+                  )
+                    return true;
+                  else return false;
+                },
+              )
               ? true
               : false
             : false;
@@ -538,12 +554,17 @@ export class Classify {
           return 'great';
         }
         if (isSacc) {
-          if (
+          if (isbest) {
+            if ((waswining && iswining) || (!waswining && !islosing))
+              return 'brilliant';
+            else return 'best';
+          }
+          /* if (
             ((waswining && iswining) || (!waswining && !islosing)) &&
             isbest
           ) {
             return 'brilliant';
-          }
+          } */
           if (islosing && isQueen) {
             return 'botezgambit';
           }
