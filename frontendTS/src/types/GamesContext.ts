@@ -7,4 +7,5 @@ export interface GamesContext {
   lichessGames: Unique_Game_Array;
   setLichessGames: React.Dispatch<React.SetStateAction<Unique_Game_Array>>;
   engineDepth: number;
+  get_game_byId: (id: string) => Game | null;
 }

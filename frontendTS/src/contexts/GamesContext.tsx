@@ -8,6 +8,7 @@ const initialContext: GamesContext = {
   setChessdcomGames: () => {},
   lichessGames: new Unique_Game_Array(),
   setLichessGames: () => {},
+  get_game_byId: () => null,
 };
 const GameContext = createContext<GamesContext>(initialContext);
 
@@ -21,6 +22,18 @@ const GameContextProvider: React.FC<{ children: ReactNode }> = ({
   const [lichessGames, setLichessGames] = useState<Unique_Game_Array>(
     new Unique_Game_Array(),
   );
+  const get_game_byId = (id: string): Game | null => {
+    // check both chessdcomGames and lichessGames
+    let game = chessdcomGames.find((game) => game.gameId === id);
+    if (game) {
+      return game;
+    }
+    game = lichessGames.find((game) => game.gameId === id);
+    if (game) {
+      return game;
+    }
+    return null;
+  };
 
   return (
     <GameContext.Provider
@@ -31,6 +44,7 @@ const GameContextProvider: React.FC<{ children: ReactNode }> = ({
         setLichessGames,
         engineDepth,
         setEngineDepth,
+        get_game_byId,
       }}
     >
       {children}
