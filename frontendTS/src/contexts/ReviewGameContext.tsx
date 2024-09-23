@@ -1,35 +1,28 @@
-import React, { useState, createContext, useEffect, useRef } from 'react';
-import { Chess, ChessInstance } from 'chess.js';
+import React, { useState, createContext, useEffect } from 'react';
 import type { ReviewGameContext } from '../types/ReviewGameContext';
 import type {
   EngineLine,
   Evaluation,
   Move,
-  PlayerColor,
   Game as GameType,
-  Lan,
 } from '../types/Game';
 import {
-  classificationInfo,
   ClassificationScores,
   ClassName,
   emptyClassificationScores,
 } from '../types/Review';
-import { getClassificationScore } from '../scripts/evaluate';
-import { db } from '../api/Indexed';
-import { constructPgn } from '../scripts/pgn';
-
 // @ts-ignore
 const ReviewGameContext = createContext<ReviewGameContext>();
 
 const ReviewGameContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  let gameRef = useRef<ChessInstance>();
+  const initalEvaluation: Evaluation = { type: 'cp', value: 0.3 };
   const [reviewStatus, setReviewStatus] = useState<boolean>(false);
   const [classificationNames, setClassificationNames] = useState<ClassName[]>(
     [],
   );
+  const [clks, setClks] = useState<string[]>([]);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [sanMoves, setsanMoves] = useState<string[]>([]);
   const [moves, setMoves] = useState<Move[]>([]);
@@ -72,8 +65,29 @@ const ReviewGameContextProvider: React.FC<{ children: React.ReactNode }> = ({
       setReviewStatus(true);
     }
   }, [currentPerc]);
-
-  useEffect(() => {
+  const getClassificationScore = (classification_names: ClassName[]) => {
+    const emptyClassification: ClassificationScores = {
+      best: [0, 0],
+      good: [0, 0],
+      inaccuracy: [0, 0],
+      mistake: [0, 0],
+      blunder: [0, 0],
+      excellent: [0, 0],
+      book: [0, 0],
+      great: [0, 0],
+      brilliant: [0, 0],
+      forced: [0, 0],
+      missed: [0, 0],
+      botezgambit: [0, 0],
+      unknown: [0, 0],
+    };
+    let score: ClassificationScores = { ...emptyClassification };
+    classification_names.forEach((classification, i) => {
+      score[classification][i % 2]++;
+    });
+    return score;
+  };
+  /*   useEffect(() => {
     if (reviewStatus) {
       let score = getClassificationScore(classificationNames);
       setMovesClassifications(score);
@@ -97,7 +111,7 @@ const ReviewGameContextProvider: React.FC<{ children: React.ReactNode }> = ({
      // db.games.update(gameInfo.gameId, gameInfo);
     }
   }, [reviewStatus]);
-
+ */
   return (
     <ReviewGameContext.Provider
       value={{
@@ -125,6 +139,9 @@ const ReviewGameContextProvider: React.FC<{ children: React.ReactNode }> = ({
         setEngineResponses,
         moves,
         setMoves,
+        clks,
+        setClks,
+        initalEvaluation,
       }}
     >
       {children}

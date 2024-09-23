@@ -1,6 +1,8 @@
 import { getFenArr } from './convert';
 import { parsePgn } from './pgn';
 import type { EngineLine, Evaluation, Lan } from '../types/Game';
+import { Classify } from './_Classify';
+import { ClassName } from '../types/Review';
 export class ChessEngine {
   private workerUrl: URL;
   private stockfishWorker: Worker;
@@ -56,7 +58,7 @@ export class ChessEngine {
   /**
    * @param fen empty input evaluateMove starting position
    */
-  async evaluateMove(fen: string = 'startpos'): Promise<any> {
+  async evaluateMove(fen: string = 'startpos'): Promise<EngineLine[]> {
     !fen || fen == 'startpos'
       ? this.stockfishWorker.postMessage(`position startpos`)
       : this.stockfishWorker.postMessage(`position fen ${fen}`);
@@ -98,7 +100,6 @@ export class ChessEngine {
               if (fen && fen.includes(' b ')) {
                 evaluation.value *= -1;
               }
-
               // If any piece of data from message is missing, discard message
               if (!idString || !depthString || !bestMove) {
                 console.error(
@@ -142,7 +143,7 @@ export class ChessEngine {
   async evaluatePositionFromIndex(param: {
     fens: string[];
     startIndex: number;
-    afterMoveCallback: (param: {
+    get_classification_update_callback: (param: {
       ok: boolean;
       moveNum: number;
       sanMove: string;
@@ -153,6 +154,7 @@ export class ChessEngine {
     return new Promise(async (resolve, reject) => {
       let index = param.startIndex;
       let newfens = param.fens.slice(index);
+      let evaluations = [];
       for (let fen of newfens) {
         if (!fen) {
           console.error('fen is empty the fens array is shifted');
@@ -160,12 +162,14 @@ export class ChessEngine {
         }
         try {
           let lines = await this.evaluateMove(fen);
-          param.afterMoveCallback({
+          await param.get_classification_update_callback({
             ok: true,
             moveNum: index + 1,
             sanMove: param.moves[index],
             lines,
           });
+          //new
+          evaluations.push(lines[0].evaluation);
           index++;
         } catch (error) {
           this.stockfishWorker.terminate();
@@ -179,7 +183,7 @@ export class ChessEngine {
       }
 
       this.stockfishWorker.terminate();
-      resolve(true);
+      resolve({ evaluations });
     });
   }
 
@@ -190,15 +194,21 @@ export class ChessEngine {
   async evaluatePosition(param: {
     pgn: string;
     moves?: string[];
-    afterMoveCallback: (param: {
+    get_classification_update_callback: (param: {
       ok: boolean;
       moveNum: number;
       sanMove: string;
       lines: EngineLine[];
-    }) => any;
-  }) {
+    }) => Promise<
+      | { ok: true; res: { classi_name: ClassName } }
+      | null
+    >;
+  }): Promise<{ evaluations: Evaluation[] }> {
     return new Promise(async (resolve, reject) => {
       let moves: string[] = [];
+      let index = 0;
+      let evaluations = [];
+      let classification_names = [];
       if (param.pgn) {
         try {
           const res = parsePgn(param.pgn);
@@ -210,35 +220,23 @@ export class ChessEngine {
         moves = param.moves;
       }
       let fens = getFenArr(moves);
-
-      let linesarr = await this.evaluateMove();
-      param.afterMoveCallback({
-        ok: true,
-        moveNum: 0,
-        sanMove: '',
-        lines: linesarr,
-      });
-      console.debug('evaluate start pos');
-
-      let index = 0;
       for (let fen of fens) {
-        console.info(fen);
         try {
           const lines = await this.evaluateMove(fen);
-          console.debug({
+          const classi_name = await param.get_classification_update_callback({
             ok: true,
-            sanMove: moves[index],
             moveNum: index + 1,
+            sanMove: moves[index],
             lines: lines,
           });
-          param.afterMoveCallback({
-            ok: true,
-            sanMove: moves[index],
-            moveNum: index + 1,
-            lines: lines,
-          });
-          if (index == moves.length - 1) resolve(true);
+          evaluations.push(lines[0].evaluation);
+          if (classi_name && classi_name.ok) {
+            classification_names.push(classi_name.res.classi_name);
+          } else {
+            resolve({ evaluations });
+          }
           index++;
+          if (index == moves.length - 1) resolve({ evaluations });
         } catch (e) {
           this.stockfishWorker.terminate();
           reject({
@@ -251,7 +249,7 @@ export class ChessEngine {
         }
       }
       this.stockfishWorker.terminate();
-      resolve(true);
+      resolve({ evaluations });
     });
   }
 
@@ -276,6 +274,5 @@ export class ChessEngine {
     this.targetDepth = targetDepth;
     this.verbose = verbose;
     this.waitFor = this.waitFor.bind(this);
-    //this.evaluatePosition = this.evaluatePosition.bind(this);
   }
 }
