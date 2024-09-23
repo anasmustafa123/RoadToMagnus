@@ -43,14 +43,14 @@ const constructPgn = (
     4: classifi.length,
   });
   console.log(evaluations);
-  if (moves.length === clks?.length) {
-    if (clks.length === evaluations?.length) {
-      res += pgnMerge3(moves, clks, evaluations, classifi);
+  if (moves.length === clks.length) {
+    if (clks.length === evaluations.length) {
+      res += pgnMerge(moves, clks, evaluations, classifi);
     } else {
-      res += pgnMerge2(moves, clks);
+      res += pgnMerge(moves, clks);
     }
   } else {
-    res += pgnMerge1(moves);
+    res += pgnMerge(moves);
   }
 
   return res;
@@ -176,44 +176,85 @@ function startsWithAlpha(str: string) {
     (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)
   );
 }
-const pgnMerge1 = (moves: Move[]) => {
-  return moves
-    .map((move, i) =>
-      !(i % 2)
-        ? `${i / 2 + 1}. ${move} `
-        : `${Math.floor(i / 2) + 1}... ${move} `,
-    )
-    .join('');
-};
 
-const pgnMerge2 = (moves: Move[], clks: string[]) => {
-  return moves
-    .map((move, i) =>
-      !(i % 2)
-        ? `${i / 2 + 1}. ${move} {[%clk ${clks[i]}]} `
-        : `${Math.floor(i / 2) + 1}... ${move} {[%clk ${clks[i]}]} `,
-    )
-    .join('');
-};
-
-const pgnMerge3 = (
+/**
+ *
+ * @param moves Move[]
+ * @param sec can be clks:string[] or evaluations:Evaluation[]
+ * @param third  is evaluations:Evaluation[]
+ * @param fourth is classifi:string[]
+ * @returns
+ */
+function pgnMerge(
   moves: Move[],
-  clks: string[],
-  evaluations: Evaluation[],
-  classifi: string[],
-) => {
-  return moves
-    .map((move, i) =>
+  sec?: string[] | Evaluation[],
+  third?: Evaluation[],
+  fourth?: string[],
+) {
+  if (sec && third && fourth) {
+    if (typeof sec[0] === 'string') {
+      // clks and evaluations and classifi
+      return moves
+        .map((move, i) =>
+          !(i % 2)
+            ? `${i / 2 + 1}. ${move.san} {[%clk ${sec[i]} %eval ${
+                third[i].value
+              } %classif ${fourth[i]}]} `
+            : `${Math.floor(i / 2) + 1}... ${move.san} {[%clk ${sec[i]} %eval ${
+                third[i].value
+              } %classif ${fourth[i]}]} `,
+        )
+        .join('');
+    } else {
+      // evaluations and evaluations and classifi
+      return moves.map((move, i) =>
+        !(i % 2)
+          ? `${i / 2 + 1}. ${move.san} {[%eval ${third[i].value} %classif ${fourth[i]}]} `
+          : `${Math.floor(i / 2) + 1}... ${move.san} {[%eval ${third[i].value} %classif ${fourth[i]}]} `,
+      );
+    }
+  } else if (sec && third) {
+    if (sec.length === third.length) {
+      if (typeof sec[0] === 'string') {
+        // clks and evaluations
+        return moves
+          .map((move, i) =>
+            !(i % 2)
+              ? `${i / 2 + 1}. ${move.san} {[%clk ${sec[i]} %eval ${
+                  third[i].value
+                }]} `
+              : `${Math.floor(i / 2) + 1}... ${move.san} {[%clk ${sec[i]} %eval ${
+                  third[i].value
+                }]} `,
+          )
+          .join('');
+      } else {
+        // evaluations and evaluations
+        return moves.map((move, i) =>
+          !(i % 2)
+            ? `${i / 2 + 1}. ${move.san} {[%eval ${third[i].value}]} `
+            : `${Math.floor(i / 2) + 1}... ${move.san} {[%eval ${third[i].value}]} `,
+        );
+      }
+    }
+  } else if (sec) {
+    // only clks
+    return moves
+      .map((move, i) =>
+        !(i % 2)
+          ? `${i / 2 + 1}. ${move.san} {[%clk ${sec[i]}]} `
+          : `${Math.floor(i / 2) + 1}... ${move.san} {[%clk ${sec[i]}]} `,
+      )
+      .join('');
+  } else {
+    // only moves
+    return moves.map((move, i) =>
       !(i % 2)
-        ? `${i / 2 + 1}. ${move.san} {[%clk ${clks[i]} %eval ${
-            evaluations[i].value
-          } %classif ${classifi[i]}]} `
-        : `${Math.floor(i / 2) + 1}... ${move.san} {[%clk ${clks[i]} %eval ${
-            evaluations[i].value
-          } %classif ${classifi[i]}]} `,
-    )
-    .join('');
-};
+        ? `${i / 2 + 1}. ${move.san} `
+        : `${Math.floor(i / 2) + 1}... ${move.san} `,
+    );
+  }
+}
 
 /**
  *
