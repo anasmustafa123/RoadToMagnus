@@ -536,7 +536,7 @@ export class Classify {
                             Math.abs(
                               engineLine.evaluation.value -
                                 bestEngineLine.evaluation.value,
-                            ) <= 100)))
+                            ) <= 50)))
                     )
                       return true;
                     else return false;
