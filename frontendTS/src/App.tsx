@@ -11,13 +11,13 @@ import ReviewGame from './routes/ReviewGame';
 import Stats from './routes/Stats';
 import { UserContext } from './contexts/UserContext';
 function App() {
-  const { checkNotUser , checkUser } = useContext(UserContext);
+  const { checkNotUser, checkUser } = useContext(UserContext);
   const [engineRes] = useState<EngineLine[]>([]);
+
   useEffect(() => {
     if (engineRes) {
     }
   }, [engineRes]);
-
   const router = createBrowserRouter([
     {
       path: '/login',
@@ -77,7 +77,6 @@ function App() {
       element: <div>u lost ur way my friend</div>,
     },
   ]);
-
   return (
     <>
       <RouterProvider router={router} />
