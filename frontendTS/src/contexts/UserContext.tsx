@@ -10,7 +10,7 @@ import { MenuBarTheme } from '../types/Ui';
 import { db, IDB_User } from '../api/Indexed';
 import { GameContext } from './GamesContext';
 import { Unique_Game_Array } from '../types/Game';
-import { convertPgnToGame, parsePgn } from '../scripts/pgn';
+import { convertPgnToGame } from '../scripts/pgn';
 const defaultValue: UserContextType = {
   setChessDCAvatarLink: () => {},
   setUiTheme: () => {},
@@ -28,6 +28,9 @@ const defaultValue: UserContextType = {
   setUser: () => {},
   checkUser: () => Promise.resolve(false),
   checkNotUser: () => Promise.resolve(false),
+  layout: ['layout_1', 'v'],
+  setLayout: () => {},
+  update_layout: () => {},
 };
 false;
 const UserContext = createContext<UserContextType>(defaultValue);
@@ -43,24 +46,18 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   const [menuBarTheme, setMenuBarTheme] = useState<MenuBarTheme>('v');
   const [showRigthSidebar, setShowRightSidebar] = useState<boolean>(true);
   const [largeScreen, setLargeScreenWidth] = useState(false);
-
+  const [layout, setLayout] = useState<string[]>(['layout_1', 'v']);
   useEffect(() => {
     const handleResize = () => {
-      //console.log(menuBarTheme);
       if (window.innerWidth > 1350) {
         setChessboardWidth(750);
         if (!largeScreen) setLargeScreenWidth(true);
-        //if (menuBarTheme != 'v') setMenuBarTheme('v');
       } else if (window.innerWidth <= 1350 && window.innerWidth > 1100) {
         console.log('vertical');
-        //if (menuBarTheme == 'v') setChessboardWidth(650);
-        // if (menuBarTheme != 'v') setMenuBarTheme('v');
         if (!largeScreen) setLargeScreenWidth(true);
       } else if (window.innerWidth <= 900) {
         console.log('horizontal');
-
         if (largeScreen) setLargeScreenWidth(false);
-        //  if (menuBarTheme != 'h') setMenuBarTheme('h');
         setChessboardWidth(window.innerWidth - 10);
       }
     };
@@ -82,7 +79,25 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
       root.className = 'light';
     }
   }, [uiTheme]);
-
+  const update_layout = (new_layout: string[]) => {
+    console.log({ new_layout, layout });
+    let current_layout = [...layout];
+    if (new_layout.includes('layout_1') || new_layout.includes('layout_2')) {
+      if (new_layout.length > 1) {
+        current_layout = [];
+      } else {
+        current_layout = layout.filter((l) => {
+          return l == 'layout_1' || l == 'layout_2' ? false : true;
+        });
+      }
+    } else if (new_layout.length) {
+      current_layout = layout.filter((l) => {
+        return l == 'layout_1' || l == 'layout_2' ? true : false;
+      });
+    }
+    current_layout = current_layout.concat(new_layout);
+    setLayout(current_layout);
+  };
   const checkUser = (): Promise<boolean> => {
     return new Promise((resolve, reject) => {
       if (user) {
@@ -157,10 +172,10 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
           reject(false);
         }
       } catch (e) {
-       resolve(true);
+        resolve(true);
       }
     });
-    };
+  };
 
   return (
     <UserContext.Provider
@@ -181,6 +196,9 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
         setUser,
         checkUser,
         checkNotUser,
+        layout,
+        setLayout,
+        update_layout,
       }}
     >
       {children}

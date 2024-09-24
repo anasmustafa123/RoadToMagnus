@@ -18,4 +18,7 @@ export interface UserContextType {
   user: IDB_User | undefined;
   checkUser: () => Promise<boolean>;
   checkNotUser: () => Promise<boolean>;
+  layout: string[];
+  setLayout: React.Dispatch<React.SetStateAction<string[]>>;
+  update_layout: (layout: string[]) => void;
 }
