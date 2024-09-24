@@ -40,32 +40,66 @@ function App() {
       path: '/',
       element: <ProtectedRoute />,
       children: [
-        { path: '', element: <Profile /> },
-        { path: 'profile', element: <Profile /> },
+        {
+          path: '',
+          element: (
+            <>
+              <title>review.com</title>
+              <Profile />
+            </>
+          ),
+        },
+        {
+          path: 'profile',
+          element: (
+            <>
+              <title>review.com</title>
+              <Profile />
+            </>
+          ),
+        },
         {
           path: 'games',
           element: (
-            <Games
-              inlineStyles={{
-                gridColumnStart: '2',
-                marginLeft: 'auto',
-                marginRight: 'auto',
-                backgroundColor: 'var(--bg-color)',
-              }}
-            />
+            <>
+              <title>Games</title>
+              <Games
+                inlineStyles={{
+                  gridColumnStart: '2',
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+                  backgroundColor: 'var(--bg-color)',
+                }}
+              />
+            </>
           ),
         },
         {
           path: 'stats',
-          element: <Stats />,
+          element: (
+            <>
+              <title>Stats</title>
+              <Stats />
+            </>
+          ),
         },
         {
           path: 'review/:gameId',
-          element: <ReviewGame />,
+          element: (
+            <>
+              <title>Review Game</title>
+              <ReviewGame />
+            </>
+          ),
         },
         {
           path: 'explorer',
-          element: 'explore',
+          element: (
+            <>
+              <title>Explorer</title>
+              <ReviewGame />
+            </>
+          ),
         },
       ],
       loader: () => {
