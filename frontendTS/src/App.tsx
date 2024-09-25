@@ -62,7 +62,7 @@ function App() {
           path: 'games',
           element: (
             <>
-              <title>Games</title>
+              <title>Games - review.com</title>
               <Games
                 inlineStyles={{
                   gridColumnStart: '2',
@@ -78,7 +78,7 @@ function App() {
           path: 'stats',
           element: (
             <>
-              <title>Stats</title>
+              <title>Stats - review.com</title>
               <Stats />
             </>
           ),
@@ -87,7 +87,7 @@ function App() {
           path: 'review/:gameId',
           element: (
             <>
-              <title>Review Game</title>
+              <title>Review Game - review.com</title>
               <ReviewGame />
             </>
           ),
@@ -96,7 +96,7 @@ function App() {
           path: 'explorer',
           element: (
             <>
-              <title>Explorer</title>
+              <title>Explorer - review.com</title>
               <ReviewGame />
             </>
           ),

@@ -7,10 +7,10 @@ import { ReviewGameContext } from '../contexts/ReviewGameContext';
 import styles from '../styles/ReviewGame.module.css';
 import { ChessBoardContextProvider } from '../contexts/GameBoardContext';
 import { UserContext } from '../contexts/UserContext';
-import { useParams,useLocation } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { Classify } from '../scripts/_Classify';
 import { EngineLine, Game } from '../types/Game';
-import { ClassName } from '../types/Review';
+import { ClassificationScores, ClassName } from '../types/Review';
 import { ChessEngine } from '../scripts/_Stockfish';
 import { constructPgn, getMoves, parsePgn } from '../scripts/pgn';
 import { GameContext } from '../contexts/GamesContext';
@@ -23,7 +23,7 @@ type callbackfunctionType = (param: {
 const ReviewGame = () => {
   const location = useLocation();
   const { gameId } = useParams();
-  const { largeScreen } = useContext(UserContext);
+  const { largeScreen, update_layout } = useContext(UserContext);
   const {
     reviewStatus,
     setReviewStatus,
@@ -38,11 +38,34 @@ const ReviewGame = () => {
     setClks,
     setEngineResponses,
     setCurrentEngineLines,
+    setMovesClassifications,
   } = useContext(ReviewGameContext);
   const { get_game_byId } = useContext(GameContext);
   const [expand_review_state, setExpand_review_state] = useState(false);
   const [showEval_chessmoves] = useState(false);
 
+  function getClassificationScore(classification_names: ClassName[]) {
+    const emptyClassification: ClassificationScores = {
+      best: [0, 0],
+      good: [0, 0],
+      inaccuracy: [0, 0],
+      mistake: [0, 0],
+      blunder: [0, 0],
+      excellent: [0, 0],
+      book: [0, 0],
+      great: [0, 0],
+      brilliant: [0, 0],
+      forced: [0, 0],
+      missed: [0, 0],
+      botezgambit: [0, 0],
+      unknown: [0, 0],
+    };
+    let score: ClassificationScores = { ...emptyClassification };
+    classification_names.forEach((classification, i) => {
+      score[classification][i % 2]++;
+    });
+    return score;
+  }
   function callbackfunction(
     ClassificationHelper: Classify,
     gameData: Game,
@@ -69,13 +92,15 @@ const ReviewGame = () => {
           return null;
         }
         setClassificationNames((old) => [...old, moveClassification]);
-        setEvaluations((old) => [...old, param.lines[param.lines.length-1].evaluation]);
+        setEvaluations((old) => [
+          ...old,
+          param.lines[param.lines.length - 1].evaluation,
+        ]);
         setCurrentPerc((old) => old + 1);
         setEngineResponses((old) => [...old, param.lines]);
         setCurrentEngineLines(param.lines);
 
         return { ok: true, res: { classi_name: moveClassification } };
-
       }
       return null;
     };
@@ -133,7 +158,7 @@ const ReviewGame = () => {
   };
 
   useEffect(() => {
-    console.log('refreshing')
+    console.log('refreshing');
     // when the review status is false endicating that the game is not yet evaluated
     // we need to evaluate the game
 
@@ -147,7 +172,7 @@ const ReviewGame = () => {
         console.error('cant find game with id: ', gameId);
         return;
       }
-      console.log('gameinfo', gameData);  
+      console.log('gameinfo', gameData);
       setGameInfo(gameData);
       setMaxtPerc(gameData.movesCount);
       let parsedGameData = parsePgn(gameData.pgn);
@@ -197,7 +222,10 @@ const ReviewGame = () => {
                 moves,
                 parsedGameData.clks,
                 res.evaluations,
-                [],
+                res.classification_names,
+              );
+              setMovesClassifications(
+                getClassificationScore(res.classification_names),
               );
               console.log('after pgn');
               console.log(newpgn);
@@ -239,32 +267,43 @@ const ReviewGame = () => {
       </ChessBoardContextProvider>
     ) : (
       <>
-        <ReviewResult expand_review_state={expand_review_state} />
-        <div className={styles.showReview}>
-          <div
-            onClick={() => {
-              const current_review_state = !expand_review_state;
-              setExpand_review_state(current_review_state);
-            }}
-            className={styles.expand_review}
-          >
-            <i
-              style={
-                expand_review_state
-                  ? { boxShadow: '0px 0px 0px red' }
-                  : {
-                      boxShadow: '1px -31px 28px 30px rgba(255, 255, 255, 0.9)',
-                    }
-              }
-              className={
-                expand_review_state
-                  ? 'bx bx-chevrons-up'
-                  : 'bx bx-chevrons-down'
-              }
-            ></i>
-          </div>
-          <button>Review</button>
-        </div>
+        <ReviewResult
+          expand_review_state={expand_review_state}
+          children={
+            <div className={styles.showReview}>
+              <div
+                onClick={() => {
+                  const current_review_state = !expand_review_state;
+                  setExpand_review_state(current_review_state);
+                }}
+                className={styles.expand_review}
+              >
+                <i
+                  style={
+                    expand_review_state
+                      ? { boxShadow: '0px 0px 0px red' }
+                      : {
+                          boxShadow:
+                            '1px -31px 28px 30px rgba(255, 255, 255, 0.9)',
+                        }
+                  }
+                  className={
+                    expand_review_state
+                      ? 'bx bx-chevrons-up'
+                      : 'bx bx-chevrons-down'
+                  }
+                ></i>
+              </div>
+              <button
+                onClick={() => {
+                  update_layout(['layout_2']);
+                }}
+              >
+                Review
+              </button>
+            </div>
+          }
+        />
       </>
     )
   ) : largeScreen ? (

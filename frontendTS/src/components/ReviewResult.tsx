@@ -1,10 +1,11 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { ReactElement, useContext, useEffect, useRef } from 'react';
 import styles from '../styles/ReviewResult.module.css';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
 import { classificationInfo } from '../types/Review';
-const ReviewResult: React.FC<{ expand_review_state: boolean }> = ({
-  expand_review_state,
-}) => {
+const ReviewResult: React.FC<{
+  expand_review_state: boolean;
+  children: ReactElement;
+}> = ({ expand_review_state, children }) => {
   const { gameInfo, movesClassifications } = useContext(ReviewGameContext);
   const expandstateRef = useRef(null);
   useEffect(() => {
@@ -34,16 +35,18 @@ const ReviewResult: React.FC<{ expand_review_state: boolean }> = ({
               }
               className={styles.imgContainer}
             >
-              <img src={gameInfo.wuser.avatar} alt="black avatar" />
+              <img src={gameInfo.wuser.avatar || '/white_brain.png'} />
             </div>
             <div
               style={
                 gameInfo.gameResult == 1
                   ? {
                       '--block-border': `var(--win-color)`,
+                      width: '100%',
                     }
                   : {
                       '--block-border': `var(--loss-color)`,
+                      width: '100%',
                     }
               }
               className={`${styles.wblock} ${styles.block}`}
@@ -64,16 +67,21 @@ const ReviewResult: React.FC<{ expand_review_state: boolean }> = ({
               }
               className={styles.imgContainer}
             >
-              <img src={gameInfo.buser.avatar} alt="black avatar" />
+              <img
+                src={gameInfo.buser.avatar || '/black_brain.png'}
+                alt="black avatar"
+              />
             </div>
             <div
               style={
                 gameInfo.gameResult == -1
                   ? {
                       '--block-border': `var(--win-color)`,
+                      width: '100%',
                     }
                   : {
                       '--block-border': `var(--loss-color)`,
+                      width: '100%',
                     }
               }
               className={`${styles.bblock} ${styles.block}`}
@@ -162,6 +170,7 @@ const ReviewResult: React.FC<{ expand_review_state: boolean }> = ({
           </div>
         </div>
       </div>
+      {children}
     </div>
   );
 };
