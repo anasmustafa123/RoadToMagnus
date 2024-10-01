@@ -1,9 +1,8 @@
-import React from 'react'
+import { useOutletContext } from 'react-router-dom';
 
 const Stats = () => {
-  return (
-    <div>Stats</div>
-  )
-}
+  const { outletStyles } = useOutletContext<any>();
+  return <div style={outletStyles}>Stats</div>;
+};
 
-export default Stats
+export default Stats;

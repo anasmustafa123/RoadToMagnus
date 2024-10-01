@@ -4,7 +4,15 @@ import PieChart from '../components/stats/PieChart';
 import RouteLink from '../components/RouteLink';
 import MiniGamesStat from '../components/profile/MiniGamesStat';
 import BarChart from '../components/stats/BarChart';
+import { useOutletContext } from 'react-router-dom';
+import { Right_SideBar } from '../components/Right_SideBar';
+
+/**
+ * @prop {React.CSSProperties} inline_styles
+ * @returns
+ */
 const Profile = () => {
+  const { outletStyles } = useOutletContext<any>();
   let classifications = [
     { name: 'good', chess: 20, lichess: 30 },
     { name: 'great', chess: 150, lichess: 90 },
@@ -31,7 +39,6 @@ const Profile = () => {
     gameRescopy.result = res[index2];
     return gameRescopy;
   });
-
   let minigamesdata = [
     { name: 'Rapid', url: 'rapid', 'chess.com': 1200, lichess: 1300 },
     { name: 'Blitz', url: 'blitz', 'chess.com': 1200, lichess: 1300 },
@@ -41,7 +48,7 @@ const Profile = () => {
 
   return (
     <>
-      <div className={styles.profile}>
+      <div style={outletStyles} className={styles.profile}>
         <Header styles={styles}></Header>
         <div className={styles.classificationBlocksContainer}>
           <RouteLink
@@ -88,7 +95,7 @@ const Profile = () => {
           ))}
         </div>
       </div>
-      <div className={styles.rightSidebar}>
+      {/* <div className={styles.rightSidebar}>
         <div
           style={{ border: '1px solid black' }}
           className={styles.donutContainer}
@@ -99,11 +106,11 @@ const Profile = () => {
             title="Stats"
             hovercolor="green"
           />
-          {/*           <PieChart data={data} info={info} title="Game Played"></PieChart> */}
           <BarChart />
         </div>
         <MiniGamesStat />
-      </div>
+      </div> */}
+      <Right_SideBar />
     </>
   );
 };

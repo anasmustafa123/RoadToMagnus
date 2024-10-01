@@ -15,13 +15,13 @@ const Game: React.FC<{
     bullet: 'orange',
     daily: 'yellow',
   };
-  const { usernameChessDC, usernameLichess } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const playerColor =
     gameData.site == 'chess.com'
-      ? usernameChessDC == gameData.wuser.username
+      ? user?.username.split('-')[0] == gameData.wuser.username
         ? 1
         : -1
-      : usernameLichess == gameData.wuser.username
+      : user?.username.split('-')[1] == gameData.wuser.username
         ? 1
         : -1;
   return (
