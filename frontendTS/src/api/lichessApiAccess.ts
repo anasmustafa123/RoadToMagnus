@@ -10,7 +10,6 @@ async function fetchLichesssGames(username: string) {
   }
   toast.success('correct username wait for game loading....');
   const data = await response.text();
-  console.log(data);
   return data;
 }
 

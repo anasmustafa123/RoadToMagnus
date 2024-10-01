@@ -52,7 +52,6 @@ const get_chessDcom_last_date = (
         ]
           .split('/')
           .slice(-2);
-        console.debug(lastmonth, lastyear);
         let month = parseInt(lastmonth);
         let year = parseInt(lastyear);
         resolve({ ok: true, month: month, year: year });
@@ -73,7 +72,6 @@ const getAvalibleArchieves = async (username: string) => {
       throw new Error(`Error fetching games: ${response.status}`);
     }
     const data = await response.json();
-    console.debug(data);
     return data;
   } catch (error) {
     console.error('enter correct chess.com username');
@@ -92,14 +90,9 @@ const getAllGames = async (
     }
     let full_games = [] as Game[];
     for (let url of res.archives as string[]) {
-      console.log({ url });
       try {
         const response = await fetch(url);
         if (!response.ok) {
-          console.error({
-            ok: false,
-            message: `Error fetching games: ${response.status}`,
-          });
           continue;
         }
         const data = await response.json();
@@ -169,8 +162,6 @@ const reduceGamesOfMonth = (
       let res = game.url.split('/');
       if (res.length > 0) {
         let url = res[res.length - 1];
-        console.error(game.url)
-        console.log(res)
         _gameId = url;
       }
     }
@@ -228,7 +219,6 @@ async function fetch_games_onperiod({
   eyear: number | null;
   afterEachMonthCallback: (games: Game[]) => any;
 }): Promise<{ ok: boolean; allGames: Game[] }> {
-  console.log(afterEachMonthCallback);
   let allGames: Game[] = [];
   if (eyear == null || emonth == null || smonth == null || syear == null) {
     let res = await getAllGames(username, afterEachMonthCallback);
@@ -246,7 +236,6 @@ async function fetch_games_onperiod({
         .fill(0)
         .map((v, i) => (smonth as number) + i)) {
         let games = await getGamesOfMonth(username, startYear, startMonth);
-        console.log(afterEachMonthCallback);
         afterEachMonthCallback(games);
         allGames = allGames.concat(games);
       }

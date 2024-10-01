@@ -1,3 +1,5 @@
+@value gridContainer, v, mv, h , layout_1, layout_2 from './ProtectedRoute.module.css';
+
 .header {
   padding-top: 1rem;
   color: var(--text-color);
@@ -44,13 +46,25 @@
   animation: toTheRightToTheRight 3s infinite;
   animation-timing-function: linear;
 }
-.animatedTextRight{
+.animatedTextRight {
   margin-top: 3rem;
 }
 .animatedTextLeft {
   animation-direction: alternate;
 }
-
+/* ---------------- layout styling ---------------- */
+.gridContainer.layout_1.v .gamesContainer,
+.gridContainer.layout_1.mv .gamesContainer,
+.gridContainer.layout_2.v .gamesContainer,
+.gridContainer.layout_2.mv .gamesContainer {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+.gridContainer.layout_1.h .gamesContainer,
+.gridContainer.layout_2.h .gamesContainer{
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
 @keyframes toTheRightToTheRight {
   0% {
     transform: translateX(-100%);

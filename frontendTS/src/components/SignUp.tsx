@@ -1,20 +1,22 @@
-import React, { useState, useContext, Suspense } from 'react';
-import { UserContext } from '../contexts/UserContext';
+import React, { useState, Suspense } from 'react';
 import styles from '../styles/SignUp.module.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { notify } from '../scripts/toast.ts';
 import { validateEmail, validatePassword } from '../scripts/validate.ts';
-import { Await, Link, Navigate, useLoaderData, useNavigate } from 'react-router-dom';
+import {
+  Await,
+  Link,
+  Navigate,
+  useLoaderData,
+  useNavigate,
+} from 'react-router-dom';
 import { getUserInfo as lichessVerify } from '../api/lichessApiAccess.ts';
 import { getUserInfo as chessVerify } from '../api/chessApiAccess.ts';
 import { NewUser } from '../types/User';
 const SignUp = () => {
   const { loader_data } = useLoaderData() as any;
   const navigate = useNavigate();
-  const { setChessDCUsername, setChessDCAvatarLink, setUserLicehessname } =
-    useContext(UserContext);
-
   const [passwordInputType, setPasswordInputType] = useState('password');
   const [confirmPasswordInputType, setconfirmPasswordInputType] =
     useState('password');
@@ -293,7 +295,6 @@ const SignUp = () => {
                       } else {
                         lichessVerify(data.lichess).then((res) => {
                           if (res.ok) {
-                            setUserLicehessname(res.data.username);
                             notify('lichess verified', 'success');
                             setErrors((old) => {
                               const copy = { ...old };
@@ -381,8 +382,6 @@ const SignUp = () => {
                           data['chess.com'] ? data['chess.com'] : '',
                         ).then((res) => {
                           if (res.ok) {
-                            setChessDCAvatarLink(res.data.avatar);
-                            setChessDCUsername(res.data.username);
                             notify('chess.com verified', 'success');
                             setErrors((old) => {
                               const copy = { ...old };

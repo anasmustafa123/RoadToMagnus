@@ -1,31 +1,24 @@
-import  { useContext, useRef, useEffect, Suspense } from 'react';
+import { useContext, useRef, useEffect, Suspense } from 'react';
 import { Await, Navigate, Outlet, useLoaderData } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
 import Sidebar from '../components/MenuBar';
+import styles from '../styles/ProtectedRoute.module.css';
 
 const ProtectedRoute = () => {
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const { menuBarTheme, showRigthSidebar } = useContext(UserContext);
+  const { menuBarTheme, showRigthSidebar, layout, setLayout } =
+    useContext(UserContext);
   const { loader_data } = useLoaderData() as any;
   useEffect(() => {
-    sidebarRef.current
-      ? (sidebarRef.current.className = `gridContainer ${
-          menuBarTheme == 'v'
-            ? showRigthSidebar
-              ? 'layout_1_v'
-              : 'layout_2_v'
-            : menuBarTheme == 'h'
-              ? showRigthSidebar
-                ? 'layout_1_h'
-                : 'layout_2_h'
-              : menuBarTheme == 'mv'
-                ? showRigthSidebar
-                  ? 'layout_1_mv'
-                  : 'layout_2_mv'
-                : ''
-        }`)
-      : '';
-  }, [menuBarTheme]);
+    if (sidebarRef.current) {
+      sidebarRef.current.className = `${styles.gridContainer} ${layout
+        .map((v) => {
+          return styles[v];
+        })
+        .join(' ')}`;
+    }
+  }, [layout]);
+
   return (
     <Suspense
       fallback={
@@ -43,20 +36,10 @@ const ProtectedRoute = () => {
       <Await resolve={loader_data} errorElement={<Navigate to="/login" />}>
         <div
           ref={sidebarRef}
-          className={`gridContainer ${
-            menuBarTheme == 'v'
-              ? showRigthSidebar
-                ? 'layout_1_v'
-                : 'layout_2_v'
-              : menuBarTheme == 'h'
-                ? showRigthSidebar
-                  ? 'layout_1_h'
-                  : 'layout_2_h'
-                : menuBarTheme == 'mv'
-                  ? showRigthSidebar
-                    ? 'layout_1_mv'
-                    : 'layout_2_mv'
-                  : ''
+          className={`${styles.gridContainer} ${
+            showRigthSidebar
+              ? `${styles.layout_1} ${styles[menuBarTheme]}`
+              : `${styles.layout_2} ${styles[menuBarTheme]}`
           }`}
         >
           <Sidebar
@@ -73,13 +56,13 @@ const ProtectedRoute = () => {
           <Outlet
             context={{
               outletStyles: {
-                gridColumn:
+                /*  gridColumn:
                   menuBarTheme == 'v' || menuBarTheme == 'mv'
                     ? '2/3'
                     : menuBarTheme == 'h'
                       ? '1/2'
                       : 0,
-                gridRow: menuBarTheme == 'h' ? '2/3' : '',
+                gridRow: menuBarTheme == 'h' ? '2/3' : '', */
               },
             }}
           />

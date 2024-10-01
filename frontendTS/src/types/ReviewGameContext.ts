@@ -1,5 +1,5 @@
 import { EngineLine, Evaluation, Game, Move } from './Game';
-import { Classification, ClassificationScores, ClassName } from './Review';
+import { ClassificationScores, ClassName } from './Review';
 import React from 'react';
 
 export interface ReviewGameContext {
@@ -29,4 +29,7 @@ export interface ReviewGameContext {
   setEngineResponses: React.Dispatch<React.SetStateAction<EngineLine[][]>>;
   moves: Move[];
   setMoves: React.Dispatch<React.SetStateAction<Move[]>>;
+  clks: string[];
+  setClks: React.Dispatch<React.SetStateAction<string[]>>;
+  initalEvaluation: Evaluation;
 }

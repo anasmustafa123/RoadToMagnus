@@ -4,6 +4,6 @@ declare module 'react' {
   interface CSSProperties {
     '--hover-color'?: string;
     '--block-border'?: string;
-    "--header-color"?: string;
+    '--header-color'?: string;
   }
 }
