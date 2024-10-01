@@ -1,23 +1,14 @@
 import { useContext } from 'react';
 import ChessBoard from './ChessBoard';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
+import styles from '../styles/NewReview.module.css';
+
 const Loading_Review_SmallScreen: React.FC = () => {
   const { currentPerc, maxPerc } = useContext(ReviewGameContext);
 
   return (
     <>
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          overflow: 'hidden',
-          gridColumn: '1/3'
-        }}
-      >
+      <div className={styles.Phone_loading_container}>
         <ChessBoard
           inlineStyles={{
             maxWidth: 'fit-content',

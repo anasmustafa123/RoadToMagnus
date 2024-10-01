@@ -8,21 +8,16 @@ import {
   Await,
   Link,
   Navigate,
-  useLoaderData,
-  useNavigate,
+  useLoaderData
 } from 'react-router-dom';
 import { validateEmail, validatePassword } from '../scripts/validate';
 import { OldUser } from '../types/User';
+import { db } from '../api/Indexed';
 const Login = () => {
   const { loader_data } = useLoaderData() as any;
   console.log(loader_data);
-  const navigate = useNavigate();
   const {
-    setUserId,
-    setIsUser,
-    setChessDCUsername,
-    setUsername,
-    setUserLicehessname,
+    setUser
   } = useContext(UserContext);
   const [passwordInputType, setPasswordInputType] = useState('password');
   const [data, setData] = useState({
@@ -61,16 +56,20 @@ const Login = () => {
     if (errors.email == '' && errors.password == '') {
       loginReq(data).then((res) => {
         if (res.ok) {
-          console.dir(res);
-          setUserId(res.data.userId);
-          setIsUser(true);
-          res.data['chess.com']
-            ? setChessDCUsername(res.data['chess.com'])
-            : '';
-          res.data['lichess'] ? setUserLicehessname(res.data['lichess']) : '';
-          setUsername(res.data.name);
+          setUser({
+            key: res.data.userId,
+            username: `${res.data['chess.com'] ? res.data['chess.com'] : ''}-${res.data['lichess'] ? res.data['lichess'] : ''}`,
+            lichessdate: 0,
+            chessdate: 0,
+          });
+          db.users.add({
+            key: res.data.userId,
+            username: `${res.data['chess.com'] ? res.data['chess.com'] : ''}-${res.data['lichess'] ? res.data['lichess'] : ''}`,
+            lichessdate: 0,
+            chessdate: 0,
+          })
           notify(
-            `${res.data['chess.com']} you logged to your account successfully`,
+            `${res.data.name} you logged to your account successfully`,
             'success',
           );
         } else notify(res.message, 'error');

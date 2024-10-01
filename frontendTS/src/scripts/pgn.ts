@@ -1,12 +1,21 @@
-import { Evaluation, GameResult, GameType, Lan, Move } from '../types/Game';
+import {
+  Evaluation,
+  Game,
+  GameResult,
+  GameType,
+  Lan,
+  Move,
+} from '../types/Game';
 import { UserInfo } from '../types/User';
 import {
   Classification,
   classificationInfo,
+  ClassName,
   ClassSymbol,
 } from '../types/Review';
 import { Chess, PieceType } from 'chess.js';
 import { Piece } from 'react-chessboard/dist/chessboard/types';
+import { Vendor } from '../types/Api';
 const constructPgn = (
   wplayer: UserInfo,
   bplayer: UserInfo,
@@ -14,7 +23,7 @@ const constructPgn = (
   moves: Move[],
   clks: string[],
   evaluations: Evaluation[],
-  classifi: string[],
+  classifi_names: ClassName[],
 ) => {
   let res = '';
   res += wplayer.username ? getHeader('White', wplayer.username) : '';
@@ -28,21 +37,22 @@ const constructPgn = (
       )
     : '';
   res += '\n';
+  const classifi_keys = convert_classiName_to_sym(classifi_names);
   console.log({
     1: moves.length,
     2: clks.length,
     3: evaluations.length,
-    4: classifi.length,
+    4: classifi_keys.length,
   });
   console.log(evaluations);
-  if (moves.length === clks?.length) {
-    if (clks.length === evaluations?.length) {
-      res += pgnMerge3(moves, clks, evaluations, classifi);
+  if (moves.length === clks.length) {
+    if (clks.length === evaluations.length) {
+      res += pgnMerge(moves, clks, evaluations, classifi_keys);
     } else {
-      res += pgnMerge2(moves, clks);
+      res += pgnMerge(moves, clks);
     }
   } else {
-    res += pgnMerge1(moves);
+    res += pgnMerge(moves);
   }
 
   return res;
@@ -168,44 +178,92 @@ function startsWithAlpha(str: string) {
     (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)
   );
 }
-const pgnMerge1 = (moves: Move[]) => {
-  return moves
-    .map((move, i) =>
-      !(i % 2)
-        ? `${i / 2 + 1}. ${move} `
-        : `${Math.floor(i / 2) + 1}... ${move} `,
-    )
-    .join('');
+const convert_classiName_to_sym = (classiNames: ClassName[]) => {
+  return classiNames.map((classiName) => {
+    const classification_sym = classificationInfo.find(
+      (v) => v.name == classiName,
+    )?.sym;
+    return classification_sym ? classification_sym : '????';
+  });
 };
-
-const pgnMerge2 = (moves: Move[], clks: string[]) => {
-  return moves
-    .map((move, i) =>
-      !(i % 2)
-        ? `${i / 2 + 1}. ${move} {[%clk ${clks[i]}]} `
-        : `${Math.floor(i / 2) + 1}... ${move} {[%clk ${clks[i]}]} `,
-    )
-    .join('');
-};
-
-const pgnMerge3 = (
+/**
+ *
+ * @param {Move[]} moves Move[]
+ * @param {string[] | Evaluation[]} sec can be clks:string[] or evaluations:Evaluation[]
+ * @param {Evaluation[]} third  is evaluations
+ * @param {Classification.sym[]} fourth is string[]
+ * @returns
+ */
+function pgnMerge(
   moves: Move[],
-  clks: string[],
-  evaluations: Evaluation[],
-  classifi: string[],
-) => {
-  return moves
-    .map((move, i) =>
+  sec?: string[] | Evaluation[],
+  third?: Evaluation[],
+  fourth?: string[],
+) {
+  if (sec && third && fourth) {
+    if (typeof sec[0] === 'string') {
+      // clks and evaluations and classifi
+      return moves
+        .map((move, i) =>
+          !(i % 2)
+            ? `${i / 2 + 1}. ${move.san} {[%clk ${sec[i]} %eval ${
+                third[i].value
+              } %classif ${fourth[i]}]} `
+            : `${Math.floor(i / 2) + 1}... ${move.san} {[%clk ${sec[i]} %eval ${
+                third[i].value
+              } %classif ${fourth[i]}]} `,
+        )
+        .join('');
+    } else {
+      // evaluations and evaluations and classifi
+      return moves.map((move, i) =>
+        !(i % 2)
+          ? `${i / 2 + 1}. ${move.san} {[%eval ${third[i].value} %classif ${fourth[i]}]} `
+          : `${Math.floor(i / 2) + 1}... ${move.san} {[%eval ${third[i].value} %classif ${fourth[i]}]} `,
+      );
+    }
+  } else if (sec && third) {
+    if (sec.length === third.length) {
+      if (typeof sec[0] === 'string') {
+        // clks and evaluations
+        return moves
+          .map((move, i) =>
+            !(i % 2)
+              ? `${i / 2 + 1}. ${move.san} {[%clk ${sec[i]} %eval ${
+                  third[i].value
+                }]} `
+              : `${Math.floor(i / 2) + 1}... ${move.san} {[%clk ${sec[i]} %eval ${
+                  third[i].value
+                }]} `,
+          )
+          .join('');
+      } else {
+        // evaluations and evaluations
+        return moves.map((move, i) =>
+          !(i % 2)
+            ? `${i / 2 + 1}. ${move.san} {[%eval ${third[i].value}]} `
+            : `${Math.floor(i / 2) + 1}... ${move.san} {[%eval ${third[i].value}]} `,
+        );
+      }
+    }
+  } else if (sec) {
+    // only clks
+    return moves
+      .map((move, i) =>
+        !(i % 2)
+          ? `${i / 2 + 1}. ${move.san} {[%clk ${sec[i]}]} `
+          : `${Math.floor(i / 2) + 1}... ${move.san} {[%clk ${sec[i]}]} `,
+      )
+      .join('');
+  } else {
+    // only moves
+    return moves.map((move, i) =>
       !(i % 2)
-        ? `${i / 2 + 1}. ${move.san} {[%clk ${clks[i]} %eval ${
-            evaluations[i].value
-          } %classif ${classifi[i]}]} `
-        : `${Math.floor(i / 2) + 1}... ${move.san} {[%clk ${clks[i]} %eval ${
-            evaluations[i].value
-          } %classif ${classifi[i]}]} `,
-    )
-    .join('');
-};
+        ? `${i / 2 + 1}. ${move.san} `
+        : `${Math.floor(i / 2) + 1}... ${move.san} `,
+    );
+  }
+}
 
 /**
  *
@@ -237,4 +295,35 @@ const getMoves = (pgn: string) => {
   });
 };
 
-export { constructPgn, parsePgn, getMovesNum, getMoves };
+const convertPgnToGame = (
+  pgn: string,
+  username: string,
+  vendor: Vendor,
+): Game => {
+  const parsedGame = parsePgn(pgn);
+  return {
+    ...parsedGame,
+    playerColor: username == parsedGame.wuser.username ? 1 : -1,
+    site: vendor,
+    pgn,
+  };
+};
+
+const convertPgnsToGames = (
+  pgns: string[],
+  username: string,
+  vendor: Vendor,
+): Game[] => {
+  return pgns.map((pgn) => {
+    return convertPgnToGame(pgn, username, vendor);
+  });
+};
+
+export {
+  constructPgn,
+  parsePgn,
+  getMovesNum,
+  getMoves,
+  convertPgnsToGames,
+  convertPgnToGame,
+};

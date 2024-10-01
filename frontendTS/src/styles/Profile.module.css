@@ -1,6 +1,6 @@
+@value gridContainer, v, mv, h , layout_1, layout_2 from './ProtectedRoute.module.css';
+
 .profile {
-  /* height: 1000px; */
-  grid-column: 2/3;
 }
 .header {
   display: flex;
@@ -13,11 +13,7 @@
   border-radius: 10px;
   margin: auto;
 }
-.header > div {
-  /* display: flex;
-  flex-direction: column;
-  margin: 5px; */
-}
+
 .header > div > div {
   display: flex;
   align-items: center;
@@ -220,13 +216,16 @@ h1.username {
   border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
 }
 
-/* ------------- */
-.rightSidebar {
-  padding: 4rem 10px 0px 10px;
+/* -------- layout ----------- */
+.gridContainer.layout_1.v .profile,
+.gridContainer.layout_1.mv .profile,
+.gridContainer.layout_2.v .profile,
+.gridContainer.layout_2.mv .profile {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
 }
-.rightSidebar > *{
-  margin: 1rem 0px 1rem  0px;
-  background-color: var(--text-color);
-  color: var(--bg-color);
-  border-radius: 10px;
+.gridContainer.layout_1.h .profile,
+.gridContainer.layout_2.h .profile{
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
 }

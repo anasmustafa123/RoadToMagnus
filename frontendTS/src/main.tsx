@@ -8,11 +8,11 @@ import { ReviewGameContextProvider } from './contexts/ReviewGameContext.tsx';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <GameContextProvider>
     <UserContextProvider>
-      <React.StrictMode>
+      {/* <React.StrictMode> */}
         <ReviewGameContextProvider>
           <App />
         </ReviewGameContextProvider>
-      </React.StrictMode>
+      {/* </React.StrictMode> */}
     </UserContextProvider>
   </GameContextProvider>,
 );

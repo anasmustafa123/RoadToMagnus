@@ -7,7 +7,7 @@ export default function Sidebar(props: {
   classNames: string[];
 }) {
   const navigate = useNavigate();
-  const { setUiTheme, uiTheme, menuBarTheme, setMenuBarTheme, largeScreen } =
+  const { setUiTheme, uiTheme, menuBarTheme, setMenuBarTheme, update_layout } =
     useContext(UserContext);
   const options = [
     {
@@ -76,7 +76,9 @@ export default function Sidebar(props: {
           onClick={() => {
             if (menuBarTheme == 'v') {
               setMenuBarTheme('mv');
+              update_layout(['mv']);
             } else if (menuBarTheme == 'mv') {
+              update_layout(['v']);
               setMenuBarTheme('v');
             }
           }}

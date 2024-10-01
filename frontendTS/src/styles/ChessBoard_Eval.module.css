@@ -1,3 +1,5 @@
+@value gridContainer, v, mv, h , layout_1, layout_2 from './ProtectedRoute.module.css';
+
 .buttonContainer button {
   font-size: 30px;
   background-color: #5d9948;
@@ -13,4 +15,20 @@
   margin-right: auto;
   width: fit-content;
   margin-top: 1rem;
+}
+.chessboard_eval{
+
+}
+/* ---------------- layout styling ---------------- */
+.gridContainer.layout_1.v .chessboard_eval,
+.gridContainer.layout_1.mv .chessboard_eval,
+.gridContainer.layout_2.v .chessboard_eval,
+.gridContainer.layout_2.mv .chessboard_eval {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+.gridContainer.layout_1.h .chessboard_eval,
+.gridContainer.layout_2.h .chessboard_eval{
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
 }

@@ -5,11 +5,9 @@ import { GameboardContext } from '../contexts/GameBoardContext';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
 import styles from '../styles/ChessBoard_Eval.module.css';
 import { ChessInstance } from 'chess.js';
-import { useOutletContext } from 'react-router-dom';
 export default function ChessBoard_Eval(props: {
   inlineStyles: React.CSSProperties;
 }) {
-  const { gridColumn } = useOutletContext<React.CSSProperties>();
   const {
     makeAMove,
     safeGameMutate,
@@ -24,7 +22,7 @@ export default function ChessBoard_Eval(props: {
 
   return (
     <div
-      style={{ ...props.inlineStyles, gridColumn }}
+      style={{ ...props.inlineStyles }}
       className={styles.chessboard_eval}
     >
       <div
@@ -35,7 +33,7 @@ export default function ChessBoard_Eval(props: {
           width: 'fit-content',
         }}
       >
-        <EvaluationBar evaluation={evaluations[movesIndex]}></EvaluationBar>
+        <EvaluationBar evaluation={evaluations[movesIndex-1]}></EvaluationBar>
         <ChessBoard
           inlineStyles={{
             display: 'flex',

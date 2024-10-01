@@ -48,9 +48,10 @@ export class Classify {
     plRating: number,
     plColor: PlayerColor,
   ) => {
-    if (bestEvaluation.type == 'cp') {
+    if (bestEvaluation.type === 'cp') {
       return (
-        bestEvaluation.value * plColor >= this.minwining(plRating, plColor)
+        bestEvaluation.value * plColor >=
+        this.minwining(plRating, plColor) * plColor
       );
     } else {
       return bestEvaluation.value * plColor > 0;
@@ -62,9 +63,10 @@ export class Classify {
     plRating: number,
     plColor: PlayerColor,
   ) => {
-    if (bestEvaluation.type == 'cp') {
+    if (bestEvaluation.type === 'cp') {
       return (
-        bestEvaluation.value * plColor <= this.minLosing(plRating, plColor)
+        bestEvaluation.value * plColor <=
+        this.minLosing(plRating, plColor) * plColor
       );
     } else {
       return bestEvaluation.value * plColor < 0;
@@ -72,8 +74,12 @@ export class Classify {
   };
 
   /**
-   * Dosn't determines if the move were bad or good
-   * just if it's  piece Sacrfice
+   *
+   * @param move
+   * @param game
+   * @param verbose
+   * @returns verbose ? array of moves and result of each move : boolean
+   * @returns !verbose ? boolean
    */
   private isSac = (move: Move, game: ChessInstance, verbose = false) => {
     let plColor = move.piece[0];
@@ -103,7 +109,8 @@ export class Classify {
       // the attackers
       let i = 0;
       let endofattackers = false;
-      let msg = '';
+
+      let msg;
       attackersOptions.push({ result, moves: [...sacMoves] });
       do {
         if (attackers && attackers.length > i) {
@@ -117,7 +124,7 @@ export class Classify {
               );
               sacMoves.push(res.san);
             }
-            // pop the first attacer
+            // pop the first attacker
             attackers.splice(0, 1);
           } else i++;
         } else {
@@ -214,6 +221,9 @@ export class Classify {
     plRating: number,
     opponentRating: number,
   ): ClassName => {
+    console.log({
+      anas: { cEvaluation, prevEvaluation, plColor, plRating, opponentRating },
+    });
     const cAccuracy = this.getAccuracy(cEvaluation, plRating, opponentRating);
 
     const prevAccuracy = this.getAccuracy(
@@ -406,6 +416,7 @@ export class Classify {
         1.0 / (1.0 + Math.exp(-0.4 * (evaluation.value / 200)));
       let accuracyExp =
         1.0 / (1.0 + Math.pow(10, (opponnetRating - plRating) / 400));
+      return normalizedEval;
       return Number((normalizedEval * accuracyExp * 2).toFixed(3));
     } else return 1;
   };
@@ -415,30 +426,26 @@ export class Classify {
     plColor: PlayerColor;
     moveNum: number;
     gameInfo: Game;
+    initial_Evaluation: Evaluation;
   }) => {
+    if (!params.engineResponse.length) return 'best';
     this.engineResponses.push(params.engineResponse);
     this.evaluations.push(
       params.engineResponse[params.engineResponse.length - 1].evaluation,
     );
-    if (params.moveNum == 0) {
+    if (params.moveNum == 1) {
+      // restart game on chess.js
       this.game.reset();
-      return 'book';
+      //return 'book';
     }
-    const evaluation: Evaluation = this.evaluations[params.moveNum - 1];
     if (this.sanMoves && params.gameInfo) {
       let plColor: PlayerColor, opponent: UserInfo, player: UserInfo;
       let move: string = this.sanMoves[params.moveNum - 1];
-      console.debug({ history: this.game.history() });
-      console.debug({ sanmoves: this.sanMoves });
-      if (
-        this.game.history().length != params.moveNum ||
-        this.game.history()[this.game.history().length - 1] !=
-          this.sanMoves[params.moveNum - 1]
-      ) {
+      console.log(this.game.history());
+      console.log(this.game.history()[this.game.history().length - 1]);
+      console.log(this.sanMoves[params.moveNum - 1]);
+      if (this.game.history().length === params.moveNum - 1) {
         const lastMove = this.game.move(move) as chessjsMove;
-        console.debug({ lastMove });
-        console.debug({ history: this.game.history() });
-        console.debug({ sanmoves: this.sanMoves });
         if (!lastMove)
           throw new Error(
             `illigal move num: ${params.moveNum} move= ${this.sanMoves[params.moveNum - 1]}`,
@@ -452,19 +459,26 @@ export class Classify {
           opponent = params.gameInfo.wuser;
           plColor = -1;
         }
-        let maxClassification = 6;
+        const bestEngineLine: EngineLine =
+          params.engineResponse[params.engineResponse.length - 1];
+        const current_evaluation: Evaluation = bestEngineLine.evaluation;
+        const prev_evaluation: Evaluation =
+          params.moveNum == 1
+            ? params.initial_Evaluation
+            : this.evaluations[params.moveNum - 2];
+
+        //let maxClassification = 6;
         let firstMiddleGame = 0;
-        let firsetEndGame = 0;
+        //let firsetEndGame = 0;
         let iswining = this.isWining(
-          params.engineResponse[params.engineResponse.length - 1].evaluation,
+          current_evaluation,
           player.rating,
           plColor,
         );
-        console.debug({ evaluation });
-        let waswining = this.isWining(evaluation, player.rating, plColor);
-        let waslosing = this.isLosing(evaluation, player.rating, plColor);
+        let waswining = this.isWining(prev_evaluation, player.rating, plColor);
+        let waslosing = this.isLosing(prev_evaluation, player.rating, plColor);
         let islosing = this.isLosing(
-          params.engineResponse[params.engineResponse.length - 1].evaluation,
+          current_evaluation,
           player.rating,
           plColor,
         );
@@ -472,9 +486,6 @@ export class Classify {
         let isQueen = currentPieceChar
           ? currentPieceChar.toLowerCase() == 'q'
           : false;
-        if (lastMove.flags == 'cp' || lastMove.flags == 'pc') {
-          alert(lastMove.flags);
-        }
         let lastMoveAsMove: Move = {
           from: lastMove.from,
           to: lastMove.to,
@@ -495,15 +506,47 @@ export class Classify {
         if (this.game) {
           isSacc = this.isSac(lastMoveAsMove, new Chess(this.game.fen()));
         }
+        console.log({
+          engineResponses: this.engineResponses[params.moveNum - 1],
+        });
         // is best when its one of top lines returned by the engine
         let isbest =
-          this.engineResponses[params.moveNum - 1].length > 1
-            ? this.engineResponses[params.moveNum - 1].find((engineLine) => {
-                return engineLine.bestMove == lastMoveAsMove.lan;
-              })
-              ? true
-              : false
-            : false;
+          params.moveNum === 1
+            ? false
+            : this.engineResponses[params.moveNum - 2].length > 1
+              ? this.engineResponses[params.moveNum - 2].find(
+                  (engineLine, index) => {
+                    console.log({ engineLine, index });
+                    console.log({
+                      engineLinebestmove: engineLine.bestMove,
+                      lastmovelan: lastMoveAsMove.lan,
+                    });
+                    console.log({
+                      index,
+                      supposedindex:
+                        this.engineResponses[params.moveNum - 2].length - 1,
+                    });
+                    if (
+                      engineLine.bestMove == lastMoveAsMove.lan &&
+                      // if it's the last (best) line then automatically it's the bestmove
+                      (index ===
+                        this.engineResponses[params.moveNum - 2].length - 1 || // else it has to be the same type as best line
+                        (engineLine.evaluation.type ==
+                          bestEngineLine.evaluation.type &&
+                          (engineLine.evaluation.type == 'mate' ||
+                            // For centipawn evaluations, check if it's within 2 centipawns of the top move
+                            Math.abs(
+                              engineLine.evaluation.value -
+                                bestEngineLine.evaluation.value,
+                            ) <= 50)))
+                    )
+                      return true;
+                    else return false;
+                  },
+                )
+                ? true
+                : false
+              : false;
 
         // u set the first move of middle game after last opening move  (book move)
         if (!firstMiddleGame) {
@@ -518,15 +561,15 @@ export class Classify {
           }
         }
         let normalClassification = this.getNormalClassification(
-          params.engineResponse[params.engineResponse.length - 1].evaluation,
-          evaluation,
+          current_evaluation,
+          prev_evaluation,
           plColor,
           player.rating,
           opponent.rating,
         );
         if (
           this.isGreat(
-            this.engineResponses[params.moveNum - 1],
+            params.engineResponse,
             iswining,
             islosing,
             waswining,
@@ -538,11 +581,10 @@ export class Classify {
           return 'great';
         }
         if (isSacc) {
-          if (
-            ((waswining && iswining) || (!waswining && !islosing)) &&
-            isbest
-          ) {
-            return 'brilliant';
+          if (isbest) {
+            if ((waswining && iswining) || (!waswining && !islosing))
+              return 'brilliant';
+            else return 'best';
           }
           if (islosing && isQueen) {
             return 'botezgambit';
@@ -550,13 +592,13 @@ export class Classify {
           return normalClassification;
         } else if (isbest) {
           return 'best';
-        } else if (
-          (normalClassification == 'mistake' ||
-            normalClassification == 'blunder') &&
-          iswining
+        } /* else if (
+          normalClassification == 'mistake' ||
+          normalClassification == 'blunder' ||
+          (normalClassification == 'inaccuracy' && iswining)
         ) {
           return 'missed';
-        } else return normalClassification;
+        } */ else return normalClassification;
       }
     }
     return 'unknown';
