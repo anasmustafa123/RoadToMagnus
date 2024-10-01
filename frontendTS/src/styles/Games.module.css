@@ -52,6 +52,21 @@
 .animatedTextLeft {
   animation-direction: alternate;
 }
+
+.load_more {
+  background-color: var(--main-color);
+  font-size: 1.2rem;
+  border: none;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 1rem;
+}
+.load_more:hover {
+  background-color: var(--main-color-hover);
+  cursor: pointer;
+  border-radius: 5px;
+}
+
 /* ---------------- layout styling ---------------- */
 .gridContainer.layout_1.v .gamesContainer,
 .gridContainer.layout_1.mv .gamesContainer,
