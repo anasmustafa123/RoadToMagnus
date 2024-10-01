@@ -1,11 +1,10 @@
 import Loading_Review_LargeScreen from '../components/Labtop_loading';
 import Loading_Review_SmallScreen from '../components/Phone_loading';
 import ReviewResult from '../components/ReviewResult';
-import ChessBoard_Eval from '../components/ChessBoard_Eval';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
 import styles from '../styles/ReviewGame.module.css';
-import { ChessBoardContextProvider } from '../contexts/GameBoardContext';
+import reviewResultStyles from '../styles/ReviewResult.module.css';
 import { UserContext } from '../contexts/UserContext';
 import { useParams, useLocation } from 'react-router-dom';
 import { Classify } from '../scripts/_Classify';
@@ -14,6 +13,8 @@ import { ClassificationScores, ClassName } from '../types/Review';
 import { ChessEngine } from '../scripts/_Stockfish';
 import { constructPgn, getMoves, parsePgn } from '../scripts/pgn';
 import { GameContext } from '../contexts/GamesContext';
+import ChessBoard_Eval from '../components/ChessBoard_Eval';
+import { ChessBoardContextProvider } from '../contexts/GameBoardContext';
 type callbackfunctionType = (param: {
   ok: boolean;
   sanMove: string;
@@ -21,6 +22,7 @@ type callbackfunctionType = (param: {
   lines: EngineLine[];
 }) => Promise<{ ok: true; res: { classi_name: ClassName } } | null>;
 const ReviewGame = () => {
+  const ReviewResult_Ref = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const { gameId } = useParams();
   const { largeScreen, update_layout } = useContext(UserContext);
@@ -43,7 +45,8 @@ const ReviewGame = () => {
   const { get_game_byId } = useContext(GameContext);
   const [expand_review_state, setExpand_review_state] = useState(false);
   const [showEval_chessmoves] = useState(false);
-
+  const [startReviewingMoves, setStartReviewingMoves] =
+    useState<boolean>(false);
   function getClassificationScore(classification_names: ClassName[]) {
     const emptyClassification: ClassificationScores = {
       best: [0, 0],
@@ -87,10 +90,26 @@ const ReviewGame = () => {
           });
         console.debug(param);
         console.debug(moveClassification);
-        if (param.lines.length == 0) {
-          setReviewStatus(true);
-          return null;
-        }
+        //if (param.lines.length == 0) {
+         /*  setMovesClassifications(
+            getClassificationScore(res.classification_names),
+          );
+          setGameInfo((old) => ({
+            ...old,
+            waccuracy: get_player_accuracy_ongame(
+              classification_names.filter((clname, index) => {
+                return !(index % 2);
+              }),
+            ),
+            baccuracy: get_player_accuracy_ongame(
+            classification_names.filter((clname, index) => {
+                return index % 2;
+              }),
+            ),
+          })); */
+        //  setReviewStatus(true);
+        //  return null;
+       // }
         setClassificationNames((old) => [...old, moveClassification]);
         setEvaluations((old) => [
           ...old,
@@ -156,6 +175,60 @@ const ReviewGame = () => {
       }
     });
   };
+  function get_player_accuracy_ongame(
+    classification_names: ClassName[],
+  ): number {
+    const MOVE_SCORES: Record<ClassName, number> = {
+      best: 1.0,
+      great: 1.0,
+      brilliant: 1.0,
+      excellent: 0.9,
+      good: 0.8,
+      inaccuracy: 0.7,
+      mistake: 0.6,
+      blunder: 0.0,
+      botezgambit: 0.0,
+      book: 0.9,
+      forced: 1.0,
+      missed: 0.5,
+      unknown: 0.0,
+    };
+    if (!classification_names || classification_names.length === 0) return 0; // No moves, no accuracy score
+
+    let totalPoints = 0;
+    let maxPossiblePoints = 0;
+
+    // Iterate over each move and calculate the score
+    classification_names.forEach((moveType) => {
+      const score = MOVE_SCORES[moveType]; // Get score or 0 if undefined
+      totalPoints += score;
+      maxPossiblePoints += 1.0; // Each move adds 1 to max points
+    });
+
+    // Calculate accuracy percentage (0-100 scale)
+    const accuracy = (totalPoints / maxPossiblePoints) * 100;
+    return Number(accuracy.toFixed(2));
+  }
+  useEffect(() => {
+    if (ReviewResult_Ref.current) {
+      if (startReviewingMoves) {
+        if (
+          !ReviewResult_Ref.current.classList.contains(
+            `${reviewResultStyles.startReviewingMoves}`,
+          )
+        ) {
+          console.warn({ warn: `${reviewResultStyles.startReviewingMoves}` });
+          ReviewResult_Ref.current.classList.add(
+            `${reviewResultStyles.startReviewingMoves}`,
+          );
+        }
+      } else {
+        ReviewResult_Ref.current.classList.remove(
+          `${reviewResultStyles.startReviewingMoves}`,
+        );
+      }
+    }
+  }, [startReviewingMoves]);
 
   useEffect(() => {
     console.log('refreshing');
@@ -227,6 +300,20 @@ const ReviewGame = () => {
               setMovesClassifications(
                 getClassificationScore(res.classification_names),
               );
+              setGameInfo((old) => ({
+                ...old,
+                waccuracy: get_player_accuracy_ongame(
+                  res.classification_names.filter((clname, index) => {
+                    return !(index % 2);
+                  }),
+                ),
+                baccuracy: get_player_accuracy_ongame(
+                  res.classification_names.filter((clname, index) => {
+                    return index % 2;
+                  }),
+                ),
+              }));
+              setReviewStatus(true);
               console.log('after pgn');
               console.log(newpgn);
             })
@@ -253,59 +340,63 @@ const ReviewGame = () => {
       });
     }
   }, [location]);
+
   return reviewStatus ? (
-    showEval_chessmoves ? (
-      <ChessBoardContextProvider>
-        <ChessBoard_Eval
-          inlineStyles={{
-            gridColumn: '2 / 3',
-            margin: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        />
-      </ChessBoardContextProvider>
-    ) : (
-      <>
-        <ReviewResult
-          expand_review_state={expand_review_state}
-          children={
-            <div className={styles.showReview}>
-              <div
-                onClick={() => {
-                  const current_review_state = !expand_review_state;
-                  setExpand_review_state(current_review_state);
-                }}
-                className={styles.expand_review}
-              >
-                <i
-                  style={
-                    expand_review_state
-                      ? { boxShadow: '0px 0px 0px red' }
-                      : {
-                          boxShadow:
-                            '1px -31px 28px 30px rgba(255, 255, 255, 0.9)',
-                        }
-                  }
-                  className={
-                    expand_review_state
-                      ? 'bx bx-chevrons-up'
-                      : 'bx bx-chevrons-down'
-                  }
-                ></i>
-              </div>
-              <button
-                onClick={() => {
-                  update_layout(['layout_2']);
-                }}
-              >
-                Review
-              </button>
+    <>
+      {startReviewingMoves && (
+        <ChessBoardContextProvider>
+          <ChessBoard_Eval
+            inlineStyles={{
+              /* gridColumn: '2 / 3' */
+              display: 'flex',
+              flexDirection: 'column',
+              alignSelf: 'start',
+              top: '3rem',
+              position: 'sticky',
+            }}
+          />
+        </ChessBoardContextProvider>
+      )}
+      <ReviewResult
+        expand_review_state={expand_review_state}
+        children={
+          <div className={styles.showReview}>
+            <div
+              onClick={() => {
+                const current_review_state = !expand_review_state;
+                setExpand_review_state(current_review_state);
+              }}
+              className={styles.expand_review}
+            >
+              <i
+                style={
+                  expand_review_state
+                    ? { boxShadow: '0px 0px 0px red' }
+                    : {
+                        boxShadow:
+                          '1px -31px 28px 30px rgba(255, 255, 255, 0.9)',
+                      }
+                }
+                className={
+                  expand_review_state
+                    ? 'bx bx-chevrons-up'
+                    : 'bx bx-chevrons-down'
+                }
+              ></i>
             </div>
-          }
-        />
-      </>
-    )
+            <button
+              onClick={() => {
+                //update_layout(['layout_2']);
+                setStartReviewingMoves(true);
+              }}
+            >
+              Review
+            </button>
+          </div>
+        }
+        Ref={ReviewResult_Ref}
+      />
+    </>
   ) : largeScreen ? (
     <Loading_Review_LargeScreen />
   ) : (

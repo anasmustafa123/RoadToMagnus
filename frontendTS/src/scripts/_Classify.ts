@@ -416,6 +416,7 @@ export class Classify {
         1.0 / (1.0 + Math.exp(-0.4 * (evaluation.value / 200)));
       let accuracyExp =
         1.0 / (1.0 + Math.pow(10, (opponnetRating - plRating) / 400));
+      return normalizedEval;
       return Number((normalizedEval * accuracyExp * 2).toFixed(3));
     } else return 1;
   };
@@ -427,6 +428,7 @@ export class Classify {
     gameInfo: Game;
     initial_Evaluation: Evaluation;
   }) => {
+    if (!params.engineResponse.length) return 'best';
     this.engineResponses.push(params.engineResponse);
     this.evaluations.push(
       params.engineResponse[params.engineResponse.length - 1].evaluation,
@@ -590,13 +592,13 @@ export class Classify {
           return normalClassification;
         } else if (isbest) {
           return 'best';
-        } else if (
+        } /* else if (
           normalClassification == 'mistake' ||
           normalClassification == 'blunder' ||
           (normalClassification == 'inaccuracy' && iswining)
         ) {
           return 'missed';
-        } else return normalClassification;
+        } */ else return normalClassification;
       }
     }
     return 'unknown';

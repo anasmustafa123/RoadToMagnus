@@ -44,7 +44,7 @@ function App() {
           path: '',
           element: (
             <>
-              <title>review.com</title>
+              {/* <title>review.com</title> */}
               <Profile />
             </>
           ),
@@ -53,7 +53,7 @@ function App() {
           path: 'profile',
           element: (
             <>
-              <title>review.com</title>
+              {/* <title>review.com</title> */}
               <Profile />
             </>
           ),
@@ -62,10 +62,10 @@ function App() {
           path: 'games',
           element: (
             <>
-              <title>Games - review.com</title>
+              {/* <title>Games - review.com</title> */}
               <Games
                 inlineStyles={{
-                  gridColumnStart: '2',
+                  /* gridColumnStart: '2', */
                   marginLeft: 'auto',
                   marginRight: 'auto',
                   backgroundColor: 'var(--bg-color)',

@@ -65,28 +65,6 @@ const ReviewGameContextProvider: React.FC<{ children: React.ReactNode }> = ({
       setReviewStatus(true);
     }
   }, [currentPerc]);
-  const getClassificationScore = (classification_names: ClassName[]) => {
-    const emptyClassification: ClassificationScores = {
-      best: [0, 0],
-      good: [0, 0],
-      inaccuracy: [0, 0],
-      mistake: [0, 0],
-      blunder: [0, 0],
-      excellent: [0, 0],
-      book: [0, 0],
-      great: [0, 0],
-      brilliant: [0, 0],
-      forced: [0, 0],
-      missed: [0, 0],
-      botezgambit: [0, 0],
-      unknown: [0, 0],
-    };
-    let score: ClassificationScores = { ...emptyClassification };
-    classification_names.forEach((classification, i) => {
-      score[classification][i % 2]++;
-    });
-    return score;
-  };
   /*   useEffect(() => {
     if (reviewStatus) {
       let score = getClassificationScore(classificationNames);

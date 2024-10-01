@@ -5,7 +5,8 @@ import { classificationInfo } from '../types/Review';
 const ReviewResult: React.FC<{
   expand_review_state: boolean;
   children: ReactElement;
-}> = ({ expand_review_state, children }) => {
+  Ref: React.RefObject<HTMLDivElement>;
+}> = ({ expand_review_state, children, Ref }) => {
   const { gameInfo, movesClassifications } = useContext(ReviewGameContext);
   const expandstateRef = useRef(null);
   useEffect(() => {
@@ -16,7 +17,7 @@ const ReviewResult: React.FC<{
     }
   }, [expand_review_state]);
   return (
-    <div className={styles.reviewResult}>
+    <div ref={Ref} className={styles.reviewResult}>
       <div
         ref={expandstateRef}
         className={styles.reviewResult_content + ' ' + styles.state_is_shrinked}

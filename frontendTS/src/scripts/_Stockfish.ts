@@ -1,7 +1,6 @@
 import { getFenArr } from './convert';
 import { parsePgn } from './pgn';
 import type { EngineLine, Evaluation, Lan } from '../types/Game';
-import { Classify } from './_Classify';
 import { ClassName } from '../types/Review';
 export class ChessEngine {
   private workerUrl: URL;
@@ -102,8 +101,21 @@ export class ChessEngine {
               }
               // If any piece of data from message is missing, discard message
               if (!idString || !depthString || !bestMove) {
+                lines.push({
+                  id: parseInt(idString),
+                  depth: parseInt(depthString),
+                  evaluation: { type: 'mate', value: 0 },
+                  bestMove: 'a1a1',
+                }, {
+                  id: parseInt(idString),
+                  depth: parseInt(depthString),
+                  evaluation: { type: 'mate', value: 0 },
+                  bestMove: 'a1a1',
+                });
+                resolve(lines);
+                return;
                 console.error(
-                  `missid pram idstring or depthstring or bestmove`,
+                  `missed pram idstring or depthstring or bestmove`,
                 );
                 continue;
               }
@@ -199,16 +211,16 @@ export class ChessEngine {
       moveNum: number;
       sanMove: string;
       lines: EngineLine[];
-    }) => Promise<
-      | { ok: true; res: { classi_name: ClassName } }
-      | null
-    >;
-  }): Promise<{ evaluations: Evaluation[] }> {
+    }) => Promise<{ ok: true; res: { classi_name: ClassName } } | null>;
+  }): Promise<{
+    evaluations: Evaluation[];
+    classification_names: ClassName[];
+  }> {
     return new Promise(async (resolve, reject) => {
       let moves: string[] = [];
       let index = 0;
       let evaluations = [];
-      let classification_names = [];
+      let classification_names: ClassName[] = [];
       if (param.pgn) {
         try {
           const res = parsePgn(param.pgn);
@@ -233,10 +245,11 @@ export class ChessEngine {
           if (classi_name && classi_name.ok) {
             classification_names.push(classi_name.res.classi_name);
           } else {
-            resolve({ evaluations });
+            resolve({ evaluations, classification_names });
           }
           index++;
-          if (index == moves.length - 1) resolve({ evaluations });
+          if (index == moves.length - 1)
+            resolve({ evaluations, classification_names });
         } catch (e) {
           this.stockfishWorker.terminate();
           reject({
@@ -249,7 +262,7 @@ export class ChessEngine {
         }
       }
       this.stockfishWorker.terminate();
-      resolve({ evaluations });
+      resolve({ evaluations, classification_names });
     });
   }
 

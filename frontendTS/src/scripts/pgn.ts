@@ -10,6 +10,7 @@ import { UserInfo } from '../types/User';
 import {
   Classification,
   classificationInfo,
+  ClassName,
   ClassSymbol,
 } from '../types/Review';
 import { Chess, PieceType } from 'chess.js';
@@ -22,7 +23,7 @@ const constructPgn = (
   moves: Move[],
   clks: string[],
   evaluations: Evaluation[],
-  classifi: string[],
+  classifi_names: ClassName[],
 ) => {
   let res = '';
   res += wplayer.username ? getHeader('White', wplayer.username) : '';
@@ -36,16 +37,17 @@ const constructPgn = (
       )
     : '';
   res += '\n';
+  const classifi_keys = convert_classiName_to_sym(classifi_names);
   console.log({
     1: moves.length,
     2: clks.length,
     3: evaluations.length,
-    4: classifi.length,
+    4: classifi_keys.length,
   });
   console.log(evaluations);
   if (moves.length === clks.length) {
     if (clks.length === evaluations.length) {
-      res += pgnMerge(moves, clks, evaluations, classifi);
+      res += pgnMerge(moves, clks, evaluations, classifi_keys);
     } else {
       res += pgnMerge(moves, clks);
     }
@@ -176,13 +178,20 @@ function startsWithAlpha(str: string) {
     (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122)
   );
 }
-
+const convert_classiName_to_sym = (classiNames: ClassName[]) => {
+  return classiNames.map((classiName) => {
+    const classification_sym = classificationInfo.find(
+      (v) => v.name == classiName,
+    )?.sym;
+    return classification_sym ? classification_sym : '????';
+  });
+};
 /**
  *
- * @param moves Move[]
- * @param sec can be clks:string[] or evaluations:Evaluation[]
- * @param third  is evaluations:Evaluation[]
- * @param fourth is classifi:string[]
+ * @param {Move[]} moves Move[]
+ * @param {string[] | Evaluation[]} sec can be clks:string[] or evaluations:Evaluation[]
+ * @param {Evaluation[]} third  is evaluations
+ * @param {Classification.sym[]} fourth is string[]
  * @returns
  */
 function pgnMerge(

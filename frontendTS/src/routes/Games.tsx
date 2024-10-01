@@ -15,7 +15,7 @@ const Games: React.FC<{ inlineStyles: CSSProperties }> = memo(
     const [animation, setanimation] = useState('');
     const { setLichessGames, chessdcomGames, setChessdcomGames } =
       useContext(GameContext);
-    
+
     /*   db.users.toArray().then((users) => {
       const newuser = users[0];
       if (newuser) {

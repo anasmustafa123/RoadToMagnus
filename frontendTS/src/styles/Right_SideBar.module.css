@@ -1,0 +1,27 @@
+@value gridContainer, v, mv, h , layout_1, layout_2 from './ProtectedRoute.module.css';
+
+.rightSidebar {
+  padding: 4rem 10px 0px 10px;
+}
+.rightSidebar > * {
+  margin: 1rem 0px 1rem 0px;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  border-radius: 10px;
+}
+.gridContainer.layout_2 .rightSidebar {
+  display: none;
+}
+.gridContainer.layout_1.v .rightSidebar,
+.gridContainer.layout_1.mv .rightSidebar {
+  grid-column: 3/4;
+  grid-row: 1/2;
+}
+.gridContainer.layout_1.h .rightSidebar {
+  grid-column: 2/3;
+  grid-row: 2/3;
+}
+/* -----------composing  Profile */
+.donutContainer {
+  composes: donutContainer from './Profile.module.css';
+}
