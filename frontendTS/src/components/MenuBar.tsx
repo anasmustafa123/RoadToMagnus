@@ -10,17 +10,17 @@ export default function Sidebar(props: {
   const { setUiTheme, uiTheme, menuBarTheme, setMenuBarTheme, update_layout } =
     useContext(UserContext);
   const options = [
-    {
+    /* {
       icon: 'bx bxs-user',
       header: 'Profile',
       inlineStyles: { '--hover-color': 'rgb(129, 253, 6)' },
-    },
+    }, */
     {
       icon: 'bx bxl-graphql',
       header: 'Games',
       inlineStyles: { '--hover-color': 'rgb(129, 253, 6)' },
     },
-    {
+    /* {
       icon: 'bx bxs-chess',
       header: 'Explorer',
       inlineStyles: { '--hover-color': 'rgb(129, 253, 6)' },
@@ -29,7 +29,7 @@ export default function Sidebar(props: {
       icon: 'bx bx-stats',
       header: 'Stats',
       inlineStyles: { '--hover-color': 'rgb(129, 253, 6)' },
-    },
+    }, */
     {
       url: 'https://ko-fi.com/anasmostafa',
       icon: 'bx bxs-donate-heart',
@@ -124,7 +124,6 @@ export default function Sidebar(props: {
             className={value.className ? styles[value.className] : ''}
             style={value.inlineStyles}
           >
-            {/*  <Link to={'/gg'}>link</ Link> */}
             <i className={value.icon}></i>
             <h2 className={styles.option_name}>{value.header}</h2>
           </Link>
