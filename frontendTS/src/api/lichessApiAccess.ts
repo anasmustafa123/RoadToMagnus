@@ -143,10 +143,14 @@ const getLichessDates = (
   });
 };
 
+const getCloudEvaluation = async (current_fen: string) => {
+};
+
 export {
   fetchLichesssGames,
   getUserInfo,
   checkIfBook,
   fetchPlayerGames,
   getLichessDates,
+  getCloudEvaluation
 };
