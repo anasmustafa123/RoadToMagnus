@@ -27,22 +27,8 @@ import { IUser } from "./@types";
 import { getGameById } from "./utils/getGameById.js";
 import { protect } from "./middleware/authMiddleware.js";
 import { Writable } from "stream";
-/* declare  module "express" {
-  interface Request {
-    user?: IUser;
-  }
-} */
-connectDB();
-/* import connectDb from "./config/db.js";
-import { getUser } from "./models/userModel.js";
- */
 
-/* ";
-import customerRoutes from "./routes/customerRoutes.js";
-import carsRoutes from "./routes/carRoutes.js";
-import reservationRoutes from "./routes/reservationRoutes.js";
-import officeRoutes from "./routes/officeRoutes.js";
- */
+connectDB();
 
 //adding the .env const to process.env
 dotenv.config();
@@ -107,21 +93,6 @@ app.get("/chess.com/game/:id", async (req, res) => {
     res.send(JSON.stringify(game));
   });
 });
-//app.options("/api/users/auth", cors());
-/* 
-app.use("/api/customers", customerRoutes);
-app.use("/api/cars", carsRoutes);
-app.use("/api/reservations", reservationRoutes);
-app.use("/api/offices", officeRoutes); */
-
-/* if (process.env.NODE_ENV == "production") {
-  const __dirname = path.resolve();
-  app.use(express.static(path.join(__dirname, "frontend/dist")));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
-  });
-} */
 app.get("/", (req, res) => {
   console.log("anas");
   res.send("server is ready");

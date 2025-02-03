@@ -1,7 +1,7 @@
 import {
   RegisterUser as Ruser,
   LoginUser as Luser,
-} from "../../../shared/types/dist";
+} from "./common";
 import { Request as ExpressRequest, Express } from "express";
 export interface RegisterUser extends Ruser {}
 export interface LoginUser extends Luser {}

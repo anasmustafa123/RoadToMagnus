@@ -1,5 +1,5 @@
 import { Chess } from "chess.js";
-import type {GetGameById} from "../../../shared/types/dist/index.js"
+import type {GetGameById} from "../@types/common"
 const _boards =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?";
 const BOARD_FILES = "abcdefgh";
