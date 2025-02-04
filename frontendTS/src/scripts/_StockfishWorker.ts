@@ -155,7 +155,6 @@ class StockfishWorker {
       after_each_move_callback();
       this.game_review_manager.add_enginelines(engineLines, move_num);
     }
-    debugger;
   }
 
   /**

@@ -27,7 +27,6 @@ class CloudEvalWorker {
       }
     }
     console.log('terminate cloud worker');
-    debugger;
     return { success: true };
   }
 }
