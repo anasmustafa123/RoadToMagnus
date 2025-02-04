@@ -22,6 +22,7 @@
 }
 .userInfo > div {
   margin-bottom: 1rem;
+  font-size: 16px;
 }
 .imgContainer {
   border: 5px solid;

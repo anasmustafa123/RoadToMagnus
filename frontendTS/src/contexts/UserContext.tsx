@@ -53,10 +53,8 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
         setChessboardWidth(750);
         if (!largeScreen) setLargeScreenWidth(true);
       } else if (window.innerWidth <= 1350 && window.innerWidth > 1100) {
-        console.log('vertical');
         if (!largeScreen) setLargeScreenWidth(true);
       } else if (window.innerWidth <= 900) {
-        console.log('horizontal');
         if (largeScreen) setLargeScreenWidth(false);
         setChessboardWidth(window.innerWidth - 10);
       }
@@ -80,7 +78,6 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [uiTheme]);
   const update_layout = (new_layout: string[]) => {
-    console.log({ new_layout, layout });
     let current_layout = [...layout];
     if (new_layout.includes('layout_1') || new_layout.includes('layout_2')) {
       if (new_layout.length > 1) {
@@ -101,19 +98,16 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   const checkUser = (): Promise<boolean> => {
     return new Promise((resolve, reject) => {
       if (user) {
-        console.log({ user });
         resolve(true);
         return;
       }
       db.users
         .toArray()
         .then((users) => {
-          console.log(users);
           if (users.length) {
             let dbuser = users[0];
             // load IDB Games
             db.games.toArray().then((games) => {
-              console.log(`IDB games: ${games}`);
               games.forEach((game) => {
                 if (game.vendor == 'chess.com') {
                   setChessdcomGames((old) => {
@@ -165,7 +159,6 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
     return new Promise(async (resolve, reject) => {
       try {
         const isuser = await checkUser();
-        console.log({ isuser });
         if (!isuser) {
           resolve(true);
         } else {

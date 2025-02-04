@@ -65,8 +65,6 @@ export default function Sidebar(props: {
   return (
     <div
       className={props.classNames.reduce((p, c, i, arr) => {
-        console.debug({ p });
-        console.debug({ c });
         return !p.length ? styles[c] : p + ' ' + styles[c];
       }, '')}
       style={props.inlineStyles}

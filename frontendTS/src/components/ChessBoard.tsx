@@ -18,7 +18,7 @@ const ChessBoard: React.FC<{
   moves?: Move[];
   classifications?: ClassName[];
   movesIndex?: number;
-  inlineStyles?:React.CSSProperties ;
+  inlineStyles?: React.CSSProperties;
 }> = ({
   moves = [],
   classifications = [],
@@ -229,6 +229,7 @@ const ChessBoard: React.FC<{
     if (move === null) return false;
     return true;
   }
+
   const pieces: Piece[] = [
     'wP',
     'wN',

@@ -2,11 +2,17 @@ import React, { ReactElement, useContext, useEffect, useRef } from 'react';
 import styles from '../styles/ReviewResult.module.css';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
 import { classificationInfo } from '../types/Review';
+/**
+ *
+ * @param {boolean} expand_review_state
+ * @returns
+ */
 const ReviewResult: React.FC<{
+  startReviewingMoves: boolean;
   expand_review_state: boolean;
   children: ReactElement;
   Ref: React.RefObject<HTMLDivElement>;
-}> = ({ expand_review_state, children, Ref }) => {
+}> = ({ startReviewingMoves, expand_review_state, children, Ref }) => {
   const { gameInfo, movesClassifications } = useContext(ReviewGameContext);
   const expandstateRef = useRef(null);
   useEffect(() => {
@@ -17,7 +23,12 @@ const ReviewResult: React.FC<{
     }
   }, [expand_review_state]);
   return (
-    <div ref={Ref} className={styles.reviewResult}>
+    <div
+      ref={Ref}
+      className={`${styles.reviewResult} ${
+        startReviewingMoves ? styles.startReviewingMoves : ''
+      }`}
+    >
       <div
         ref={expandstateRef}
         className={styles.reviewResult_content + ' ' + styles.state_is_shrinked}
@@ -52,7 +63,7 @@ const ReviewResult: React.FC<{
               }
               className={`${styles.wblock} ${styles.block}`}
             >
-              {gameInfo.waccuracy}
+              {gameInfo.waccuracy?? 100}
             </div>
           </div>
           <div
@@ -87,7 +98,7 @@ const ReviewResult: React.FC<{
               }
               className={`${styles.bblock} ${styles.block}`}
             >
-              {gameInfo.baccuracy}
+              {gameInfo.baccuracy?? 100}
             </div>
           </div>
         </div>

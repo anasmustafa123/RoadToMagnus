@@ -21,10 +21,7 @@ export default function ChessBoard_Eval(props: {
   const [movesIndex, setMovesIndex] = useState(0);
 
   return (
-    <div
-      style={{ ...props.inlineStyles }}
-      className={styles.chessboard_eval}
-    >
+    <div style={{ ...props.inlineStyles }} className={styles.chessboard_eval}>
       <div
         style={{
           display: 'flex',
@@ -33,7 +30,7 @@ export default function ChessBoard_Eval(props: {
           width: 'fit-content',
         }}
       >
-        <EvaluationBar evaluation={evaluations[movesIndex-1]}></EvaluationBar>
+        <EvaluationBar evaluation={evaluations[movesIndex - 1]}></EvaluationBar>
         <ChessBoard
           inlineStyles={{
             display: 'flex',

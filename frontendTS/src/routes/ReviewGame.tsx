@@ -51,6 +51,10 @@ const ReviewGame = () => {
   const [startReviewingMoves, setStartReviewingMoves] =
     useState<boolean>(false);
 
+  /*   useEffect(() => {
+    setReviewStatus(true);
+  }, []); */
+
   function getClassificationScore(classification_names: ClassName[]) {
     const emptyClassification: ClassificationScores = {
       best: [0, 0],
@@ -169,11 +173,13 @@ const ReviewGame = () => {
     // we need to evaluate the game
 
     if (!reviewStatus) {
+      console.log({ gameId });
       if (!gameId) {
         console.error('gameId is null');
         return;
       }
       const gameData = get_game_byId(gameId);
+      console.log({ gameData });
       if (!gameData) {
         console.error('cant find game with id: ', gameId);
         return;
@@ -245,7 +251,7 @@ const ReviewGame = () => {
             })
             .then(({ classification_names }) => {
               console.log({ classification_names });
-              setClassificationNames(classificationNames);
+              setClassificationNames(classification_names);
               const classification_score =
                 getClassificationScore(classification_names);
               console.log({ classification_score });
@@ -272,6 +278,7 @@ const ReviewGame = () => {
         </ChessBoardContextProvider>
       )}
       <ReviewResult
+        startReviewingMoves={startReviewingMoves}
         expand_review_state={expand_review_state}
         children={
           <div className={styles.showReview}>
@@ -298,14 +305,15 @@ const ReviewGame = () => {
                 }
               ></i>
             </div>
-            <button
-              onClick={() => {
-                //update_layout(['layout_2']);
-                setStartReviewingMoves(true);
-              }}
-            >
-              Review
-            </button>
+            {!startReviewingMoves && (
+              <button
+                onClick={() => {
+                  setStartReviewingMoves(true);
+                }}
+              >
+                Review
+              </button>
+            )}
           </div>
         }
         Ref={ReviewResult_Ref}
@@ -314,8 +322,11 @@ const ReviewGame = () => {
   ) : largeScreen ? (
     <Loading_Review_LargeScreen />
   ) : (
-    <Loading_Review_SmallScreen />
+    <Loading_Review_LargeScreen />
   );
+  {
+    /* <Loading_Review_SmallScreen /> */
+  }
 };
 
 export default ReviewGame;
