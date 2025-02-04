@@ -24,6 +24,7 @@ export class Classify {
   sanMoves: string[];
   evaluations: Evaluation[];
   engineResponses: EngineLine[][];
+  private classifications: [Number, ClassName][] = [];
 
   private minwining = (rating: number, plColor: PlayerColor) => {
     const wineval =
@@ -428,6 +429,13 @@ export class Classify {
     gameInfo: Game;
     initial_Evaluation: Evaluation;
   }) => {
+    console.log({
+      engineResponse: params.engineResponse,
+      plcolor: params.plColor,
+      movenum: params.moveNum,
+      gameinfo: params.gameInfo,
+      initialeval: params.initial_Evaluation,
+    });
     if (!params.engineResponse.length) return 'best';
     this.engineResponses.push(params.engineResponse);
     this.evaluations.push(
@@ -602,6 +610,38 @@ export class Classify {
       }
     }
     return 'unknown';
+  };
+
+  getGameClassifications = async ({
+    engineResponses,
+    gameInfo,
+    initial_Evaluation,
+  }: {
+    engineResponses: EngineLine[][];
+    gameInfo: Game;
+    initial_Evaluation: Evaluation;
+  }): Promise<{ classification_names: ClassName[] }> => {
+    return new Promise((res, rej) => {
+      engineResponses.forEach((engineResponse, index) => {
+        this.getMoveClassification({
+          engineResponse,
+          plColor: index % 2 ? -1 : 1,
+          moveNum: index + 1,
+          gameInfo,
+          initial_Evaluation,
+        }).then((classname) => {
+          this.classifications.push([index + 1, classname]);
+          if (this.classifications.length == this.sanMoves.length) {
+            const classificationnames: ClassName[] = this.classifications
+              .sort((a, b) => {
+                return Number(a[0]) - Number(b[0]);
+              })
+              .map((v) => v[1]);
+            res({ classification_names: classificationnames });
+          }
+        });
+      });
+    });
   };
 
   _init(params: {

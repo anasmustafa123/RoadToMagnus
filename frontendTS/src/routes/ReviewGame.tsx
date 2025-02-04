@@ -4,14 +4,12 @@ import ReviewResult from '../components/ReviewResult';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
 import styles from '../styles/ReviewGame.module.css';
-import reviewResultStyles from '../styles/ReviewResult.module.css';
 import { UserContext } from '../contexts/UserContext';
 import { useParams, useLocation } from 'react-router-dom';
 import { Classify } from '../scripts/_Classify';
 import { EngineLine, Game } from '../types/Game';
 import { ClassificationScores, ClassName } from '../types/Review';
-import { ChessEngine } from '../scripts/_Stockfish';
-import { constructPgn, getMoves, parsePgn } from '../scripts/pgn';
+import { getMoves, parsePgn } from '../scripts/pgn';
 import { GameContext } from '../contexts/GamesContext';
 import ChessBoard_Eval from '../components/ChessBoard_Eval';
 import { ChessBoardContextProvider } from '../contexts/GameBoardContext';
@@ -28,10 +26,11 @@ const ReviewGame = () => {
   const ReviewResult_Ref = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const { gameId } = useParams();
-  const { largeScreen, update_layout } = useContext(UserContext);
+  const { largeScreen } = useContext(UserContext);
   const {
     reviewStatus,
     setReviewStatus,
+    classificationNames,
     setClassificationNames,
     setEvaluations,
     setCurrentPerc,
@@ -39,17 +38,19 @@ const ReviewGame = () => {
     setGameInfo,
     setMaxtPerc,
     setMoves,
+    sanMoves,
     setsanMoves,
     setClks,
     setEngineResponses,
     setCurrentEngineLines,
+    gameInfo,
     setMovesClassifications,
   } = useContext(ReviewGameContext);
   const { get_game_byId } = useContext(GameContext);
   const [expand_review_state, setExpand_review_state] = useState(false);
-  const [showEval_chessmoves] = useState(false);
   const [startReviewingMoves, setStartReviewingMoves] =
     useState<boolean>(false);
+
   function getClassificationScore(classification_names: ClassName[]) {
     const emptyClassification: ClassificationScores = {
       best: [0, 0],
@@ -72,6 +73,7 @@ const ReviewGame = () => {
     });
     return score;
   }
+
   function callbackfunction(
     ClassificationHelper: Classify,
     gameData: Game,
@@ -125,57 +127,6 @@ const ReviewGame = () => {
       return null;
     };
   }
-  /*const continueEvaluatingPosition = async (params: {
-    stockfish: ChessEngine;
-    e: any;
-    ClassificationHelper: Classify;
-    parsedGameData: any;
-    gameData: Game;
-  }) => {
-    const newclassify = new Classify({
-      sanMoves: params.parsedGameData.moves,
-      evaluations: params.parsedGameData.evaluations,
-    });
-    newclassify._init({
-      game: params.ClassificationHelper.game,
-      engineResponses: params.ClassificationHelper.engineResponses,
-      evaluations: params.ClassificationHelper.evaluations,
-    });
-    let stockfish2 = new ChessEngine(2, 18);
-    stockfish2._init().then(() => {
-      try {
-        stockfish2
-          .evaluatePositionFromIndex({
-            fens: params.e.fens,
-            startIndex: params.e.index,
-            get_classification_update_callback: callbackfunction(
-              newclassify,
-              params.gameData,
-            ),
-            moves: params.e.moves,
-          })
-          .catch((e) => {
-           continueEvaluatingPosition({
-              stockfish: params.stockfish,
-              e,
-              ClassificationHelper: params.ClassificationHelper,
-              parsedGameData: params.parsedGameData,
-              gameData: params.gameData,
-            });
-          });
-      } catch (e: any) {
-        console.error(` restarting again`);
-        console.debug(`restarting  at index ${e.index}`);
-       continueEvaluatingPosition({
-          stockfish: params.stockfish,
-          e,
-          ClassificationHelper: params.ClassificationHelper,
-          parsedGameData: params.parsedGameData,
-          gameData: params.gameData,
-        });
-      }
-    });
-  };*/
 
   function get_player_accuracy_ongame(
     classification_names: ClassName[],
@@ -243,143 +194,65 @@ const ReviewGame = () => {
         if (parsedGameData.classifi && parsedGameData.classifi.length > 0) {
           setClassificationNames(parsedGameData.classifi.map((c) => c.name));
         }
-        // to do
-        // update classification table good: 5 ....etc...
-        /* console.log('finish line');
-        console.log(parsedGameData.classifi.map((c) => c.name))
-        setMovesClassifications(
-          getClassificationScore(parsedGameData.classifi.map((c) => c.name)),
-        ); */
         setReviewStatus(true);
         return;
       } else {
         setReviewStatus(false);
       }
-      /* let ClassificationHelper = new Classify({
-        sanMoves: [...parsedGameData.moves],
-        evaluations: [...parsedGameData.evaluations],
-      }); */
-      let number_of_workers = 3;
-      const game_review_manager = new GameReviewManager(parsedGameData.moves, number_of_workers);
-      const cores_avalible_count = window.navigator.hardwareConcurrency - 2;
+      let number_of_workers = 1;
+      const game_review_manager = new GameReviewManager(parsedGameData.moves);
+      const stockfish_workers: StockfishWorker[] = [];
+      const uninitialized_workers = [];
+      const initialized_workers: any = [];
+
       for (let i = 0; i < number_of_workers; i++) {
         const stockfish_worker = new StockfishWorker(
           game_review_manager,
           2,
           18,
         );
-        stockfish_worker._init().then(() => {
-          stockfish_worker
-            .evaluatePosition(() => {
-              console.log(`worker ${i + 1}`);
-              setCurrentPerc((old) => old + 1);
-            })
-            .then(() => {
-              game_review_manager.worker_done_evaluating();
-              if (game_review_manager.done_evaluating()) {
-/*
-                let moveClassification =
-                await ClassificationHelper.getMoveClassification({
-                  engineResponse: param.lines,
-                  moveNum: param.moveNum,
-                  plColor: param.moveNum % 2 ? 1 : -1,
-                  gameInfo: gameData,
-                  initial_Evaluation: initalEvaluation,
-                });
-*/
-                console.log(game_review_manager.get_engine_response())
-                /*setMovesClassifications(
-                  getClassificationScore(
-                    parsedGameData.classifi.map((c) => c.name),
-                  ),
-                );*/
-                console.log('all workers are done');
-              } else {
-                console.log('all workers are not done');
-              }
-            });
-        });
+        stockfish_workers.push(stockfish_worker);
+        uninitialized_workers.push(stockfish_worker._init());
       }
-      //let stockfish = new ChessEngine(2, 18);
-      /* 
-      const stockfish_worker = new StockfishWorker(game_review_manager, 2, 18);
-      stockfish_worker._init().then(() => {
-        stockfish_worker.evaluatePosition(() => {
-          console.log('worker 1');
-          setCurrentPerc((old) => old + 1);
+      let uninitalized_results = Promise.all(uninitialized_workers);
+      uninitalized_results.then((uninitalized_result) => {
+        console.log({ uninitalized_result });
+        stockfish_workers.forEach((stockfish_worker) => {
+          initialized_workers.push(
+            stockfish_worker.evaluatePosition(() => {
+              setCurrentPerc((old) => old + 1);
+            }),
+          );
+        });
+        let initalized_results = Promise.all(initialized_workers);
+        console.log({ initalized_results });
+        initalized_results.then(() => {
+          console.log('all workers are done');
+          const engineResponses: EngineLine[][] =
+            game_review_manager.get_engineResponses();
+          console.log({ engineResponses });
+          setEngineResponses(engineResponses);
+          // update classification moves
+          console.log({ sanMoves });
+          const classification_class = new Classify({
+            sanMoves: parsedGameData.moves,
+          });
+          classification_class
+            .getGameClassifications({
+              engineResponses,
+              gameInfo,
+              initial_Evaluation: initalEvaluation,
+            })
+            .then(({ classification_names }) => {
+              console.log({ classification_names });
+              setClassificationNames(classificationNames);
+              const classification_score =
+                getClassificationScore(classification_names);
+              console.log({ classification_score });
+              setMovesClassifications(classification_score);
+            });
         });
       });
-      const stockfish_worker2 = new StockfishWorker(game_review_manager, 2, 18);
-      stockfish_worker2._init().then(() => {
-        stockfish_worker2.evaluatePosition(() => {
-          console.log('worker 2');
-          setCurrentPerc((old) => old + 1);
-        });
-      }); */
-      /* stockfish._init().then(() => {
-        try {
-          stockfish
-            .evaluatePosition({
-              pgn: gameData.pgn,
-              get_classification_update_callback: callbackfunction(
-                ClassificationHelper,
-                gameData,
-              ),
-            })
-            .then((res) => {
-              console.log('finished');
-              console.log(res);
-              console.log('before pgn', gameData.pgn);
-              const newpgn = constructPgn(
-                gameData.wuser,
-                gameData.buser,
-                gameData.gameResult,
-                moves,
-                parsedGameData.clks,
-                res.evaluations,
-                res.classification_names,
-              );
-              setMovesClassifications(
-                getClassificationScore(res.classification_names),
-              );
-              setGameInfo((old) => ({
-                ...old,
-                waccuracy: get_player_accuracy_ongame(
-                  res.classification_names.filter((clname, index) => {
-                    return !(index % 2);
-                  }),
-                ),
-                baccuracy: get_player_accuracy_ongame(
-                  res.classification_names.filter((clname, index) => {
-                    return index % 2;
-                  }),
-                ),
-              }));
-              setReviewStatus(true);
-              console.log('after pgn');
-              console.log(newpgn);
-            })
-            .catch((e) => {
-              console.error('error');
-              console.log({
-                ClassificationHelper: ClassificationHelper,
-                e,
-                parsedGameData,
-                stockfish,
-                gameData,
-              });
-              continueEvaluatingPosition({
-                ClassificationHelper: ClassificationHelper,
-                e,
-                parsedGameData,
-                stockfish,
-                gameData,
-              });
-            });
-        } catch (e: any) {
-          console.error(`error: ${e.message}`);
-        }
-      }); */
     }
   }, [location]);
 
@@ -389,7 +262,6 @@ const ReviewGame = () => {
         <ChessBoardContextProvider>
           <ChessBoard_Eval
             inlineStyles={{
-              /* gridColumn: '2 / 3' */
               display: 'flex',
               flexDirection: 'column',
               alignSelf: 'start',

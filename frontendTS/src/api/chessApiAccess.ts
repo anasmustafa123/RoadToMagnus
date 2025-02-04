@@ -44,7 +44,7 @@ const get_chessDcom_last_date = (
   | { ok: true; month: number; year: number }
   | { ok: false; month: null; year: null }
 > => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     getAvalibleArchieves(username)
       .then((archieves) => {
         let [lastyear, lastmonth] = archieves.archives[

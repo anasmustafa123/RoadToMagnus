@@ -1,5 +1,5 @@
-import { SimpleResponse } from "../types/Response";
-const validatePassword = (password: string):SimpleResponse => {
+import { SimpleResponse } from '../types/Response';
+const validatePassword = (password: string): SimpleResponse => {
   if (!password) {
     return { ok: 0, message: 'Password is Required' };
   } else if (!(password.length >= 6)) {
@@ -7,7 +7,7 @@ const validatePassword = (password: string):SimpleResponse => {
   }
   return { ok: 1, message: 'success' };
 };
-const validateEmail = (email: string):SimpleResponse => {
+const validateEmail = (email: string): SimpleResponse => {
   if (!email) {
     return { ok: 0, message: 'Email is Required!' };
   } else if (

@@ -6,6 +6,7 @@ class GameReviewManager {
   private un_evaluated_sanmoves: string[];
   private engine_responses: { engineLines: EngineLine[]; move_num: number }[];
   private fen_arr: string[];
+
   get_next_move() {
     const current_fen = this.fen_arr[this.current_index];
     const sanmove = this.un_evaluated_sanmoves[this.current_index];
@@ -20,6 +21,12 @@ class GameReviewManager {
 
   add_enginelines(engineLines: EngineLine[], move_num: number) {
     this.engine_responses.push({ engineLines, move_num });
+  }
+
+  get_engineResponses(): EngineLine[][] {
+    return this.engine_responses.map((engine_response) => {
+      return engine_response.engineLines;
+    });
   }
 
   constructor(un_evaluated_sanmoves: string[]) {

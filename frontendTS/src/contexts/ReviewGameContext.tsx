@@ -65,31 +65,6 @@ const ReviewGameContextProvider: React.FC<{ children: React.ReactNode }> = ({
       setReviewStatus(true);
     }
   }, [currentPerc]);
-  /*   useEffect(() => {
-    if (reviewStatus) {
-      let score = getClassificationScore(classificationNames);
-      setMovesClassifications(score);
-      let newpgn = constructPgn(
-        gameInfo.wuser,
-        gameInfo.buser,
-        gameInfo.gameResult,
-        moves,
-        new Array(moves.length).fill(''),
-        evaluations,
-        classificationInfo.map((classification) => {
-          return classification.sym;
-        }),
-      );
-      let newObject = Object.assign({}, gameInfo, {
-        isReviewed: true,
-        pgn: newpgn,
-      });
-      console.log(gameInfo);
-      console.log(newObject);
-     // db.games.update(gameInfo.gameId, gameInfo);
-    }
-  }, [reviewStatus]);
- */
   return (
     <ReviewGameContext.Provider
       value={{

@@ -143,7 +143,7 @@ const getLichessDates = (
   });
 };
 
-const getCloudEvaluation = async (current_fen: string) => {
+const getCloudEvaluation = async () => {
 };
 
 export {

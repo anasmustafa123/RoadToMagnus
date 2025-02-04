@@ -1,7 +1,4 @@
-import { getFenArr } from './convert';
-import { parsePgn } from './pgn';
 import type { EngineLine, Evaluation, Lan } from '../types/Game';
-import { ClassName } from '../types/Review';
 import type GameReviewManager from './_GameReviewManager';
 
 class StockfishWorker {
@@ -148,15 +145,17 @@ class StockfishWorker {
     });
   }
 
-  async evaluatePosition() {
+  async evaluatePosition(after_each_move_callback: () => any) {
     console.log('evaluating position');
     while (!this.game_review_manager.done_evaluating()) {
-      const { current_fen, move_num, sanmove } = this.game_review_manager.get_next_move();
+      const { current_fen, move_num, sanmove } =
+        this.game_review_manager.get_next_move();
       console.log({ current_fen, move_num, sanmove });
       const engineLines = await this.evaluateMove(current_fen);
+      after_each_move_callback();
       this.game_review_manager.add_enginelines(engineLines, move_num);
     }
-    debugger
+    debugger;
   }
 
   /**
