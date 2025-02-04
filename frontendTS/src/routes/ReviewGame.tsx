@@ -1,5 +1,4 @@
 import Loading_Review_LargeScreen from '../components/Labtop_loading';
-import Loading_Review_SmallScreen from '../components/Phone_loading';
 import ReviewResult from '../components/ReviewResult';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { ReviewGameContext } from '../contexts/ReviewGameContext';
@@ -15,13 +14,8 @@ import ChessBoard_Eval from '../components/ChessBoard_Eval';
 import { ChessBoardContextProvider } from '../contexts/GameBoardContext';
 import GameReviewManager from '../scripts/_GameReviewManager';
 import StockfishWorker from '../scripts/_StockfishWorker';
-GameReviewManager;
-type callbackfunctionType = (param: {
-  ok: boolean;
-  sanMove: string;
-  moveNum: number;
-  lines: EngineLine[];
-}) => Promise<{ ok: true; res: { classi_name: ClassName } } | null>;
+import CloudEvalWorker from '../scripts/_CloudEvalWorker';
+
 const ReviewGame = () => {
   const ReviewResult_Ref = useRef<HTMLDivElement>(null);
   const location = useLocation();
@@ -30,7 +24,6 @@ const ReviewGame = () => {
   const {
     reviewStatus,
     setReviewStatus,
-    classificationNames,
     setClassificationNames,
     setEvaluations,
     setCurrentPerc,
@@ -42,7 +35,6 @@ const ReviewGame = () => {
     setsanMoves,
     setClks,
     setEngineResponses,
-    setCurrentEngineLines,
     gameInfo,
     setMovesClassifications,
   } = useContext(ReviewGameContext);
@@ -50,10 +42,6 @@ const ReviewGame = () => {
   const [expand_review_state, setExpand_review_state] = useState(false);
   const [startReviewingMoves, setStartReviewingMoves] =
     useState<boolean>(false);
-
-  /*   useEffect(() => {
-    setReviewStatus(true);
-  }, []); */
 
   function getClassificationScore(classification_names: ClassName[]) {
     const emptyClassification: ClassificationScores = {
@@ -76,95 +64,6 @@ const ReviewGame = () => {
       score[classification][i % 2]++;
     });
     return score;
-  }
-
-  function callbackfunction(
-    ClassificationHelper: Classify,
-    gameData: Game,
-  ): callbackfunctionType {
-    return async function (param: {
-      ok: boolean;
-      sanMove: string;
-      moveNum: number;
-      lines: EngineLine[];
-    }): Promise<{ ok: true; res: { classi_name: ClassName } } | null> {
-      if (param.ok) {
-        let moveClassification =
-          await ClassificationHelper.getMoveClassification({
-            engineResponse: param.lines,
-            moveNum: param.moveNum,
-            plColor: param.moveNum % 2 ? 1 : -1,
-            gameInfo: gameData,
-            initial_Evaluation: initalEvaluation,
-          });
-        //if (param.lines.length == 0) {
-        /*  setMovesClassifications(
-            getClassificationScore(res.classification_names),
-          );
-          setGameInfo((old) => ({
-            ...old,
-            waccuracy: get_player_accuracy_ongame(
-              classification_names.filter((clname, index) => {
-                return !(index % 2);
-              }),
-            ),
-            baccuracy: get_player_accuracy_ongame(
-            classification_names.filter((clname, index) => {
-                return index % 2;
-              }),
-            ),
-          })); */
-        //  setReviewStatus(true);
-        //  return null;
-        // }
-        setClassificationNames((old) => [...old, moveClassification]);
-        setEvaluations((old) => [
-          ...old,
-          param.lines[param.lines.length - 1].evaluation,
-        ]);
-        setCurrentPerc((old) => old + 1);
-        setEngineResponses((old) => [...old, param.lines]);
-        setCurrentEngineLines(param.lines);
-
-        return { ok: true, res: { classi_name: moveClassification } };
-      }
-      return null;
-    };
-  }
-
-  function get_player_accuracy_ongame(
-    classification_names: ClassName[],
-  ): number {
-    const MOVE_SCORES: Record<ClassName, number> = {
-      best: 1.0,
-      great: 1.0,
-      brilliant: 1.0,
-      excellent: 0.9,
-      good: 0.8,
-      inaccuracy: 0.7,
-      mistake: 0.6,
-      blunder: 0.0,
-      botezgambit: 0.0,
-      book: 0.9,
-      forced: 1.0,
-      missed: 0.5,
-      unknown: 0.0,
-    };
-    if (!classification_names || classification_names.length === 0) return 0; // No moves, no accuracy score
-
-    let totalPoints = 0;
-    let maxPossiblePoints = 0;
-
-    // Iterate over each move and calculate the score
-    classification_names.forEach((moveType) => {
-      const score = MOVE_SCORES[moveType]; // Get score or 0 if undefined
-      totalPoints += score;
-      maxPossiblePoints += 1.0; // Each move adds 1 to max points
-    });
-
-    // Calculate accuracy percentage (0-100 scale)
-    const accuracy = (totalPoints / maxPossiblePoints) * 100;
-    return Number(accuracy.toFixed(2));
   }
 
   useEffect(() => {
@@ -210,7 +109,12 @@ const ReviewGame = () => {
       const stockfish_workers: StockfishWorker[] = [];
       const uninitialized_workers = [];
       const initialized_workers: any = [];
-
+        const cloud_worker = new CloudEvalWorker(game_review_manager);
+        uninitialized_workers.push(
+          cloud_worker.evaluatePosition(() => {
+            setCurrentPerc((old) => old + 1);
+          }),
+        );
       for (let i = 0; i < number_of_workers; i++) {
         const stockfish_worker = new StockfishWorker(
           game_review_manager,
@@ -324,9 +228,6 @@ const ReviewGame = () => {
   ) : (
     <Loading_Review_LargeScreen />
   );
-  {
-    /* <Loading_Review_SmallScreen /> */
-  }
 };
 
 export default ReviewGame;

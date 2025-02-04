@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify';
 import { parsePgn } from '../scripts/pgn';
-import { Game } from '../types/Game';
+import { EngineLine, Game } from '../types/Game';
 import { Vendor } from '../types/Api';
 async function fetchLichesssGames(username: string) {
   const url = `https://lichess.org/api/games/user/${username}`;
@@ -143,7 +143,26 @@ const getLichessDates = (
   });
 };
 
-const getCloudEvaluation = async () => {
+const getCloudEvaluation = async (fen) => {
+  const jsonres = await fetch(`https://lichess.org/api/cloud-eval?fen=${fen}`);
+  const res = await jsonres.json();
+  if (res.error) {
+    return { ok: false, error: res.error };
+  } else {
+    if (res.pvs) {
+      let engineLines:EngineLine[] = res.pvs.map((v, i) => {
+        return {
+          bestMove: v.moves.split(' ')[0],
+          id: i + 1,
+          evaluation: { type: 'cp', value: v.cp },
+          depth: res.depth,
+        };
+      });
+      return { ok: true, engineLines: engineLines };
+    } else {
+      return { ok: false, error: 'res.pvs not found' };
+    }
+  }
 };
 
 export {
@@ -152,5 +171,5 @@ export {
   checkIfBook,
   fetchPlayerGames,
   getLichessDates,
-  getCloudEvaluation
+  getCloudEvaluation,
 };
