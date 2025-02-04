@@ -1,4 +1,4 @@
-import { LoginUser, RegisterUser } from '../../../shared/types';
+import { LoginUser, RegisterUser } from './common';
 
 export type OldUser = LoginUser;
 

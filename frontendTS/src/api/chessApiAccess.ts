@@ -2,7 +2,7 @@ import { getMovesNum } from '../scripts/pgn';
 import { ChessComGame, Vendor } from '../types/Api';
 import type { Game, GameResult, GamesCount, GameType } from '../types/Game';
 import { GameTypes } from '../types/Game';
-import { GetGameById } from '../../../shared/types/dist';
+import { GetGameById } from '../types/common';
 async function getUserInfo(username: string) {
   const url = `https://api.chess.com/pub/player/${username}`;
   const res = await fetch(url);
