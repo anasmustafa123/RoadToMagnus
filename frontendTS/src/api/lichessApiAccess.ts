@@ -18,7 +18,7 @@ const getUserInfo = async (username: string) => {
   try {
     const res = await fetch(url);
     console.error(res);
-    return { ok: true, data: await res.json() };
+    return { ok: res.ok, data: await res.json() };
   } catch (e) {
     return { ok: false, data: null };
   }
