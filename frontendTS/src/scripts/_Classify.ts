@@ -222,9 +222,6 @@ export class Classify {
     plRating: number,
     opponentRating: number,
   ): ClassName => {
-    console.log({
-      anas: { cEvaluation, prevEvaluation, plColor, plRating, opponentRating },
-    });
     const cAccuracy = this.getAccuracy(cEvaluation, plRating, opponentRating);
 
     const prevAccuracy = this.getAccuracy(
@@ -241,7 +238,6 @@ export class Classify {
     plColor: PlayerColor,
     game: ChessInstance,
   ): AttackPiece[] => {
-    console.log('-------------------------------------------------');
     let y = square[0].charCodeAt(0),
       x = parseInt(square[1]);
     let attackers: AttackPiece[] = [];
@@ -429,13 +425,6 @@ export class Classify {
     gameInfo: Game;
     initial_Evaluation: Evaluation;
   }) => {
-    console.log({
-      engineResponse: params.engineResponse,
-      plcolor: params.plColor,
-      movenum: params.moveNum,
-      gameinfo: params.gameInfo,
-      initialeval: params.initial_Evaluation,
-    });
     if (!params.engineResponse.length) return 'best';
     this.engineResponses.push(params.engineResponse);
     this.evaluations.push(
@@ -449,9 +438,6 @@ export class Classify {
     if (this.sanMoves && params.gameInfo) {
       let plColor: PlayerColor, opponent: UserInfo, player: UserInfo;
       let move: string = this.sanMoves[params.moveNum - 1];
-      console.log(this.game.history());
-      console.log(this.game.history()[this.game.history().length - 1]);
-      console.log(this.sanMoves[params.moveNum - 1]);
       if (this.game.history().length === params.moveNum - 1) {
         const lastMove = this.game.move(move) as chessjsMove;
         if (!lastMove)
@@ -514,9 +500,6 @@ export class Classify {
         if (this.game) {
           isSacc = this.isSac(lastMoveAsMove, new Chess(this.game.fen()));
         }
-        console.log({
-          engineResponses: this.engineResponses[params.moveNum - 1],
-        });
         // is best when its one of top lines returned by the engine
         let isbest =
           params.moveNum === 1
@@ -524,16 +507,6 @@ export class Classify {
             : this.engineResponses[params.moveNum - 2].length > 1
               ? this.engineResponses[params.moveNum - 2].find(
                   (engineLine, index) => {
-                    console.log({ engineLine, index });
-                    console.log({
-                      engineLinebestmove: engineLine.bestMove,
-                      lastmovelan: lastMoveAsMove.lan,
-                    });
-                    console.log({
-                      index,
-                      supposedindex:
-                        this.engineResponses[params.moveNum - 2].length - 1,
-                    });
                     if (
                       engineLine.bestMove == lastMoveAsMove.lan &&
                       // if it's the last (best) line then automatically it's the bestmove
@@ -621,7 +594,7 @@ export class Classify {
     gameInfo: Game;
     initial_Evaluation: Evaluation;
   }): Promise<{ classification_names: ClassName[] }> => {
-    return new Promise((res, rej) => {
+    return new Promise((res) => {
       engineResponses.forEach((engineResponse, index) => {
         this.getMoveClassification({
           engineResponse,

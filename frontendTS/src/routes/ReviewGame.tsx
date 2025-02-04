@@ -67,23 +67,23 @@ const ReviewGame = () => {
   }
 
   useEffect(() => {
-    console.log('refreshing');
+    //console.log('refreshing');
     // when the review status is false endicating that the game is not yet evaluated
     // we need to evaluate the game
 
     if (!reviewStatus) {
-      console.log({ gameId });
+      //console.log({ gameId });
       if (!gameId) {
-        console.error('gameId is null');
+        //console.error('gameId is null');
         return;
       }
       const gameData = get_game_byId(gameId);
-      console.log({ gameData });
+      //console.log({ gameData });
       if (!gameData) {
-        console.error('cant find game with id: ', gameId);
+        //console.error('cant find game with id: ', gameId);
         return;
       }
-      console.log('gameinfo', gameData);
+      //console.log('gameinfo', gameData);
       setGameInfo(gameData);
       setMaxtPerc(gameData.movesCount);
       let parsedGameData = parsePgn(gameData.pgn);
@@ -126,7 +126,7 @@ const ReviewGame = () => {
       }
       let uninitalized_results = Promise.all(uninitialized_workers);
       uninitalized_results.then((uninitalized_result) => {
-        console.log({ uninitalized_result });
+        //console.log({ uninitalized_result });
         stockfish_workers.forEach((stockfish_worker) => {
           initialized_workers.push(
             stockfish_worker.evaluatePosition(() => {
@@ -135,15 +135,15 @@ const ReviewGame = () => {
           );
         });
         let initalized_results = Promise.all(initialized_workers);
-        console.log({ initalized_results });
+        //console.log({ initalized_results });
         initalized_results.then(() => {
-          console.log('all workers are done');
+          //console.log('all workers are done');
           const engineResponses: EngineLine[][] =
             game_review_manager.get_engineResponses();
-          console.log({ engineResponses });
+          //console.log({ engineResponses });
           setEngineResponses(engineResponses);
           // update classification moves
-          console.log({ sanMoves });
+          //console.log({ sanMoves });
           const classification_class = new Classify({
             sanMoves: parsedGameData.moves,
           });
@@ -154,11 +154,11 @@ const ReviewGame = () => {
               initial_Evaluation: initalEvaluation,
             })
             .then(({ classification_names }) => {
-              console.log({ classification_names });
+              //console.log({ classification_names });
               setClassificationNames(classification_names);
               const classification_score =
                 getClassificationScore(classification_names);
-              console.log({ classification_score });
+              //console.log({ classification_score });
               setMovesClassifications(classification_score);
             });
         });
