@@ -381,6 +381,7 @@ const SignUp = () => {
                         chessVerify(
                           data['chess.com'] ? data['chess.com'] : '',
                         ).then((res) => {
+                          console.log(res);
                           if (res.ok) {
                             notify('chess.com verified', 'success');
                             setErrors((old) => {
@@ -390,14 +391,14 @@ const SignUp = () => {
                             });
                             setloading((old) => {
                               const copy = { ...old };
-                              old['chess.com'] = 2;
+                              copy['chess.com'] = 2;
                               return copy;
                             });
                           } else {
                             notify('wrong chess.com username', 'error');
                             setloading((old) => {
                               const copy = { ...old };
-                              old['chess.com'] = 0;
+                              copy['chess.com'] = 0;
                               return copy;
                             });
                             setErrors((old) => {
