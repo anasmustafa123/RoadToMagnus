@@ -104,7 +104,7 @@ const ReviewGame = () => {
       } else {
         setReviewStatus(false);
       }
-      let number_of_workers = 1;
+      let number_of_workers = 3;
       const game_review_manager = new GameReviewManager(parsedGameData.moves);
       const stockfish_workers: StockfishWorker[] = [];
       const uninitialized_workers = [];
